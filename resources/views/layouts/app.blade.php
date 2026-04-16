@@ -238,9 +238,9 @@
         </ul>
       </nav>
       <div class="rb-global-social">
-        <a href="#" aria-label="Facebook"><img src="{{ asset('storage/img/facebook.png') }}" alt="Facebook"></a>
-        <a href="#" aria-label="Instagram"><img src="{{ asset('storage/img/instagram.png') }}" alt="Instagram"></a>
-        <a href="#" aria-label="WhatsApp"><img src="{{ asset('storage/img/vatsap.png') }}" alt="WhatsApp"></a>
+        <a href="https://www.facebook.com/61584804524037/mentions/" target="_blank" rel="noopener noreferrer" aria-label="Facebook"><img src="{{ asset('storage/img/facebook.png') }}" alt="Facebook"></a>
+        <a href="https://www.instagram.com/realbrickasia/" target="_blank" rel="noopener noreferrer" aria-label="Instagram"><img src="{{ asset('storage/img/instagram.png') }}" alt="Instagram"></a>
+        <a href="https://wa.me/77004446999" target="_blank" rel="noopener noreferrer" aria-label="WhatsApp"><img src="{{ asset('storage/img/vatsap.png') }}" alt="WhatsApp"></a>
       </div>
       <button class="rb-global-burger" type="button" aria-label="Открыть меню">
         <span class="rb-global-burger-lines"><span></span></span>
@@ -256,9 +256,9 @@
     <a href="/blog">блог</a>
     <a href="/contacts">контакты</a>
     <div class="rb-mobile-social">
-      <a href="#" aria-label="Facebook"><img src="{{ asset('storage/img/facebook.png') }}" alt="Facebook"></a>
-      <a href="#" aria-label="Instagram"><img src="{{ asset('storage/img/instagram.png') }}" alt="Instagram"></a>
-      <a href="#" aria-label="WhatsApp"><img src="{{ asset('storage/img/vatsap.png') }}" alt="WhatsApp"></a>
+      <a href="https://www.facebook.com/61584804524037/mentions/" target="_blank" rel="noopener noreferrer" aria-label="Facebook"><img src="{{ asset('storage/img/facebook.png') }}" alt="Facebook"></a>
+      <a href="https://www.instagram.com/realbrickasia/" target="_blank" rel="noopener noreferrer" aria-label="Instagram"><img src="{{ asset('storage/img/instagram.png') }}" alt="Instagram"></a>
+      <a href="https://wa.me/77004446999" target="_blank" rel="noopener noreferrer" aria-label="WhatsApp"><img src="{{ asset('storage/img/vatsap.png') }}" alt="WhatsApp"></a>
     </div>
   </nav>
 

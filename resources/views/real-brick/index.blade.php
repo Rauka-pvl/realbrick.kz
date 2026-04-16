@@ -416,13 +416,13 @@
           </div>
 
           <div class="contacts_social">
-            <a href="#">
+            <a href="https://www.facebook.com/61584804524037/mentions/" target="_blank" rel="noopener noreferrer">
                 <img src="{{ asset('storage/img/facebook.png') }}" alt="Facebook" width="36">
             </a>
-            <a href="#">
+            <a href="https://www.instagram.com/realbrickasia/" target="_blank" rel="noopener noreferrer">
                 <img src="{{ asset('storage/img/instagram.png') }}" alt="Instagram" width="36">
             </a>
-            <a href="#">
+            <a href="https://wa.me/77004446999" target="_blank" rel="noopener noreferrer">
               <img src="{{ asset('storage/img/vatsap.png') }}" alt="WhatsApp" width="36">
             </a>
           </div>
