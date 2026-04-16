@@ -3,7 +3,7 @@
 @section('title', 'REAL BRICK — главная')
 
 @push('styles')
-<link rel="stylesheet" href="{{ asset('rb/styles/main.css') }}"> 
+@vite('resources/rb/main.css')
 <style>body{overflow-x:hidden;}</style>
 @endpush
 
@@ -439,5 +439,5 @@
 @endsection
 
 @push('scripts')
-<script src="{{ asset('rb/js/main.js') }}"></script>
+@vite('resources/rb/main.js')
 @endpush

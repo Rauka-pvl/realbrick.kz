@@ -34,8 +34,18 @@
     };
   </script>
   <style>
-    body { font-family: "Stem", "STEM", "Montserrat", system-ui, sans-serif; }
-    html { scroll-behavior: smooth; }
+    html {
+      scroll-behavior: smooth;
+      width: 100%;
+      max-width: 100%;
+      overflow-x: hidden;
+    }
+    body {
+      font-family: "Stem", "STEM", "Montserrat", system-ui, sans-serif;
+      width: 100%;
+      max-width: 100%;
+      overflow-x: hidden;
+    }
     .rb-global-header {
       position: fixed;
       top: 0;
@@ -58,19 +68,36 @@
     .rb-global-nav {
       display: flex;
       align-items: center;
-      gap: 18px;
       color: #ecdac1;
       text-transform: lowercase;
       font-size: 18px;
     }
-    .rb-global-nav a {
+    .rb-global-nav .nav {
+      display: flex;
+      gap: 22px;
+    }
+    .rb-global-nav .nav_link {
       position: relative;
+      padding-right: 18px;
+    }
+    .rb-global-nav .nav_link:not(:last-child)::after {
+      content: "";
+      position: absolute;
+      right: 0;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 0.5px;
+      height: 20px;
+      background: #d9b176;
+      opacity: 0.95;
+    }
+    .rb-global-nav .nav_link a {
       color: inherit;
       font-family: "Stem", "STEM", "Montserrat", system-ui, sans-serif;
       font-weight: 300;
       transition: color 0.28s ease, transform 0.28s ease, opacity 0.28s ease;
     }
-    .rb-global-nav a::after {
+    .rb-global-nav .nav_link a::after {
       content: "";
       position: absolute;
       left: 0;
@@ -83,21 +110,13 @@
       transition: transform 0.28s ease;
       opacity: 0.9;
     }
-    .rb-global-nav a:hover {
+    .rb-global-nav .nav_link a:hover {
       color: #d9b176;
       transform: translateY(-1px);
       opacity: 0.96;
     }
-    .rb-global-nav a:hover::after {
+    .rb-global-nav .nav_link a:hover::after {
       transform: scaleX(1);
-    }
-    .rb-nav-sep {
-      color: rgba(201, 169, 110, 0.55);
-      transition: color 0.28s ease, opacity 0.28s ease;
-    }
-    .rb-global-nav a:hover + .rb-nav-sep {
-      color: rgba(217, 177, 118, 0.85);
-      opacity: 1;
     }
     .rb-global-social { display: flex; align-items: center; gap: 8px; }
     .rb-global-social img {
@@ -110,11 +129,94 @@
       transform: translateY(-1px);
       opacity: 0.95;
     }
+    .rb-global-burger {
+      display: none;
+      width: 42px;
+      height: 42px;
+      align-items: center;
+      justify-content: center;
+      border-radius: 9999px;
+      border: 1px solid rgba(201, 169, 110, 0.45);
+      background: rgba(10, 10, 10, 0.5);
+      color: #ecdac1;
+      cursor: pointer;
+    }
+    .rb-global-burger-lines {
+      position: relative;
+      width: 18px;
+      height: 12px;
+      display: block;
+    }
+    .rb-global-burger-lines::before,
+    .rb-global-burger-lines::after,
+    .rb-global-burger-lines span {
+      content: "";
+      position: absolute;
+      left: 0;
+      width: 100%;
+      height: 1.5px;
+      background: currentColor;
+      transition: transform 0.24s ease, opacity 0.24s ease;
+    }
+    .rb-global-burger-lines::before { top: 0; }
+    .rb-global-burger-lines span { top: 5px; }
+    .rb-global-burger-lines::after { bottom: 0; }
+    .rb-global-burger.is-active .rb-global-burger-lines::before { transform: translateY(5px) rotate(45deg); }
+    .rb-global-burger.is-active .rb-global-burger-lines span { opacity: 0; }
+    .rb-global-burger.is-active .rb-global-burger-lines::after { transform: translateY(-5px) rotate(-45deg); }
+    .rb-mobile-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.5);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.22s ease;
+      z-index: 95;
+    }
+    .rb-mobile-overlay.is-open {
+      opacity: 1;
+      pointer-events: auto;
+    }
+    .rb-mobile-menu {
+      position: fixed;
+      top: 0;
+      right: 0;
+      width: 280px;
+      height: 100dvh;
+      padding: 80px 24px 24px;
+      background: #0d0d0d;
+      border-left: 1px solid rgba(255, 255, 255, 0.08);
+      transform: translateX(100%);
+      transition: transform 0.24s ease;
+      z-index: 96;
+    }
+    .rb-mobile-menu.is-open { transform: translateX(0); }
+    .rb-mobile-menu a {
+      display: block;
+      padding: 10px 0;
+      color: #ecdac1;
+      text-transform: lowercase;
+      font-weight: 300;
+    }
+    .rb-mobile-social {
+      margin-top: 18px;
+      display: flex;
+      gap: 10px;
+    }
+    .rb-mobile-social img {
+      width: 34px;
+      height: 34px;
+      display: block;
+    }
     @media (max-width: 980px) {
-      .rb-global-nav { font-size: 15px; gap: 10px; }
+      .rb-global-nav { font-size: 15px; }
+      .rb-global-nav .nav { gap: 14px; }
+      .rb-global-nav .nav_link { padding-right: 12px; }
     }
     @media (max-width: 760px) {
       .rb-global-nav { display: none; }
+      .rb-global-social { display: none; }
+      .rb-global-burger { display: inline-flex; }
     }
   </style>
   @stack('styles')
@@ -126,20 +228,39 @@
         <img src="{{ asset('rb/img/RBlogo.png') }}" alt="Realbrick Logo" width="84" height="84">
       </a>
       <nav class="rb-global-nav">
-        <a href="/">главная</a><span class="rb-nav-sep">|</span>
-        <a href="/about">о нас</a><span class="rb-nav-sep">|</span>
-        <a href="{{ route('catalog.index', ['lang' => request('lang', 'ru')]) }}">каталог</a><span class="rb-nav-sep">|</span>
-        <a href="/gallery">галерея</a><span class="rb-nav-sep">|</span>
-        <a href="/blog">блог</a><span class="rb-nav-sep">|</span>
-        <a href="/contacts">контакты</a>
+        <ul class="nav">
+          <li class="nav_link"><a href="/">главная</a></li>
+          <li class="nav_link"><a href="/about">о нас</a></li>
+          <li class="nav_link"><a href="{{ route('catalog.index', ['lang' => request('lang', 'ru')]) }}">каталог</a></li>
+          <li class="nav_link"><a href="/gallery">галерея</a></li>
+          <li class="nav_link"><a href="/blog">блог</a></li>
+          <li class="nav_link"><a href="/contacts">контакты</a></li>
+        </ul>
       </nav>
       <div class="rb-global-social">
         <a href="#" aria-label="Facebook"><img src="{{ asset('rb/img/фейсбук.png') }}" alt="Facebook"></a>
         <a href="#" aria-label="Instagram"><img src="{{ asset('rb/img/Инстаграм.png') }}" alt="Instagram"></a>
         <a href="#" aria-label="WhatsApp"><img src="{{ asset('rb/img/Ватсап.png') }}" alt="WhatsApp"></a>
       </div>
+      <button class="rb-global-burger" type="button" aria-label="Открыть меню">
+        <span class="rb-global-burger-lines"><span></span></span>
+      </button>
     </div>
   </header>
+  <div class="rb-mobile-overlay" id="rb-mobile-overlay"></div>
+  <nav class="rb-mobile-menu" id="rb-mobile-menu" aria-label="Мобильная навигация">
+    <a href="/">главная</a>
+    <a href="/about">о нас</a>
+    <a href="{{ route('catalog.index', ['lang' => request('lang', 'ru')]) }}">каталог</a>
+    <a href="/gallery">галерея</a>
+    <a href="/blog">блог</a>
+    <a href="/contacts">контакты</a>
+    <div class="rb-mobile-social">
+      <a href="#" aria-label="Facebook"><img src="{{ asset('rb/img/фейсбук.png') }}" alt="Facebook"></a>
+      <a href="#" aria-label="Instagram"><img src="{{ asset('rb/img/Инстаграм.png') }}" alt="Instagram"></a>
+      <a href="#" aria-label="WhatsApp"><img src="{{ asset('rb/img/Ватсап.png') }}" alt="WhatsApp"></a>
+    </div>
+  </nav>
 
   <main class="flex-1 pt-28">
     @if(session('success'))
@@ -178,6 +299,39 @@
       </div>
     </div>
   </footer>
+  <script>
+    (() => {
+      const burger = document.querySelector('.rb-global-burger');
+      const overlay = document.getElementById('rb-mobile-overlay');
+      const menu = document.getElementById('rb-mobile-menu');
+      if (!burger || !overlay || !menu) return;
+
+      const closeMenu = () => {
+        burger.classList.remove('is-active');
+        overlay.classList.remove('is-open');
+        menu.classList.remove('is-open');
+        document.body.style.overflow = '';
+      };
+      const openMenu = () => {
+        burger.classList.add('is-active');
+        overlay.classList.add('is-open');
+        menu.classList.add('is-open');
+        document.body.style.overflow = 'hidden';
+      };
+
+      burger.addEventListener('click', () => {
+        if (menu.classList.contains('is-open')) closeMenu();
+        else openMenu();
+      });
+      overlay.addEventListener('click', closeMenu);
+      menu.querySelectorAll('a').forEach((link) => {
+        link.addEventListener('click', closeMenu);
+      });
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') closeMenu();
+      });
+    })();
+  </script>
   @stack('scripts')
 </body>
 </html>

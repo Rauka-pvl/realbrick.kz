@@ -234,58 +234,58 @@ if (brickDecor) {
 
 // ── BURGER MENU ──
 const burger = document.querySelector('.nav_burger');
-const nav = document.querySelector('.nav');
+if (burger) {
+  // Создаём оверлей
+  const overlay = document.createElement('div');
+  overlay.classList.add('nav_overlay');
+  document.body.appendChild(overlay);
 
-// Создаём оверлей
-const overlay = document.createElement('div');
-overlay.classList.add('nav_overlay');
-document.body.appendChild(overlay);
+  // Создаём мобильное меню
+  const mobileNav = document.createElement('nav');
+  mobileNav.classList.add('nav_mobile');
+  mobileNav.innerHTML = `
+    <button class="nav_mobile-close" aria-label="Закрыть меню">✕</button>
+    <ul class="nav_mobile-list">
+      <li><a href="/">главная</a></li>
+      <li><a href="/about">о нас</a></li>
+      <li><a href="/catalog">каталог</a></li>
+      <li><a href="/gallery">галерея</a></li>
+      <li><a href="/blog">блог</a></li>
+      <li><a href="/contacts">контакты</a></li>
+    </ul>
+    <div class="nav_mobile-social">
+      <a href="#"><img src="/rb/img/фейсбук.png" alt="Facebook" width="36"></a>
+      <a href="#"><img src="/rb/img/Инстаграм.png" alt="Instagram" width="36"></a>
+      <a href="#"><img src="/rb/img/Ватсап.png" alt="WhatsApp" width="36"></a>
+    </div>
+  `;
+  document.body.appendChild(mobileNav);
 
-// Создаём мобильное меню
-const mobileNav = document.createElement('nav');
-mobileNav.classList.add('nav_mobile');
-mobileNav.innerHTML = `
-  <button class="nav_mobile-close" aria-label="Закрыть меню">✕</button>
-  <ul class="nav_mobile-list">
-    <li><a href="#">главная</a></li>
-    <li><a href="#">о нас</a></li>
-    <li><a href="#">каталог</a></li>
-    <li><a href="#">галерея</a></li>
-    <li><a href="#">блог</a></li>
-    <li><a href="#">контакты</a></li>
-  </ul>
-  <div class="nav_mobile-social">
-    <a href="#"><img src="./img/фейсбук.png" alt="Facebook" width="36"></a>
-    <a href="#"><img src="./img/Инстаграм.png" alt="Instagram" width="36"></a>
-    <a href="#"><img src="./img/Ватсап.png" alt="WhatsApp" width="36"></a>
-  </div>
-`;
-document.body.appendChild(mobileNav);
+  function openMenu() {
+      mobileNav.classList.add('is-open');
+      overlay.classList.add('is-visible');
+      burger.classList.add('is-active');
+      document.body.style.overflow = 'hidden';
+  }
 
-function openMenu() {
-    mobileNav.classList.add('is-open');
-    overlay.classList.add('is-visible');
-    burger.classList.add('is-active');
-    document.body.style.overflow = 'hidden';
+  function closeMenu() {
+      mobileNav.classList.remove('is-open');
+      overlay.classList.remove('is-visible');
+      burger.classList.remove('is-active');
+      document.body.style.overflow = '';
+  }
+
+  burger.addEventListener('click', openMenu);
+  overlay.addEventListener('click', closeMenu);
+  mobileNav.querySelector('.nav_mobile-close').addEventListener('click', closeMenu);
+
+  // Закрытие по Escape
+  document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') closeMenu();
+  });
+
+  // Закрытие при клике на ссылку
+  mobileNav.querySelectorAll('a').forEach(link => {
+      link.addEventListener('click', closeMenu);
+  });
 }
-
-function closeMenu() {
-    mobileNav.classList.remove('is-open');
-    overlay.classList.remove('is-visible');
-    burger.classList.remove('is-active');
-    document.body.style.overflow = '';
-}
-
-burger.addEventListener('click', openMenu);
-overlay.addEventListener('click', closeMenu);
-mobileNav.querySelector('.nav_mobile-close').addEventListener('click', closeMenu);
-
-// Закрытие по Escape
-document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape') closeMenu();
-});
-
-// Закрытие при клике на ссылку
-mobileNav.querySelectorAll('a').forEach(link => {
-    link.addEventListener('click', closeMenu);
-});
