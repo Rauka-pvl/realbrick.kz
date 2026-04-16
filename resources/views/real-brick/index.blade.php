@@ -18,6 +18,7 @@
     @vite(['resources/css/main.css', 'resources/css/reset.css'])
 
     <section class="header">
+        <div class="container">
         <div class="header_body">
             <div class="header_body-top">
               <h1>REAL BRICK</h1>
@@ -55,6 +56,7 @@
           </div>
           <div class="header_footer-bottom">
             <p>Каждый кирпич формируется <br>  вручную. Поэтому фактура<br> никогда не повторяется</p>
+            </div>
           </div>
         </div>
       </div>
