@@ -238,7 +238,7 @@
         </ul>
       </nav>
       <div class="rb-global-social">
-        <a href="#" aria-label="Facebook"><img src="{{ asset('storage/img/фейсбук.png') }}" alt="Facebook"></a>
+        <a href="#" aria-label="Facebook"><img src="{{ asset('storage/img/facebook.png') }}" alt="Facebook"></a>
         <a href="#" aria-label="Instagram"><img src="{{ asset('storage/img/Инстаграм.png') }}" alt="Instagram"></a>
         <a href="#" aria-label="WhatsApp"><img src="{{ asset('storage/img/Ватсап.png') }}" alt="WhatsApp"></a>
       </div>
@@ -256,7 +256,7 @@
     <a href="/blog">блог</a>
     <a href="/contacts">контакты</a>
     <div class="rb-mobile-social">
-      <a href="#" aria-label="Facebook"><img src="{{ asset('storage/img/фейсбук.png') }}" alt="Facebook"></a>
+      <a href="#" aria-label="Facebook"><img src="{{ asset('storage/img/facebook.png') }}" alt="Facebook"></a>
       <a href="#" aria-label="Instagram"><img src="{{ asset('storage/img/Инстаграм.png') }}" alt="Instagram"></a>
       <a href="#" aria-label="WhatsApp"><img src="{{ asset('storage/img/Ватсап.png') }}" alt="WhatsApp"></a>
     </div>
