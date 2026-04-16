@@ -10,7 +10,7 @@
   .header_footer-bottom::before { background-image: url("{{ asset('storage/img/kamen.png') }}") !important; }
   .projects::before { background-image: url("{{ asset('storage/img/123123.png') }}") !important; }
   .projects::after { background-image: url("{{ asset('storage/img/123.png') }}") !important; }
-  .consult { background-image: url("{{ asset('storage/img/pryamougolnik-2-kopiya-28.png') }}") !important; }
+  /* .consult { background-image: url("{{ asset('storage/img/pryamougolnik-2-kopiya-28.png') }}") !important; } */
 </style>
 @endpush
 
