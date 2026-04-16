@@ -8,8 +8,9 @@ export default defineConfig({
             input: [
                 'resources/css/app.css',
                 'resources/js/app.js',
-                'resources/rb/main.css',
-                'resources/rb/main.js',
+                'resources/css/main.css',
+                'resources/js/main.js',
+                'resources/css/reset.css',
             ],
             refresh: true,
         }),

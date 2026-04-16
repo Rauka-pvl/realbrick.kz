@@ -6,22 +6,22 @@ use App\Http\Controllers\CartController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
-    return view('real-brick.home-rb');
+    return view('real-brick.index');
 });
 
 Route::get('/about', function () {
-    return view('real-brick.index', ['page' => 'about']);
+    return view('real-brick.pages', ['page' => 'about']);
 });
 
 Route::get('/gallery', function () {
-    return view('real-brick.index', ['page' => 'gallery']);
+    return view('real-brick.pages', ['page' => 'gallery']);
 });
 
 Route::get('/blog', [BlogController::class, 'index'])->name('blog.index');
 Route::get('/blog/{slug}', [BlogController::class, 'show'])->name('blog.show');
 
 Route::get('/contacts', function () {
-    return view('real-brick.index', ['page' => 'contacts']);
+    return view('real-brick.pages', ['page' => 'contacts']);
 });
 
 Route::get('/catalog', [CatalogController::class, 'index'])->name('catalog.index');
