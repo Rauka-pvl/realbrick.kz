@@ -42,7 +42,7 @@ class BlogController extends Controller
             ->paginate(6, ['*'], 'page', $page)
             ->withQueryString();
 
-        return view('real-brick.index', [
+        return view('real-brick.pages', [
             'page' => 'blog',
             'featuredPost' => $featuredPost,
             'blogPosts' => $posts,
@@ -58,7 +58,7 @@ class BlogController extends Controller
             ->where('slug', $slug)
             ->firstOrFail();
 
-        return view('real-brick.index', [
+        return view('real-brick.pages', [
             'page' => 'blog-post',
             'blogPost' => $post,
         ]);
