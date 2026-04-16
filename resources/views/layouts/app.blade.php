@@ -225,7 +225,7 @@
   <header class="rb-global-header">
     <div class="rb-wrap">
       <a href="/" class="shrink-0">
-        <img src="{{ asset('storage/img/RBlogo.png') }}" alt="Realbrick Logo" width="84" height="84">
+        <img src="{{ asset('storage/img/rblogo-2.png') }}" alt="Realbrick Logo" width="84" height="84">
       </a>
       <nav class="rb-global-nav">
         <ul class="nav">
@@ -239,8 +239,8 @@
       </nav>
       <div class="rb-global-social">
         <a href="#" aria-label="Facebook"><img src="{{ asset('storage/img/facebook.png') }}" alt="Facebook"></a>
-        <a href="#" aria-label="Instagram"><img src="{{ asset('storage/img/Инстаграм.png') }}" alt="Instagram"></a>
-        <a href="#" aria-label="WhatsApp"><img src="{{ asset('storage/img/Ватсап.png') }}" alt="WhatsApp"></a>
+        <a href="#" aria-label="Instagram"><img src="{{ asset('storage/img/instagram.png') }}" alt="Instagram"></a>
+        <a href="#" aria-label="WhatsApp"><img src="{{ asset('storage/img/vatsap.png') }}" alt="WhatsApp"></a>
       </div>
       <button class="rb-global-burger" type="button" aria-label="Открыть меню">
         <span class="rb-global-burger-lines"><span></span></span>
@@ -257,8 +257,8 @@
     <a href="/contacts">контакты</a>
     <div class="rb-mobile-social">
       <a href="#" aria-label="Facebook"><img src="{{ asset('storage/img/facebook.png') }}" alt="Facebook"></a>
-      <a href="#" aria-label="Instagram"><img src="{{ asset('storage/img/Инстаграм.png') }}" alt="Instagram"></a>
-      <a href="#" aria-label="WhatsApp"><img src="{{ asset('storage/img/Ватсап.png') }}" alt="WhatsApp"></a>
+      <a href="#" aria-label="Instagram"><img src="{{ asset('storage/img/instagram.png') }}" alt="Instagram"></a>
+      <a href="#" aria-label="WhatsApp"><img src="{{ asset('storage/img/vatsap.png') }}" alt="WhatsApp"></a>
     </div>
   </nav>
 

@@ -255,9 +255,9 @@ mobileNav.innerHTML = `
     <li><a href="#">контакты</a></li>
   </ul>
   <div class="nav_mobile-social">
-    <a href="#"><img src="./img/фейсбук.png" alt="Facebook" width="36"></a>
-    <a href="#"><img src="./img/Инстаграм.png" alt="Instagram" width="36"></a>
-    <a href="#"><img src="./img/Ватсап.png" alt="WhatsApp" width="36"></a>
+    <a href="#"><img src="/storage/img/facebook.png" alt="Facebook" width="36"></a>
+    <a href="#"><img src="/storage/img/instagram.png" alt="Instagram" width="36"></a>
+    <a href="#"><img src="/storage/img/vatsap.png" alt="WhatsApp" width="36"></a>
   </div>
 `;
 document.body.appendChild(mobileNav);

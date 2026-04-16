@@ -34,7 +34,7 @@ body {
 }
 
 .header {
-    background-image: url("../img/Фон.png");
+    background-image: url("/storage/img/fon.png");
     background-size: cover;
     background-position: center;
     min-height: 110vh;
@@ -195,7 +195,7 @@ body {
     bottom: 0;
     width: 900px;
     height: 1000px;
-    background-image: url('../img/Камень.png');
+    background-image: url('/storage/img/kamen.png');
     background-repeat: no-repeat;
     background-position: center bottom;
     background-size: contain;
@@ -553,7 +553,7 @@ body {
 
 .projects_inner {
     position: relative;
-    background-image: url('../img/123123.png');
+    background-image: url('/storage/img/123123.png');
     background-size: cover;
     background-position: center;
     border-top: 1px solid #d9b176;
@@ -691,7 +691,7 @@ body {
     border-left: 2px solid #d9b176;
     border-radius: 28px;
     padding: 56px 44px;
-    background-image: url('../img/123.png');
+    background-image: url('/storage/img/123.png');
     background-size: cover;
     background-position: center;
     display: flex;
@@ -1061,7 +1061,7 @@ body {
     overflow: visible;
     margin: 0px 0px 0px 60px;
     min-height: 680px;
-    background-image: url('../img/Прямоугольник 2 копия 28.png');
+    background-image: url('/storage/img/pryamougolnik-2-kopiya-28.png');
     background-size: cover;
     background-position: center;
 }

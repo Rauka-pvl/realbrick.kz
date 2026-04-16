@@ -6,11 +6,11 @@
 <style>
   body{overflow-x:hidden;}
   /* Force image URLs from Laravel app, not Vite host */
-  .header { background-image: url("{{ asset('storage/img/Фон.png') }}") !important; }
-  .header_footer-bottom::before { background-image: url("{{ asset('storage/img/Камень.png') }}") !important; }
+  .header { background-image: url("{{ asset('storage/img/fon.png') }}") !important; }
+  .header_footer-bottom::before { background-image: url("{{ asset('storage/img/kamen.png') }}") !important; }
   .projects::before { background-image: url("{{ asset('storage/img/123123.png') }}") !important; }
   .projects::after { background-image: url("{{ asset('storage/img/123.png') }}") !important; }
-  .consult { background-image: url("{{ asset('storage/img/Прямоугольник 2 копия 28.png') }}") !important; }
+  .consult { background-image: url("{{ asset('storage/img/pryamougolnik-2-kopiya-28.png') }}") !important; }
 </style>
 @endpush
 
@@ -37,7 +37,7 @@
               </div>
             </div>
             <!-- decorative image between left and right footer columns -->
-            <img src="{{ asset('storage/img/Кирпич.png') }}" alt="" class="header_footer-decor" aria-hidden="true" width="200px">
+            <img src="{{ asset('storage/img/kirpich.png') }}" alt="" class="header_footer-decor" aria-hidden="true" width="200px">
             <div class="header_footer-right">
               <div class="header_footer-card">
                 <h1>6%</h1>
@@ -68,7 +68,7 @@
             <div class="usage_track">
 
               <div class="usage_card">
-                <img src="{{ asset('storage/img/2 блок карточки/1.png') }}" alt="Жилые дома">
+                <img src="{{ asset('storage/img/2-blok-kartochki/1.png') }}" alt="Жилые дома">
                 <div class="usage_card-content">
                   <h2>Жилые дома</h2>
                   <p>Фасады из кирпича и плитки ручной формовки</p>
@@ -77,7 +77,7 @@
               </div>
 
               <div class="usage_card">
-                <img src="{{ asset('storage/img/2 блок карточки/2.png') }}" alt="Интерьеры">
+                <img src="{{ asset('storage/img/2-blok-kartochki/2.png') }}" alt="Интерьеры">
                 <div class="usage_card-content">
                   <h2>Интерьеры</h2>
                   <p>Живая фактура кирпича для выразительных интерьеров.</p>
@@ -86,7 +86,7 @@
               </div>
 
               <div class="usage_card">
-                <img src="{{ asset('storage/img/2 блок карточки/бани и зоны барбекю.png') }}" alt="Фасады">
+                <img src="{{ asset('storage/img/2-blok-kartochki/bani-i-zony-barbekyu.png') }}" alt="Фасады">
                 <div class="usage_card-content">
                   <h2>Фасады</h2>
                   <p>Современные решения для внешней отделки зданий.</p>
@@ -95,7 +95,7 @@
               </div>
 
               <div class="usage_card">
-                <img src="{{ asset('storage/img/2 блок карточки/коммерческие объекты и офисы.png') }}" alt="Коммерческие объекты">
+                <img src="{{ asset('storage/img/2-blok-kartochki/kommercheskie-obekty-i-ofisy.png') }}" alt="Коммерческие объекты">
                 <div class="usage_card-content">
                   <h2>Коммерческие объекты</h2>
                   <p>Офисы, рестораны и общественные пространства.</p>
@@ -104,7 +104,7 @@
               </div>
 
               <div class="usage_card">
-                    <img src="{{ asset('storage/img/2 блок карточки/технические помещения.png') }}" alt="Ландшафт">
+                    <img src="{{ asset('storage/img/2-blok-kartochki/tehnicheskie-pomescheniya.png') }}" alt="Ландшафт">
                 <div class="usage_card-content">
                   <h2>Ландшафт</h2>
                   <p>Дорожки, подпорные стены и малые архитектурные формы.</p>
@@ -140,7 +140,7 @@
       <div class="collections_grid">
 
         <div class="collections_card">
-          <img src="{{ asset('storage/img/Слой 18.png') }}" alt="Кирпич ручной формовки">
+          <img src="{{ asset('storage/img/sloi-18.png') }}" alt="Кирпич ручной формовки">
           <div class="collections_card-content">
             <h3>Кирпич ручной формовки</h3>
             <a href="#" class="collections_link">каталог <span>→</span></a>
@@ -148,7 +148,7 @@
         </div>
 
         <div class="collections_card">
-          <img src="{{ asset('storage/img/Слой 17.png') }}" alt="Плитка ручной формовки">
+          <img src="{{ asset('storage/img/sloi-17.png') }}" alt="Плитка ручной формовки">
           <div class="collections_card-content">
             <h3>Плитка ручной формовки</h3>
             <a href="#" class="collections_link">каталог <span>→</span></a>
@@ -156,7 +156,7 @@
         </div>
 
         <div class="collections_card">
-          <img src="{{ asset('storage/img/Слой 19.png') }}" alt="Декоративные элементы">
+          <img src="{{ asset('storage/img/sloi-19.png') }}" alt="Декоративные элементы">
           <div class="collections_card-content">
             <h3>Декоративные элементы</h3>
             <a href="#" class="collections_link">каталог <span>→</span></a>
@@ -164,7 +164,7 @@
         </div>
 
         <div class="collections_card">
-          <img src="{{ asset('storage/img/Слой 15.png') }}" alt="Напольное покрытие">
+          <img src="{{ asset('storage/img/sloi-15.png') }}" alt="Напольное покрытие">
           <div class="collections_card-content">
             <h3>Напольное покрытие</h3>
             <a href="#" class="collections_link">каталог <span>→</span></a>
@@ -172,7 +172,7 @@
         </div>
 
         <div class="collections_card">
-          <img src="{{ asset('storage/img/Слой 19.png') }}" alt="Лимитированные серии">
+          <img src="{{ asset('storage/img/sloi-19.png') }}" alt="Лимитированные серии">
           <div class="collections_card-content">
             <h3>Лимитированные серии</h3>
             <a href="#" class="collections_link">каталог <span>→</span></a>
@@ -180,7 +180,7 @@
         </div>
 
         <div class="collections_card">
-          <img src="{{ asset('storage/img/Слой 27.png') }}" alt="Черепица">
+          <img src="{{ asset('storage/img/sloi-27.png') }}" alt="Черепица">
           <div class="collections_card-content">
             <h3>Черепица</h3>
             <a href="#" class="collections_link">каталог <span>→</span></a>
@@ -188,7 +188,7 @@
         </div>
 
         <div class="collections_card">
-          <img src="{{ asset('storage/img/Слой 28.png') }}" alt="Сопутствующие материалы">
+          <img src="{{ asset('storage/img/sloi-28.png') }}" alt="Сопутствующие материалы">
           <div class="collections_card-content">
             <h3>Сопутствующие материалы</h3>
             <a href="#" class="collections_link">каталог <span>→</span></a>
@@ -203,7 +203,7 @@
     <div class="projects_inner">
 
       <!-- фоновый текст REAL BRICK -->
-      <img src="{{ asset('storage/img/REAL BRICK копия.png') }}" alt="" class="projects_bg-img">
+      <img src="{{ asset('storage/img/real-brick-kopiya.png') }}" alt="" class="projects_bg-img">
 
       <div class="container">
         <div class="projects_layout">
@@ -219,7 +219,7 @@
             </div>
 
             <div class="projects_geo">
-              <img src="{{ asset('storage/img/kazakhstan-flag-national-europe-emblem-icon-illustration-abstract-design-element-free-vector копия.png') }}" alt="Казахстан" width="36" height="36">
+              <img src="{{ asset('storage/img/kazakhstan-flag-national-europe-emblem-icon-illustration-abstract-design-element-free-vector-kopiya.png') }}" alt="Казахстан" width="36" height="36">
               <span>Используется в проектах<br>по всему Казахстану</span>
             </div>
 
@@ -375,7 +375,7 @@
 
       <!-- картинку вставишь сам -->
       <div class="consult_right">
-        <img src="{{ asset('storage/img/Слой 23.png') }}" alt="" class="consult_img">
+        <img src="{{ asset('storage/img/sloi-23.png') }}" alt="" class="consult_img">
       </div>
 
     </div>
@@ -415,13 +415,13 @@
 
           <div class="contacts_social">
             <a href="#">
-                <img src="{{ asset('storage/img/фейсбук.png') }}" alt="Facebook" width="36">
+                <img src="{{ asset('storage/img/facebook.png') }}" alt="Facebook" width="36">
             </a>
             <a href="#">
-                <img src="{{ asset('storage/img/Инстаграм.png') }}" alt="Instagram" width="36">
+                <img src="{{ asset('storage/img/instagram.png') }}" alt="Instagram" width="36">
             </a>
             <a href="#">
-              <img src="{{ asset('storage/img/Ватсап.png') }}" alt="WhatsApp" width="36">
+              <img src="{{ asset('storage/img/vatsap.png') }}" alt="WhatsApp" width="36">
             </a>
           </div>
         </div>
