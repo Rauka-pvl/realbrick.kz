@@ -7,7 +7,6 @@
   body{overflow-x:hidden;}
   /* Force image URLs from Laravel app, not Vite host */
   .header { background-image: url("{{ asset('storage/img/fon.png') }}") !important; }
-  .header_footer-bottom::before { background-image: url("{{ asset('storage/img/kamen.png') }}") !important; }
   .projects::before { background-image: url("{{ asset('storage/img/123123.png') }}") !important; }
   .projects::after { background-image: url("{{ asset('storage/img/123.png') }}") !important; }
   /* .consult { background-image: url("{{ asset('storage/img/pryamougolnik-2-kopiya-28.png') }}") !important; } */
@@ -17,45 +16,64 @@
 @section('content')
     @vite(['resources/css/main.css', 'resources/css/reset.css'])
 
-    <section class="header">
-        <div class="container">
+    <section class="header pb-10 lg:pb-0 max-[1023px]:pb-4">
+    <div class="container 2xl:!max-w-none 2xl:!mx-0 2xl:!px-24 2xl:!w-full max-[1023px]:!max-w-full max-[1023px]:!px-4">
         <div class="header_body">
-            <div class="header_body-top">
-              <h1>REAL BRICK</h1>
-              <div class="heaeder_body-text">
-                <p>Каждый кирпич формируется <br>  вручную. Поэтому фактура<br> никогда не повторяется</p>
+            <div class="header_body-top flex-col gap-4 text-center lg:flex-row lg:items-center lg:justify-between lg:text-left max-[1023px]:!items-start max-[1023px]:!gap-2 max-[1023px]:!text-left">
+              <h1 class="text-[40px] leading-none sm:text-[52px] md:text-[72px] xl:text-[96px] 2xl:text-[130px] max-[1023px]:!text-[64px] max-[420px]:!text-[56px] max-[1023px]:!leading-[0.94]">REAL BRICK</h1>
+              <div class="heaeder_body-text max-w-full text-center lg:max-w-[36%] lg:text-left max-[1023px]:hidden">
+                <p class="text-[15px] leading-[1.35] sm:text-base lg:text-xl 2xl:text-[23px]">Каждый кирпич формируется <br class="hidden lg:block">  вручную. Поэтому фактура<br class="hidden lg:block"> никогда не повторяется</p>
               </div>
             </div>
 
           </div>
-          <div class="header_footer">
+          <div class="header_footer flex-col items-center gap-6 text-center lg:flex-row lg:items-stretch lg:justify-between lg:text-left max-[1023px]:!items-start max-[1023px]:!gap-3 max-[1023px]:!text-left">
             <div class="header_footer-left">
-              <h1>1 В МИРЕ МИНЕРАЛЬНЫЙ КИРПИЧ <br> РУЧНОЙ ФОРМОВКИ </h1>
-              <p>для архитектуры <br> и интерьеров </p>
-              <div class="header_footer-buttons">
-                <a href="#" class="btn btn_collection">смотреть коллекцию</a>
-                <a href="#" class="btn btn_catalog">скачать каталог</a>
+              <h1 class="text-[20px] sm:text-2xl lg:text-3xl 2xl:text-4xl max-[1023px]:!max-w-[320px] max-[1023px]:!text-[20px] max-[1023px]:!leading-[1.15]">1 В МИРЕ МИНЕРАЛЬНЫЙ КИРПИЧ <br class="hidden lg:block"> РУЧНОЙ ФОРМОВКИ </h1>
+              <p class="text-base sm:text-lg lg:text-2xl 2xl:text-3xl max-[1023px]:!text-[16px] max-[1023px]:!leading-[1.15]">для архитектуры <br class="hidden lg:block"> и интерьеров </p>
+              <div class="header_footer-buttons w-full items-center lg:w-auto lg:items-start max-[1023px]:!mt-3 max-[1023px]:!w-auto max-[1023px]:!items-start max-[1023px]:!gap-2.5">
+                <a href="#" class="btn btn_collection w-full sm:w-auto max-[1023px]:!w-auto max-[1023px]:!min-w-[190px] max-[1023px]:!px-6 max-[1023px]:!py-3 max-[1023px]:!text-[14px]">смотреть коллекцию</a>
+                <a href="#" class="btn btn_catalog w-full sm:w-auto max-[1023px]:!w-auto max-[1023px]:!min-w-[190px] max-[1023px]:!px-6 max-[1023px]:!py-3 max-[1023px]:!text-[14px]">скачать каталог</a>
               </div>
             </div>
             <!-- decorative image between left and right footer columns -->
-            <img src="{{ asset('storage/img/kirpich.png') }}" alt="" class="header_footer-decor" aria-hidden="true" width="200px">
-            <div class="header_footer-right">
-              <div class="header_footer-card">
+            <img src="{{ asset('storage/img/kirpich.png') }}" alt="" class="header_footer-decor static my-2 w-full max-w-[460px] translate-x-0 translate-y-0 lg:absolute lg:left-[53%] lg:top-[52%] lg:w-[650px] lg:max-w-[650px] lg:-translate-x-1/2 lg:-translate-y-1/2 max-[1023px]:!relative max-[1023px]:!left-auto max-[1023px]:!top-auto max-[1023px]:!mx-auto max-[1023px]:!mt-2 max-[1023px]:!w-[94vw] max-[1023px]:!max-w-[340px] max-[1023px]:!translate-x-0 max-[1023px]:!translate-y-0" aria-hidden="true" width="200px">
+            <div class="header_footer-right max-[1023px]:hidden">
+              <div class="header_footer-card w-full max-w-[320px] lg:w-auto lg:max-w-none">
                 <h1>6%</h1>
                 <p>- водопоглощение</p>
               </div>
-              <div class="header_footer-card">
+              <div class="header_footer-card w-full max-w-[320px] lg:w-auto lg:max-w-none">
                 <h1>M250</h1>
                 <p>- водопоглощение</p>
               </div>
-              <div class="header_footer-card">
+              <div class="header_footer-card w-full max-w-[320px] lg:w-auto lg:max-w-none">
                 <h1>F500</h1>
                 <p>- водопоглощение</p>
               </div>
             </div>
           </div>
-          <div class="header_footer-bottom">
-            <p>Каждый кирпич формируется <br>  вручную. Поэтому фактура<br> никогда не повторяется</p>
+
+          <div class="relative -mt-20 flex min-h-[220px] items-end justify-center pb-4 lg:hidden">
+            <img
+              src="{{ asset('storage/img/kamen.png') }}"
+              alt=""
+              aria-hidden="true"
+              class="pointer-events-none absolute bottom-0 left-1/2 z-0 w-[360px] max-w-none -translate-x-1/2"
+            >
+            <p class="relative z-10 max-w-[270px] text-left text-[15px] leading-[1.35] text-white">
+              Каждый кирпич формируется вручную. Поэтому фактура никогда не повторяется
+            </p>
+          </div>
+
+          <div class="rb-hero-bottom hidden pt-6 text-center lg:absolute lg:bottom-0 lg:left-0 lg:right-0 lg:flex lg:items-end lg:justify-center lg:pt-10 lg:pb-[60px]">
+            <img
+              src="{{ asset('storage/img/kamen.png') }}"
+              alt=""
+              aria-hidden="true"
+              class="pointer-events-none absolute bottom-0 left-1/2 z-0 w-[900px] max-w-none -translate-x-1/2"
+            >
+          
             </div>
           </div>
         </div>
@@ -63,8 +81,8 @@
     </section>
 
    <section class="usage">
-        <div class="usage_title">
-          Где используется <span>Real Brick</span>
+        <div class="usage_title text-[28px] leading-tight sm:text-[32px] lg:text-[36px] mb-5">
+          <p>Где используется  <span class="ml-1"> Real Brick</span></p>
         </div>
         <div class="usage_slider">
             <div class="usage_track">
@@ -135,7 +153,7 @@
     <div class="container">
 
       <div class="collections_header">
-        <h2 class="collections_title">Коллекции <span>Real Brick</span></h2>
+        <h2 class="collections_title text-[28px] leading-tight sm:text-[32px] lg:text-[36px]">Коллекции <span>Real Brick</span></h2>
         <a href="#" class="collections_all">смотреть весь каталог <span>→</span></a>
       </div>
 
@@ -208,12 +226,12 @@
       <img src="{{ asset('storage/img/real-brick-kopiya.png') }}" alt="" class="projects_bg-img">
 
       <div class="container">
-        <div class="projects_layout">
+        <div class="projects_layout grid grid-cols-1 gap-6 lg:flex lg:justify-between lg:gap-0">
 
           <!-- левая колонка -->
           <div class="projects_left">
-            <h2 class="projects_title">Реализованные<br> проекты <span>Real Brick</span></h2>
-            <p class="projects_desc">Квартиры, рестораны, коммерческие фасады.<br>Кирпич для проектов со вкусом и стилем</p>
+            <h2 class="projects_title text-[28px] leading-tight sm:text-[32px] lg:text-[36px]">Реализованные<br> проекты <span>Real Brick</span></h2>
+            <p class="projects_desc text-[15px] leading-[1.45] lg:text-base">Квартиры, рестораны, коммерческие фасады.<br>Кирпич для проектов со вкусом и стилем</p>
 
             <div class="projects_stat">
               <span class="projects_stat-num">500+</span>
@@ -244,20 +262,20 @@
 
   <section class="why">
     <div class="container">
-      <h2 class="why_title">Почему выбирают <span>Real Brick</span></h2>
+      <h2 class="why_title text-[28px] leading-tight sm:text-[32px] lg:text-[36px]">Почему выбирают <span>Real Brick</span></h2>
 
-      <div class="why_layout">
+      <div class="why_layout grid grid-cols-1 gap-6 lg:flex lg:gap-0">
 
         <!-- левая колонка -->
         <div class="why_left">
-          <p class="why_text">
+          <p class="why_text text-[15px] leading-[1.45] lg:text-base">
             <span class="why_accent">Real Brick</span> — кирпич ручной формовки
             с уникальной фактурой и характером.
             Мы поставляем материалы для
             архитектуры и интерьеров, где важны
             стиль, качество и долговечность.
           </p>
-          <p class="why_text">
+          <p class="why_text text-[15px] leading-[1.45] lg:text-base">
             С 2007 года продукция Real Brick
             используется в проектах, где ценят
             <span class="why_accent">натуральные материалы и<br>
@@ -310,7 +328,7 @@
 
   <section class="faq">
     <div class="container">
-      <h2 class="faq_title">Часто задаваемые вопросы</h2>
+      <h2 class="faq_title text-[28px] leading-tight sm:text-[32px] lg:text-[36px]">Часто задаваемые вопросы</h2>
 
       <div class="faq_list">
 
@@ -360,11 +378,11 @@
   </section>
 
   <section class="consult">
-    <div class="consult_inner">
+    <div class="consult_inner grid grid-cols-1 gap-6 lg:flex lg:justify-between lg:gap-0">
 
       <div class="consult_left">
-        <h2 class="consult_title">Получите консультацию<br>по вашему проекту</h2>
-        <p class="consult_desc">Оставьте заявку — и мы поможем подобрать<br>кирпич для вашего проекта</p>
+        <h2 class="consult_title text-[28px] leading-tight sm:text-[32px] lg:text-[36px]">Получите консультацию<br>по вашему проекту</h2>
+        <p class="consult_desc text-[15px] leading-[1.45] lg:text-base">Оставьте заявку — и мы поможем подобрать<br>кирпич для вашего проекта</p>
 
         <form class="consult_form" id="consult-form">
           <input class="consult_input" name="name" type="text" placeholder="Ваше имя*" required>
@@ -385,11 +403,11 @@
 
   <section class="contacts">
     <div class="container">
-      <div class="contacts_layout">
+      <div class="contacts_layout grid grid-cols-1 gap-6 lg:flex lg:justify-between lg:gap-0">
 
         <!-- левая колонка -->
         <div class="contacts_left">
-          <h2 class="contacts_title">Контакты <span>Real Brick</span></h2>
+          <h2 class="contacts_title text-[28px] leading-tight sm:text-[32px] lg:text-[36px]">Контакты <span>Real Brick</span></h2>
 
           <div class="contacts_list">
 
@@ -429,7 +447,7 @@
         </div>
 
         <!-- правая колонка — карта -->
-        <div class="contacts_map">
+        <div class="contacts_map min-h-[320px] lg:min-h-0">
           <iframe
             src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2906.4!2d76.9285!3d43.2567!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zReal+Brick+Asia!5e0!3m2!1sru!2skz!4v1"
             width="100%"

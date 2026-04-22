@@ -204,8 +204,8 @@
           </div>
         </div>
 
-        <div class="relative left-1/2 mt-10 w-[100dvw] max-w-[100%] -translate-x-1/2 overflow-x-clip">
-          <div class="relative flex justify-center">
+        <div class="relative left-1/2 mt-4 w-screen max-w-none -translate-x-1/2 overflow-x-clip lg:mt-2">
+          <div class="relative">
             <img
               src="{{ asset('storage/assets/contacts-bg.png') }}"
               alt=""
@@ -213,8 +213,9 @@
               height="1080"
               decoding="async"
               loading="lazy"
-              class="block h-auto w-[130vw] max-w-none object-contain object-center sm:w-[122vw] lg:w-[112vw]"
+              class="block h-auto w-full object-contain object-center"
             />
+            <div class="pointer-events-none absolute inset-0 bg-gradient-to-b from-black/10 via-black/20 to-black/55 lg:from-black/0 lg:via-black/10 lg:to-black/45"></div>
             <div class="absolute inset-0 z-10 flex items-center justify-center px-4 py-10 sm:py-12 md:py-16 lg:px-8">
             <div class="pointer-events-auto mx-auto w-full max-w-2xl rounded-3xl border border-gold/35 bg-nearblack/85 p-6 shadow-[0_0_48px_rgba(0,0,0,0.55)] backdrop-blur-md sm:p-7 md:p-8">
             <h3 class="text-center text-4xl font-semibold leading-tight text-offwhite">Напишите <span class="text-gold">нам</span></h3>

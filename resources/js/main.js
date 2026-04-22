@@ -1,46 +1,164 @@
 /* ── USAGE SLIDER ── */
 const track = document.querySelector('.usage_track');
 const dots = document.querySelectorAll('.usage_dot');
-const cards = document.querySelectorAll('.usage_card');
 let current = 0;
 
-function goTo(index) {
-  current = index;
-  const cardWidth = cards[0].offsetWidth + 24;
-  track.style.transform = `translateX(-${cardWidth * index}px)`;
-  dots.forEach(d => d.classList.remove('active'));
-  dots[index].classList.add('active');
+if (track) {
+  const originalCards = Array.from(track.querySelectorAll('.usage_card'));
+  const total = originalCards.length;
+
+  if (total > 1) {
+    // Build 3 logical blocks: [clone all] [original] [clone all]
+    // This prevents "empty area" glitches on rapid ±2 navigation.
+    const leftBlock = originalCards.map((card) => {
+      const clone = card.cloneNode(true);
+      clone.setAttribute('aria-hidden', 'true');
+      return clone;
+    });
+    const rightBlock = originalCards.map((card) => {
+      const clone = card.cloneNode(true);
+      clone.setAttribute('aria-hidden', 'true');
+      return clone;
+    });
+
+    track.innerHTML = '';
+    leftBlock.forEach((n) => track.appendChild(n));
+    originalCards.forEach((n) => track.appendChild(n));
+    rightBlock.forEach((n) => track.appendChild(n));
+
+    const allCards = Array.from(track.querySelectorAll('.usage_card'));
+    let currentTrackIndex = total; // first slide in the middle block
+    let startX = 0;
+    let isDragging = false;
+
+    const getGap = () => (window.matchMedia('(max-width: 768px)').matches ? 16 : 24);
+    const getCardStep = () => allCards[0].offsetWidth + getGap();
+
+    const updateDots = () => {
+      const logicalIndex = (currentTrackIndex - 1 + total) % total;
+      current = logicalIndex;
+      // Navigation dots work as relative controls: -2, -1, 0, +1, +2
+      // so the center dot always stays "active".
+      if (dots.length >= 5) {
+        dots.forEach(d => d.classList.remove('active'));
+        dots[2].classList.add('active');
+      } else {
+        dots.forEach(d => d.classList.remove('active'));
+        if (dots[logicalIndex]) dots[logicalIndex].classList.add('active');
+      }
+    };
+
+    const setPosition = (index, animated = true) => {
+      currentTrackIndex = index;
+      track.style.transition = animated ? 'transform 0.5s cubic-bezier(0.4, 0, 0.2, 1)' : 'none';
+      track.style.transform = `translateX(-${getCardStep() * currentTrackIndex}px)`;
+      updateDots();
+    };
+
+    const goNext = () => setPosition(currentTrackIndex + 1, true);
+    const goPrev = () => setPosition(currentTrackIndex - 1, true);
+
+    // Start from first real card in the center block.
+    setPosition(total, false);
+
+    if (dots.length >= 5) {
+      const relativeSteps = [-2, -1, 0, 1, 2];
+      dots.forEach((dot, index) => {
+        dot.dataset.step = String(relativeSteps[index] ?? 0);
+        dot.setAttribute('aria-label', relativeSteps[index] === 0
+          ? 'Текущий слайд'
+          : `Перейти на ${Math.abs(relativeSteps[index])} ${Math.abs(relativeSteps[index]) === 1 ? 'слайд' : 'слайда'} ${relativeSteps[index] > 0 ? 'вперед' : 'назад'}`);
+        dot.addEventListener('click', () => {
+          const step = Number(dot.dataset.step || '0');
+          if (step === 0) return;
+          setPosition(currentTrackIndex + step, true);
+          restartAutoplay();
+        });
+      });
+    } else {
+      dots.forEach(dot => {
+        dot.addEventListener('click', () => {
+          const logicalIndex = +dot.dataset.index;
+          setPosition(total + logicalIndex, true);
+          restartAutoplay();
+        });
+      });
+    }
+
+    track.addEventListener('transitionend', () => {
+      // Keep cursor in the center block for seamless infinite loop.
+      if (currentTrackIndex < total) {
+        setPosition(currentTrackIndex + total, false);
+      } else if (currentTrackIndex >= total * 2) {
+        setPosition(currentTrackIndex - total, false);
+      }
+    });
+
+    window.addEventListener('resize', () => setPosition(currentTrackIndex, false));
+
+    /* drag support — mouse */
+    track.addEventListener('mousedown', e => { startX = e.clientX; isDragging = true; });
+    track.addEventListener('mousemove', () => { if (!isDragging) return; });
+    track.addEventListener('mouseup', e => {
+      if (!isDragging) return;
+      isDragging = false;
+      const diff = startX - e.clientX;
+      if (diff > 60) goNext();
+      if (diff < -60) goPrev();
+    });
+    track.addEventListener('mouseleave', () => { isDragging = false; });
+
+    /* drag support — touch */
+    track.addEventListener('touchstart', e => {
+      startX = e.touches[0].clientX;
+      isDragging = true;
+    }, { passive: true });
+    track.addEventListener('touchend', e => {
+      if (!isDragging) return;
+      isDragging = false;
+      const diff = startX - e.changedTouches[0].clientX;
+      if (diff > 60) goNext();
+      if (diff < -60) goPrev();
+      if (Math.abs(diff) > 60) restartAutoplay();
+    });
+
+    // Infinite auto-loop
+    const slider = track.closest('.usage_slider');
+    const AUTOPLAY_DELAY = 3500;
+    let autoplayId = null;
+
+    function stopAutoplay() {
+      if (!autoplayId) return;
+      clearInterval(autoplayId);
+      autoplayId = null;
+    }
+
+    function startAutoplay() {
+      stopAutoplay();
+      autoplayId = setInterval(() => {
+        goNext();
+      }, AUTOPLAY_DELAY);
+    }
+
+    function restartAutoplay() {
+      startAutoplay();
+    }
+
+    if (slider) {
+      slider.addEventListener('mouseenter', stopAutoplay);
+      slider.addEventListener('mouseleave', startAutoplay);
+      slider.addEventListener('touchstart', stopAutoplay, { passive: true });
+      slider.addEventListener('touchend', startAutoplay);
+    }
+
+    document.addEventListener('visibilitychange', () => {
+      if (document.hidden) stopAutoplay();
+      else startAutoplay();
+    });
+
+    startAutoplay();
+  }
 }
-
-dots.forEach(dot => {
-  dot.addEventListener('click', () => goTo(+dot.dataset.index));
-});
-
-/* drag support — mouse */
-let startX = 0, isDragging = false;
-track.addEventListener('mousedown', e => { startX = e.clientX; isDragging = true; });
-track.addEventListener('mousemove', e => { if (!isDragging) return; });
-track.addEventListener('mouseup', e => {
-  if (!isDragging) return;
-  isDragging = false;
-  const diff = startX - e.clientX;
-  if (diff > 60 && current < cards.length - 1) goTo(current + 1);
-  if (diff < -60 && current > 0) goTo(current - 1);
-});
-track.addEventListener('mouseleave', () => { isDragging = false; });
-
-/* drag support — touch */
-track.addEventListener('touchstart', e => {
-  startX = e.touches[0].clientX;
-  isDragging = true;
-}, { passive: true });
-track.addEventListener('touchend', e => {
-  if (!isDragging) return;
-  isDragging = false;
-  const diff = startX - e.changedTouches[0].clientX;
-  if (diff > 60 && current < cards.length - 1) goTo(current + 1);
-  if (diff < -60 && current > 0) goTo(current - 1);
-});
 
 /* ── FAQ ACCORDION ── */
 document.querySelectorAll('.faq_question').forEach(btn => {
