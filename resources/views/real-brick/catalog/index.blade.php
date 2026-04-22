@@ -51,7 +51,7 @@
                     <img src="{{ $section['cover_url'] }}" alt="{{ $section['name'] }}" class="h-[170px] w-full object-cover opacity-90 transition duration-300 group-hover:opacity-100" />
                   @else
                     <div class="h-[170px] w-full bg-charcoal/80 flex items-center justify-center text-sm font-semibold text-offwhite/70">
-                      Нету Фото
+                      Изображение отсутствует
                     </div>
                   @endif
                   <div class="absolute inset-0 bg-gradient-to-t from-nearblack/95 via-nearblack/40 to-transparent"></div>

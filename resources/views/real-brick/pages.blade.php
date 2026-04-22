@@ -679,7 +679,7 @@
         <article class="group relative mt-6 overflow-hidden rounded-3xl border border-white/10 bg-charcoal/45">
           <div class="relative h-[290px] w-full md:h-[360px]">
             <div class="absolute inset-0 flex items-center justify-center bg-[linear-gradient(180deg,#202020_0%,#141414_100%)]">
-              <span class="rounded-full border border-white/20 bg-black/35 px-5 py-2 text-sm font-medium text-offwhite/75">Нету Фото</span>
+              <span class="rounded-full border border-white/20 bg-black/35 px-5 py-2 text-sm font-medium text-offwhite/75">Изображение отсутствует</span>
             </div>
             <div class="absolute inset-0 bg-gradient-to-t from-black/85 via-black/35 to-black/45"></div>
           </div>
@@ -707,7 +707,7 @@
           @forelse($cards as $post)
             <article class="group overflow-hidden rounded-3xl border border-white/10 bg-charcoal/55 transition hover:border-gold/45">
               <div class="flex h-44 items-center justify-center bg-[linear-gradient(180deg,#202020_0%,#141414_100%)]">
-                <span class="rounded-full border border-white/20 bg-black/35 px-4 py-1.5 text-xs text-offwhite/75">Нету Фото</span>
+                <span class="rounded-full border border-white/20 bg-black/35 px-4 py-1.5 text-xs text-offwhite/75">Изображение отсутствует</span>
               </div>
               <div class="p-5">
                 <h3 class="text-xl font-semibold leading-tight text-offwhite">{{ $post->title }}</h3>
@@ -781,7 +781,7 @@
 
           <div class="mt-8 overflow-hidden rounded-3xl border border-white/10 bg-[linear-gradient(180deg,#2a2a2a_0%,#1b1b1b_100%)]">
             <div class="flex h-[240px] items-center justify-center sm:h-[320px] md:h-[380px]">
-              <span class="rounded-full border border-white/20 bg-black/35 px-5 py-2 text-sm text-offwhite/75">Нету Фото</span>
+              <span class="rounded-full border border-white/20 bg-black/35 px-5 py-2 text-sm text-offwhite/75">Изображение отсутствует</span>
             </div>
           </div>
           <p class="mt-3 text-center text-xs text-offwhite/50">Текстура кирпича ручной формовки</p>

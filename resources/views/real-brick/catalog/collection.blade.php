@@ -50,7 +50,7 @@
                 @if(!empty($section['cover_url']))
                   <img src="{{ $section['cover_url'] }}" alt="{{ $section['name'] }}" class="h-full w-full object-cover transition duration-300 group-hover:scale-[1.03]" />
                 @else
-                  <div class="h-full w-full bg-charcoal/80 flex items-center justify-center text-sm font-semibold text-offwhite/70">Нету Фото</div>
+                  <div class="h-full w-full bg-charcoal/80 flex items-center justify-center text-sm font-semibold text-offwhite/70">Изображение отсутствует</div>
                 @endif
               </div>
               <div class="absolute inset-0 bg-gradient-to-t from-nearblack/90 via-nearblack/40 to-transparent"></div>
@@ -68,7 +68,7 @@
                   @if(!empty($product['image_url']))
                     <img src="{{ $product['image_url'] }}" alt="{{ $product['name'] }}" class="h-full w-full object-cover transition duration-300 group-hover:scale-[1.03]" />
                   @else
-                    <div class="h-full w-full bg-charcoal/80 flex items-center justify-center text-sm font-semibold text-offwhite/70">Нету Фото</div>
+                    <div class="h-full w-full bg-charcoal/80 flex items-center justify-center text-sm font-semibold text-offwhite/70">Изображение отсутствует</div>
                   @endif
                 </div>
                 <div class="absolute inset-0 bg-gradient-to-t from-nearblack/90 via-nearblack/40 to-transparent"></div>

@@ -39,7 +39,7 @@
               @if(!empty($item['image_url']))
                 <img src="{{ $item['image_url'] }}" alt="{{ $item['name'] }}" class="h-full w-full object-cover" />
               @else
-                <div class="flex h-full w-full items-center justify-center text-[10px] text-offwhite/60">Нету Фото</div>
+                <div class="flex h-full w-full items-center justify-center text-[10px] text-offwhite/60">Изображение отсутствует</div>
               @endif
             </div>
             <div>

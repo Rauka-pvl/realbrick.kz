@@ -235,57 +235,235 @@ if (brickDecor) {
 // ── BURGER MENU ──
 const burger = document.querySelector('.nav_burger');
 const nav = document.querySelector('.nav');
+if (burger) {
+  // Создаём оверлей
+  const overlay = document.createElement('div');
+  overlay.classList.add('nav_overlay');
+  document.body.appendChild(overlay);
 
-// Создаём оверлей
-const overlay = document.createElement('div');
-overlay.classList.add('nav_overlay');
-document.body.appendChild(overlay);
+  // Создаём мобильное меню
+  const mobileNav = document.createElement('nav');
+  mobileNav.classList.add('nav_mobile');
+  mobileNav.innerHTML = `
+    <button class="nav_mobile-close" aria-label="Закрыть меню">✕</button>
+    <ul class="nav_mobile-list">
+      <li><a href="#">главная</a></li>
+      <li><a href="#">о нас</a></li>
+      <li><a href="#">каталог</a></li>
+      <li><a href="#">галерея</a></li>
+      <li><a href="#">блог</a></li>
+      <li><a href="#">контакты</a></li>
+    </ul>
+    <div class="nav_mobile-social">
+      <a href="https://www.facebook.com/61584804524037/mentions/" target="_blank" rel="noopener noreferrer"><img src="/storage/img/facebook.png" alt="Facebook" width="36"></a>
+      <a href="https://www.instagram.com/realbrickasia/" target="_blank" rel="noopener noreferrer"><img src="/storage/img/instagram.png" alt="Instagram" width="36"></a>
+      <a href="https://wa.me/77004446999" target="_blank" rel="noopener noreferrer"><img src="/storage/img/vatsap.png" alt="WhatsApp" width="36"></a>
+    </div>
+  `;
+  document.body.appendChild(mobileNav);
 
-// Создаём мобильное меню
-const mobileNav = document.createElement('nav');
-mobileNav.classList.add('nav_mobile');
-mobileNav.innerHTML = `
-  <button class="nav_mobile-close" aria-label="Закрыть меню">✕</button>
-  <ul class="nav_mobile-list">
-    <li><a href="#">главная</a></li>
-    <li><a href="#">о нас</a></li>
-    <li><a href="#">каталог</a></li>
-    <li><a href="#">галерея</a></li>
-    <li><a href="#">блог</a></li>
-    <li><a href="#">контакты</a></li>
-  </ul>
-  <div class="nav_mobile-social">
-    <a href="https://www.facebook.com/61584804524037/mentions/" target="_blank" rel="noopener noreferrer"><img src="/storage/img/facebook.png" alt="Facebook" width="36"></a>
-    <a href="https://www.instagram.com/realbrickasia/" target="_blank" rel="noopener noreferrer"><img src="/storage/img/instagram.png" alt="Instagram" width="36"></a>
-    <a href="https://wa.me/77004446999" target="_blank" rel="noopener noreferrer"><img src="/storage/img/vatsap.png" alt="WhatsApp" width="36"></a>
-  </div>
-`;
-document.body.appendChild(mobileNav);
+  function openMenu() {
+      mobileNav.classList.add('is-open');
+      overlay.classList.add('is-visible');
+      burger.classList.add('is-active');
+      document.body.style.overflow = 'hidden';
+  }
 
-function openMenu() {
-    mobileNav.classList.add('is-open');
-    overlay.classList.add('is-visible');
-    burger.classList.add('is-active');
-    document.body.style.overflow = 'hidden';
+  function closeMenu() {
+      mobileNav.classList.remove('is-open');
+      overlay.classList.remove('is-visible');
+      burger.classList.remove('is-active');
+      document.body.style.overflow = '';
+  }
+
+  burger.addEventListener('click', openMenu);
+  overlay.addEventListener('click', closeMenu);
+  mobileNav.querySelector('.nav_mobile-close').addEventListener('click', closeMenu);
+
+  // Закрытие по Escape
+  document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') closeMenu();
+  });
+
+  // Закрытие при клике на ссылку
+  mobileNav.querySelectorAll('a').forEach(link => {
+      link.addEventListener('click', closeMenu);
+  });
 }
 
-function closeMenu() {
-    mobileNav.classList.remove('is-open');
-    overlay.classList.remove('is-visible');
-    burger.classList.remove('is-active');
-    document.body.style.overflow = '';
+/* ── CONSULT FORM -> BITRIX ── */
+async function sendToBitrix(data) {
+  var BITRIX_URL = 'https://realbrick.bitrix24.kz/rest/168/cu47wrs4cd1tbzck/crm.lead.add.json';
+
+  var params = {
+    fields: {
+      TITLE: 'InnovateX.SITE',
+      NAME: data.name,
+      PHONE: [{ VALUE: data.phone, VALUE_TYPE: 'WORK' }],
+      COMMENTS: data.message || ''
+    }
+  };
+
+  if (data.file) {
+    if (data.file.size > 5 * 1024 * 1024) {
+      throw new Error('FILE_TOO_LARGE');
+    }
+
+    var base64 = await new Promise((resolve, reject) => {
+      var reader = new FileReader();
+      reader.onload = () => resolve(reader.result.split(',')[1]);
+      reader.onerror = reject;
+      reader.readAsDataURL(data.file);
+    });
+
+    params.fields.UF_CRM_1775545282 = { fileData: [data.file.name, base64] };
+  }
+
+  var response = await fetch(BITRIX_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(params)
+  });
+
+  var result = await response.json();
+  console.log('Bitrix response:', result);
+
+  if (!result.result) {
+    console.error('Bitrix error:', result);
+    throw new Error('BITRIX_ERROR');
+  }
 }
 
-burger.addEventListener('click', openMenu);
-overlay.addEventListener('click', closeMenu);
-mobileNav.querySelector('.nav_mobile-close').addEventListener('click', closeMenu);
+function showToast(message, type = 'success') {
+  const oldToast = document.getElementById('rb-toast');
+  if (oldToast) oldToast.remove();
 
-// Закрытие по Escape
-document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape') closeMenu();
-});
+  const toast = document.createElement('div');
+  toast.id = 'rb-toast';
+  toast.textContent = message;
+  toast.style.position = 'fixed';
+  toast.style.left = '50%';
+  toast.style.top = '50%';
+  toast.style.zIndex = '9999';
+  toast.style.padding = '12px 16px';
+  toast.style.borderRadius = '12px';
+  toast.style.fontSize = '14px';
+  toast.style.fontWeight = '600';
+  toast.style.backdropFilter = 'blur(6px)';
+  toast.style.boxShadow = '0 12px 30px rgba(0,0,0,0.28)';
+  toast.style.transition = 'opacity 220ms ease, transform 220ms ease';
+  toast.style.opacity = '0';
+  toast.style.transform = 'translate(-50%, calc(-50% + 8px))';
+  toast.style.color = type === 'success' ? '#111' : '#fff';
+  toast.style.background = type === 'success'
+    ? 'linear-gradient(135deg, #d9b176, #f0d39a)'
+    : 'linear-gradient(135deg, #8d1f1f, #c94343)';
 
-// Закрытие при клике на ссылку
-mobileNav.querySelectorAll('a').forEach(link => {
-    link.addEventListener('click', closeMenu);
-});
+  document.body.appendChild(toast);
+  requestAnimationFrame(() => {
+    toast.style.opacity = '1';
+    toast.style.transform = 'translate(-50%, -50%)';
+  });
+
+  setTimeout(() => {
+    toast.style.opacity = '0';
+    toast.style.transform = 'translate(-50%, calc(-50% + 8px))';
+    setTimeout(() => toast.remove(), 260);
+  }, 2600);
+}
+
+const consultForm = document.getElementById('consult-form');
+if (consultForm) {
+  const submitBtn = consultForm.querySelector('.consult_submit');
+  const noteEl = consultForm.querySelector('.consult_note');
+  const phoneInput = consultForm.querySelector('input[name="phone"]');
+
+  function formatKzPhone(rawValue) {
+    const digits = String(rawValue || '').replace(/\D/g, '');
+    let local = digits;
+    if (local.startsWith('8')) local = `7${local.slice(1)}`;
+    if (!local.startsWith('7')) local = `7${local}`;
+    local = local.slice(0, 11);
+
+    const d = local.slice(1);
+    const p1 = d.slice(0, 3);
+    const p2 = d.slice(3, 6);
+    const p3 = d.slice(6, 8);
+    const p4 = d.slice(8, 10);
+
+    let out = '+7';
+    if (p1) out += ` (${p1}`;
+    if (p1.length === 3) out += ')';
+    if (p2) out += ` ${p2}`;
+    if (p3) out += `-${p3}`;
+    if (p4) out += `-${p4}`;
+
+    return {
+      formatted: out,
+      normalized: local.length === 11 ? `+${local}` : '',
+      isComplete: local.length === 11,
+    };
+  }
+
+  if (phoneInput) {
+    phoneInput.setAttribute('inputmode', 'tel');
+    phoneInput.setAttribute('autocomplete', 'tel');
+    phoneInput.setAttribute('placeholder', '+7 (___) ___-__-__');
+
+    const applyMask = () => {
+      const masked = formatKzPhone(phoneInput.value);
+      phoneInput.value = masked.formatted;
+    };
+
+    phoneInput.addEventListener('input', applyMask);
+    phoneInput.addEventListener('focus', () => {
+      if (!phoneInput.value.trim()) phoneInput.value = '+7';
+    });
+    phoneInput.addEventListener('blur', () => {
+      const masked = formatKzPhone(phoneInput.value);
+      if (!masked.isComplete) phoneInput.value = '';
+    });
+  }
+
+  consultForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    const formData = new FormData(consultForm);
+    const name = String(formData.get('name') || '').trim();
+    const phoneMasked = formatKzPhone(String(formData.get('phone') || '').trim());
+    const phone = phoneMasked.normalized;
+    const message = String(formData.get('message') || '').trim();
+
+    if (!name || !phoneMasked.isComplete) {
+      if (noteEl) noteEl.textContent = 'Введите номер в формате +7 (___) ___-__-__.';
+      return;
+    }
+
+    const originalBtnText = submitBtn ? submitBtn.textContent : '';
+    if (submitBtn) {
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Отправка...';
+    }
+
+    try {
+      await sendToBitrix({
+        name,
+        phone,
+        message,
+      });
+
+      consultForm.reset();
+      if (noteEl) noteEl.textContent = 'Ответим в течение 15 минут';
+      showToast('Успешно! Заявка отправлена.', 'success');
+    } catch (err) {
+      if (noteEl) noteEl.textContent = 'Ошибка отправки. Попробуйте еще раз.';
+      showToast(err && err.message ? err.message : 'Ошибка отправки. Попробуйте еще раз.', 'error');
+      console.error(err);
+    } finally {
+      if (submitBtn) {
+        submitBtn.disabled = false;
+        submitBtn.textContent = originalBtnText;
+      }
+    }
+  });
+}

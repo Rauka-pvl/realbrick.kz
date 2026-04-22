@@ -366,13 +366,13 @@
         <h2 class="consult_title">Получите консультацию<br>по вашему проекту</h2>
         <p class="consult_desc">Оставьте заявку — и мы поможем подобрать<br>кирпич для вашего проекта</p>
 
-        <div class="consult_form">
-          <input class="consult_input" type="text" placeholder="Ваше имя*">
-          <input class="consult_input" type="tel" placeholder="Номер телефона*">
-          <textarea class="consult_input consult_textarea" placeholder="Комментарий к проекту"></textarea>
-          <button class="consult_submit">Получить консультацию</button>
+        <form class="consult_form" id="consult-form">
+          <input class="consult_input" name="name" type="text" placeholder="Ваше имя*" required>
+          <input class="consult_input" name="phone" type="tel" placeholder="Номер телефона*" required>
+          <textarea class="consult_input consult_textarea" name="message" placeholder="Комментарий к проекту"></textarea>
+          <button class="consult_submit" type="submit">Получить консультацию</button>
           <p class="consult_note">Ответим в течение 15 минут</p>
-        </div>
+        </form>
       </div>
 
       <!-- картинку вставишь сам -->
