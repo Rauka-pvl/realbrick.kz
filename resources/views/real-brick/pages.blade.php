@@ -554,8 +554,7 @@
             </div>
 
             <a
-              href="/about"
-              data-scroll
+              href="{{ route('projects.index') }}"
               class="mt-10 inline-flex items-center gap-2 text-sm font-semibold text-gold transition hover:opacity-90"
             >
               смотреть портфолио <span aria-hidden="true">→</span>

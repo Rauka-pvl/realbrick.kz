@@ -23,7 +23,6 @@ class CatalogController extends Controller
             ->get()
             ->map(function ($row) use ($lang) {
                 $parts = $this->decodePathParts($row->path_parts, $row->name);
-
                 return [
                     'id' => (int) $row->bitrix_id,
                     'name' => $this->localizeName((string) $row->name, $lang),
@@ -33,6 +32,7 @@ class CatalogController extends Controller
             })
             ->values();
 
+  
         return view('real-brick.catalog.index', [
             'sections' => $sections,
             'lang' => $lang,
@@ -281,11 +281,18 @@ class CatalogController extends Controller
     private function getSectionCoverUrl(int $sectionId): ?string
     {
         $raw = DB::connection('diller')
-            ->table('bitrix24_catalog_products')
-            ->where('section_bitrix_id', $sectionId)
-            ->where('active', true)
-            ->orderBy('name')
+            ->table('bitrix24_catalog_sections')
+            ->where('bitrix_id', $sectionId)
             ->value('image_url');
+
+        if ($raw === null || trim((string) $raw) === '') {
+            $raw = DB::connection('diller')
+                ->table('bitrix24_catalog_products')
+                ->where('section_bitrix_id', $sectionId)
+                ->where('active', true)
+                ->orderBy('name')
+                ->value('image_url');
+        }
 
         return $this->resolveProductImageDisplayUrl($raw !== null && $raw !== '' ? (string) $raw : null);
     }

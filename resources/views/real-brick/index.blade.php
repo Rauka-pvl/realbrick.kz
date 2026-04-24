@@ -160,7 +160,7 @@
       <div class="collections_grid">
 
         <div class="collections_card">
-          <img src="{{ asset('storage/img/sloi-18.png') }}" alt="Кирпич ручной формовки">
+          <img src="{{ asset('storage/img/sloi-18.png')}}" alt="Кирпич ручной формовки">
           <div class="collections_card-content">
             <h3>Кирпич ручной формовки</h3>
             <a href="#" class="collections_link">каталог <span>→</span></a>
@@ -243,7 +243,7 @@
               <span>Используется в проектах<br>по всему Казахстану</span>
             </div>
 
-            <a href="#" class="projects_portfolio">смотреть портфолио <span>→</span></a>
+            <a href="{{ route('projects.index') }}" class="projects_portfolio">смотреть портфолио <span>→</span></a>
           </div>
 
           <!-- правая колонка — карточка CTA -->
