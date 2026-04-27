@@ -3,7 +3,7 @@
 use App\Http\Controllers\CatalogController;
 use App\Http\Controllers\BlogController;
 use App\Http\Controllers\CartController;
-use Illuminate\Http\Request;
+use App\Http\Controllers\ProjectController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -18,17 +18,8 @@ Route::get('/gallery', function () {
     return view('real-brick.pages', ['page' => 'gallery']);
 });
 
-Route::get('/projects', function (Request $request) {
-    $country = (string) $request->query('country', 'all');
-    if (! in_array($country, ['all', 'kz', 'ru', 'by'], true)) {
-        $country = 'all';
-    }
-
-    return view('real-brick.projects', [
-        'country' => $country,
-        'page' => max(1, (int) $request->query('page', 1)),
-    ]);
-})->name('projects.index');
+Route::get('/projects', [ProjectController::class, 'index'])->name('projects.index');
+Route::get('/projects/{slug}', [ProjectController::class, 'show'])->name('projects.show');
 
 Route::get('/blog', [BlogController::class, 'index'])->name('blog.index');
 Route::get('/blog/{slug}', [BlogController::class, 'show'])->name('blog.show');

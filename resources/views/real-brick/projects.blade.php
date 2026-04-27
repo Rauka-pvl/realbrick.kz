@@ -25,68 +25,9 @@
   @php
     $country = $country ?? 'all';
     $currentPage = $page ?? 1;
-
-    $tabs = [
-      ['id' => 'all', 'label' => 'Все страны'],
-      ['id' => 'kz', 'label' => 'Казахстан'],
-      ['id' => 'ru', 'label' => 'Россия'],
-      ['id' => 'by', 'label' => 'Беларусь'],
-    ];
-
-    $projects = [
-      [
-        'slug' => 'dom-olimp',
-        'title' => 'Дом «Олимп»',
-        'specs' => [
-          'Площадь: 230 м²',
-          'Этажность: 3 этажа',
-          'Коллекция: Loft',
-          'Размер: 530×100×40 мм',
-          'Цвет: тёмный графит',
-        ],
-        'image' => asset('storage/img/olimp.png'),
-        'alt' => 'Дом «Олимп» — фасад',
-      ],
-      [
-        'slug' => 'dom-sfera',
-        'title' => 'Дом «Сфера»',
-        'specs' => [
-          'Площадь: 190 м²',
-          'Этажность: 2 этажа',
-          'Коллекция: RE KROVLI XD',
-          'Размер: 530×100×40 мм',
-          'Цвет: осенний лес',
-        ],
-        'image' => asset('storage/img/sphere.png'),
-        'alt' => 'Дом «Сфера» — архитектура',
-      ],
-      [
-        'slug' => 'villa-aura',
-        'title' => 'Вилла «Аура»',
-        'specs' => [
-          'Площадь: 420 м²',
-          'Этажность: 2 этажа',
-          'Коллекция: RE KRA pod illum 490',
-          'Размер: 530×100×40 мм',
-          'Цвет: тёмный беж',
-        ],
-        'image' => asset('storage/img/aura.png'),
-        'alt' => 'Вилла «Аура»',
-      ],
-      [
-        'slug' => 'loft-zenit',
-        'title' => 'Лофт «Зенит»',
-        'specs' => [
-          'Площадь: 210 м²',
-          'Этажность: 1 этаж',
-          'Коллекция: RE KROVLI loft',
-          'Размер: 530×100×40 мм',
-          'Цвет: коричневый',
-        ],
-        'image' => asset('storage/img/zenit.png'),
-        'alt' => 'Лофт «Зенит»',
-      ],
-    ];
+    $tabs = $tabs ?? config('realbrick-projects.tabs', []);
+    $projects = $projects ?? [];
+    $totalPages = $totalPages ?? 1;
   @endphp
 
   <div class="bg-black text-offwhite">
@@ -116,7 +57,7 @@
       </div>
 
       <div>
-        @foreach($projects as $index => $project)
+        @forelse($projects as $index => $project)
           <article
             id="{{ $project['slug'] }}"
              style="border-top: 0.1px solid #ffffff"
@@ -124,12 +65,12 @@
             <div class="grid gap-8 md:grid-cols-2 md:items-center md:gap-10 xl:gap-14">
               @if($index % 2 === 1)
                 <a
-                  href="#{{ $project['slug'] }}"
+                  href="{{ route('projects.show', $project['slug']) }}"
                   class="relative order-2 block aspect-[16/11] min-h-[200px] md:order-1 md:min-h-[280px] xl:min-h-[340px]"
                 >
                   <img
-                    src="{{ $project['image'] }}"
-                    alt="{{ $project['alt'] }}"
+                    src="{{ asset($project['hero_image']) }}"
+                    alt="{{ $project['hero_alt'] }}"
                     class="h-full w-full rounded-2xl object-cover transition duration-500 hover:opacity-95 xl:rounded-3xl"
                     loading="lazy"
                     decoding="async"
@@ -138,7 +79,7 @@
                 <div class="order-1 flex flex-col justify-center md:order-2 md:pr-4 xl:pr-8">
                   <h2 class="text-2xl font-semibold text-offwhite sm:text-3xl xl:text-[2rem]">{{ $project['title'] }}</h2>
                   <ul class="mt-5 space-y-2 text-sm sm:text-base">
-                    @foreach($project['specs'] as $line)
+                    @foreach($project['card_specs'] as $line)
                       @php
                         $colon = strpos($line, ':');
                       @endphp
@@ -152,7 +93,7 @@
                     @endforeach
                   </ul>
                   <a
-                    href="#{{ $project['slug'] }}"
+                    href="{{ route('projects.show', $project['slug']) }}"
                     class="mt-8 inline-flex w-fit items-center justify-center rounded-full bg-gold px-7 py-3 text-xs font-bold uppercase tracking-wider text-nearblack transition hover:opacity-95 active:scale-[0.99] sm:text-[0.7rem]"
                   >
                     посмотреть проект
@@ -162,7 +103,7 @@
                 <div class="order-1 flex flex-col justify-center md:order-1 md:pr-4 xl:pr-8">
                   <h2 class="text-2xl font-semibold text-offwhite sm:text-3xl xl:text-[2rem]">{{ $project['title'] }}</h2>
                   <ul class="mt-5 space-y-2 text-sm sm:text-base">
-                    @foreach($project['specs'] as $line)
+                    @foreach($project['card_specs'] as $line)
                       @php
                         $colon = strpos($line, ':');
                       @endphp
@@ -176,19 +117,19 @@
                     @endforeach
                   </ul>
                   <a
-                    href="#{{ $project['slug'] }}"
+                    href="{{ route('projects.show', $project['slug']) }}"
                     class="mt-8 inline-flex w-fit items-center justify-center rounded-full bg-gold px-7 py-3 text-xs font-bold uppercase tracking-wider text-nearblack transition hover:opacity-95 active:scale-[0.99] sm:text-[0.7rem]"
                   >
                     посмотреть проект
                   </a>
                 </div>
                 <a
-                  href="#{{ $project['slug'] }}"
+                  href="{{ route('projects.show', $project['slug']) }}"
                   class="relative order-2 block aspect-[16/11] min-h-[200px] md:order-2 md:min-h-[280px] xl:min-h-[340px]"
                 >
                   <img
-                    src="{{ $project['image'] }}"
-                    alt="{{ $project['alt'] }}"
+                    src="{{ asset($project['hero_image']) }}"
+                    alt="{{ $project['hero_alt'] }}"
                     class="h-full w-full rounded-2xl object-cover transition duration-500 hover:opacity-95 xl:rounded-3xl"
                     loading="lazy"
                     decoding="async"
@@ -197,24 +138,30 @@
               @endif
             </div>
           </article>
-        @endforeach
+        @empty
+          <div class="border-t border-white/10 py-16 text-center text-offwhite/70">
+            По выбранному фильтру проекты пока не добавлены.
+          </div>
+        @endforelse
       </div>
 
-      <nav class="flex flex-wrap items-center justify-center gap-2 border-t border-white/10 py-10 sm:py-12" aria-label="Страницы">
-        @for($p = 1; $p <= 4; $p++)
+      @if($totalPages > 1)
+        <nav class="flex flex-wrap items-center justify-center gap-2 border-t border-white/10 py-10 sm:py-12" aria-label="Страницы">
+          @for($p = 1; $p <= $totalPages; $p++)
+            <a
+              href="{{ route('projects.index', array_filter(['country' => $country === 'all' ? null : $country, 'page' => $p === 1 ? null : $p])) }}"
+              class="flex h-9 w-9 items-center justify-center rounded-full border text-xs font-semibold transition sm:h-10 sm:w-10 sm:text-sm {{ $currentPage === $p ? 'border-gold bg-gold text-nearblack' : 'border-white/25 text-offwhite/80 hover:border-gold/60 hover:text-gold' }}"
+            >{{ $p }}</a>
+          @endfor
           <a
-            href="{{ route('projects.index', array_filter(['country' => $country === 'all' ? null : $country, 'page' => $p === 1 ? null : $p])) }}"
-            class="flex h-9 w-9 items-center justify-center rounded-full border text-xs font-semibold transition sm:h-10 sm:w-10 sm:text-sm {{ $currentPage === $p ? 'border-gold bg-gold text-nearblack' : 'border-white/25 text-offwhite/80 hover:border-gold/60 hover:text-gold' }}"
-          >{{ $p }}</a>
-        @endfor
-        <a
-          href="{{ route('projects.index', array_filter(['country' => $country === 'all' ? null : $country, 'page' => min(4, $currentPage + 1)])) }}"
-          class="ml-1 flex h-9 w-9 items-center justify-center rounded-full border border-white/25 text-offwhite/80 transition hover:border-gold/60 hover:text-gold sm:h-10 sm:w-10"
-          aria-label="Следующая страница"
-        >
-          <span aria-hidden="true">→</span>
-        </a>
-      </nav>
+            href="{{ route('projects.index', array_filter(['country' => $country === 'all' ? null : $country, 'page' => min($totalPages, $currentPage + 1)])) }}"
+            class="ml-1 flex h-9 w-9 items-center justify-center rounded-full border border-white/25 text-offwhite/80 transition hover:border-gold/60 hover:text-gold sm:h-10 sm:w-10"
+            aria-label="Следующая страница"
+          >
+            <span aria-hidden="true">→</span>
+          </a>
+        </nav>
+      @endif
 
       <section class="py-12 sm:py-14 md:py-16 xl:py-20">
         <div class="grid gap-8 md:grid-cols-[1fr_min(220px,40%)] md:items-center md:gap-10 xl:grid-cols-[1fr_280px] xl:gap-14">

@@ -37,7 +37,7 @@
               </div>
             </div>
             <!-- decorative image between left and right footer columns -->
-            <img src="{{ asset('storage/img/kirpich.png') }}" alt="" class="header_footer-decor static my-2 w-full max-w-[460px] translate-x-0 translate-y-0 lg:absolute lg:left-[53%] lg:top-[52%] lg:w-[650px] lg:max-w-[650px] lg:-translate-x-1/2 lg:-translate-y-1/2 max-[1023px]:!relative max-[1023px]:!left-auto max-[1023px]:!top-auto max-[1023px]:!mx-auto max-[1023px]:!mt-2 max-[1023px]:!w-[94vw] max-[1023px]:!max-w-[340px] max-[1023px]:!translate-x-0 max-[1023px]:!translate-y-0" aria-hidden="true" width="200px">
+            <img src="{{ asset('storage/img/kirpich.png') }}" alt="" class="header_footer-decor static my-2 w-full max-w-[460px] translate-x-0 translate-y-0 lg:absolute lg:left-[53%] lg:top-[50%] lg:z-30 lg:w-[650px] lg:max-w-[650px] lg:-translate-x-1/2 lg:-translate-y-1/2 lg:!z-[50] max-[1023px]:!z-[50] max-[1023px]:!relative max-[1023px]:!z-30 max-[1023px]:!left-auto max-[1023px]:!top-auto max-[1023px]:!mx-auto max-[1023px]:!mt-2 max-[1023px]:!w-[94vw] max-[1023px]:!max-w-[340px] max-[1023px]:!translate-x-0 max-[1023px]:!translate-y-0" aria-hidden="true" width="200px">
             <div class="header_footer-right max-[1023px]:hidden">
               <div class="header_footer-card w-full max-w-[320px] lg:w-auto lg:max-w-none">
                 <h1>6%</h1>
@@ -54,24 +54,24 @@
             </div>
           </div>
 
-          <div class="relative -mt-20 flex min-h-[220px] items-end justify-center pb-4 lg:hidden">
+          <div class="relative z-10 -mt-16 flex min-h-[220px] items-end justify-center pb-2 lg:hidden">
             <img
               src="{{ asset('storage/img/kamen.png') }}"
               alt=""
               aria-hidden="true"
-              class="pointer-events-none absolute bottom-0 left-1/2 z-0 w-[360px] max-w-none -translate-x-1/2"
+              class="pointer-events-none absolute -bottom-6 left-1/2 !z-[5] w-[360px] max-w-none -translate-x-1/2"
             >
             <p class="relative z-10 max-w-[270px] text-left text-[15px] leading-[1.35] text-white">
               Каждый кирпич формируется вручную. Поэтому фактура никогда не повторяется
             </p>
           </div>
 
-          <div class="rb-hero-bottom hidden pt-6 text-center lg:absolute lg:bottom-0 lg:left-0 lg:right-0 lg:flex lg:items-end lg:justify-center lg:pt-10 lg:pb-[60px]">
+          <div class="rb-hero-bottom hidden pt-6 text-center lg:absolute lg:-bottom-8 lg:left-0 lg:right-0 lg:z-10 lg:flex lg:items-end lg:justify-center lg:pt-10 lg:pb-[60px]">
             <img
               src="{{ asset('storage/img/kamen.png') }}"
               alt=""
               aria-hidden="true"
-              class="pointer-events-none absolute bottom-0 left-1/2 z-0 w-[900px] max-w-none -translate-x-1/2"
+              class="pointer-events-none absolute -bottom-6 left-1/2 z-10 w-[900px] max-w-none -translate-x-1/2"
             >
           
             </div>

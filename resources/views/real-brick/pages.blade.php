@@ -146,6 +146,12 @@
 @section('content')
     @php
       $page = $page ?? 'home';
+      $aboutStats = [
+        ['value' => '15+', 'label' => 'лет на рынке'],
+        ['value' => '500', 'label' => 'реализованных проектов'],
+        ['value' => '100+', 'label' => 'уникальных коллекций'],
+        ['value' => '100%', 'label' => 'экологичный состав'],
+      ];
     @endphp
 
     @if($page === 'contacts')
@@ -238,6 +244,153 @@
             </div>
           </div>
         </div>
+      </div>
+    </section>
+    @endif
+
+    @if($page === 'about')
+    <section class="bg-black pb-14 pt-20 text-offwhite md:pb-20 md:pt-24">
+      <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+        <nav class="pb-5 text-xs text-offwhite/60">
+          <a href="/" class="transition hover:text-offwhite">Главная</a>
+          <span class="px-2 text-offwhite/35">/</span>
+          <span class="text-offwhite/90">О нас</span>
+        </nav>
+      </div>
+
+      <article class="px-4 sm:px-6 lg:px-8">
+        <div class="mx-auto w-full max-w-7xl overflow-hidden rounded-[14px] sm:rounded-[18px]">
+          <div class="relative">
+            <img
+              src="{{ asset('storage/img/about/about-hero.png') }}"
+              alt="Real Brick"
+              class="h-[240px] w-full object-cover object-center sm:h-[310px] md:h-[370px] xl:h-[420px]"
+              loading="eager"
+              decoding="async"
+            />
+            <div class="absolute inset-0 bg-gradient-to-r from-black/80 via-black/45 to-transparent"></div>
+            <div class="absolute inset-y-0 left-0 flex items-center px-6 sm:px-10 lg:px-16">
+              <div>
+                <h1 class="text-4xl font-semibold tracking-tight text-gold sm:text-5xl">Real Brick</h1>
+                <p class="mt-2 max-w-[430px] text-sm leading-snug text-offwhite/75 sm:text-base">
+                  Более 15 лет мы создаем кирпич, который стирает<br>
+                  границы между архитектурой и искусством.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </article>
+
+      <div class="mx-auto mt-8 max-w-6xl px-4 sm:px-6 lg:px-8">
+        <section class="mt-8 grid gap-5 lg:grid-cols-[1fr_0.92fr]">
+          <div class="bg-black p-5 sm:p-7">
+            <h2 class="text-2xl font-semibold text-offwhite">Искусство <span class="text-gold">быть настоящим</span></h2>
+            <p class="mt-4 text-sm leading-relaxed text-offwhite/80">
+              Компания Real Brick была основана как ремесленная мастерская, где каждый кирпич производился вручную.
+              Мы сохранили этот подход и в современном производстве — фактура, оттенок и характер каждого элемента
+              остаются уникальными.
+            </p>
+            <p class="mt-4 text-sm leading-relaxed text-offwhite/80">
+              Сегодня продукция Real Brick используется в частной и коммерческой архитектуре: от уютных интерьеров
+              до крупных фасадных решений. Мы объединяем традиции ручной формовки и строгие стандарты качества.
+            </p>
+            <blockquote class="mt-5 border-l border-gold/40 pl-4 text-[1rem] leading-snug text-offwhite/85">
+              «Кирпич ручной формовки — это не просто стройматериал. Это история, застывшая в камне.»
+            </blockquote>
+          </div>
+          <figure class="overflow-hidden rounded-2xl">
+            <img
+              src="{{ asset('storage/img/about/about-bookshelf.png') }}"
+              alt="Коллекция кирпича Real Brick"
+              class="h-full w-full object-cover"
+              loading="lazy"
+              decoding="async"
+            />
+          </figure>
+        </section>
+      </div>
+
+      <section class="mt-7 bg-black px-4 sm:px-6 lg:px-8">
+        <div class="mx-auto grid w-full max-w-5xl grid-cols-2 gap-4 border-y border-gold/40 px-4 py-5 sm:grid-cols-4 sm:px-6 sm:py-6">
+          @foreach($aboutStats as $stat)
+            <div class="text-center">
+              <p class="text-3xl font-bold text-gold sm:text-4xl">{{ $stat['value'] }}</p>
+              <p class="mt-2 text-xs uppercase tracking-[0.1em] text-offwhite/70">{{ $stat['label'] }}</p>
+            </div>
+          @endforeach
+        </div>
+      </section>
+
+      <div class="mx-auto mt-8 max-w-6xl px-4 sm:px-6 lg:px-8">
+        <section class="mt-8 grid gap-5 md:grid-cols-2 md:items-center">
+          <figure class="overflow-hidden rounded-2xl">
+            <img
+              src="{{ asset('storage/img/about/about-candles.png') }}"
+              alt="Техническое превосходство Real Brick"
+              class="h-full w-full object-cover"
+              loading="lazy"
+              decoding="async"
+            />
+          </figure>
+          <div class="rounded-2xl bg-black p-5 sm:p-7">
+            <h3 class="text-2xl font-semibold text-offwhite">Технологическое <span class="text-gold">превосходство</span></h3>
+            <p class="mt-4 text-sm leading-relaxed text-offwhite/80">
+              На каждом этапе производства мы контролируем геометрию, водопоглощение и прочность изделий.
+              Это обеспечивает стабильное качество и долговечность в любых климатических условиях.
+            </p>
+            <p class="mt-4 text-sm leading-relaxed text-offwhite/80">
+              Real Brick — это ручное мастерство и современные технологии в одной системе качества.
+            </p>
+          </div>
+        </section>
+
+        <section class="mt-8 grid gap-5 md:grid-cols-2 md:items-center">
+          <div class="order-2 rounded-2xl bg-black p-5 sm:p-7 md:order-1">
+            <h3 class="text-2xl font-semibold text-offwhite">Природная <span class="text-gold">чистота</span></h3>
+            <p class="mt-4 text-sm leading-relaxed text-offwhite/80">
+              Мы используем натуральные минеральные компоненты и устойчивые производственные процессы,
+              чтобы материал оставался безопасным для жилых и общественных пространств.
+            </p>
+            <p class="mt-4 text-sm leading-relaxed text-offwhite/80">
+              Каждый кирпич сохраняет природную эстетику и тактильность, которая делает архитектуру живой.
+            </p>
+          </div>
+          <figure class="order-1 overflow-hidden rounded-2xl md:order-2">
+            <img
+              src="{{ asset('storage/img/about/about-natural.png') }}"
+              alt="Природная чистота материалов Real Brick"
+              class="h-full w-full object-cover"
+              loading="lazy"
+              decoding="async"
+            />
+          </figure>
+        </section>
+
+        <section class="mt-8 rounded-2xl border border-gold/40 bg-black px-5 py-7 sm:px-8 sm:py-8">
+          <div class="grid gap-6 md:grid-cols-[1fr_auto] md:items-end">
+            <div>
+              <h3 class="text-2xl font-semibold text-offwhite">Сотрудничество</h3>
+              <p class="mt-3 max-w-2xl text-sm leading-relaxed text-offwhite/80">
+                Мы открыты к сотрудничеству с архитекторами, дизайнерами и строительными компаниями.
+                Получите консультацию и подбор материалов под ваш проект.
+              </p>
+              <a
+                href="/contacts"
+                class="mt-6 inline-flex min-h-[44px] items-center justify-center rounded-full bg-gold px-7 py-2.5 text-xs font-bold uppercase tracking-wider text-nearblack transition hover:opacity-95"
+              >
+                получить консультацию
+              </a>
+            </div>
+            <img
+              src="{{ asset('storage/img/about/about-cooperation.png') }}"
+              alt="Сотрудничество с Real Brick"
+              class="mx-auto w-full max-w-[220px] object-contain md:mx-0 md:max-w-[260px]"
+              loading="lazy"
+              decoding="async"
+            />
+          </div>
+        </section>
       </div>
     </section>
     @endif
@@ -349,7 +502,7 @@
     @endif
 
     <!-- Usage -->
-    @if($page === 'home' || $page === 'about')
+    @if($page === 'home')
     <section id="usage" class="py-10 md:py-16 bg-[rgb(3,3,3)]">
       <div class="reveal mx-auto max-w-7xl px-4 lg:px-8">
         <div class="relative mt-8 pb-12">
@@ -600,7 +753,7 @@
     @endif
 
     <!-- Benefits -->
-    @if($page === 'home' || $page === 'about')
+    @if($page === 'home')
     <section id="benefits" class="relative overflow-hidden py-16 md:py-24">
       <div class="pointer-events-none absolute -left-28 top-1/2 h-[320px] w-[320px] -translate-y-1/2 rounded-full bg-white/18 blur-[110px]" aria-hidden="true"></div>
       <div class="pointer-events-none absolute left-1/2 top-1/2 h-[min(90vw,520px)] w-[min(90vw,520px)] -translate-x-1/2 -translate-y-1/2 rounded-full border border-gold/10 opacity-30" aria-hidden="true"></div>
