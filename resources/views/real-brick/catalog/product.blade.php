@@ -70,6 +70,7 @@
           <div class="mt-5 grid grid-cols-1 gap-2 text-sm text-offwhite/75">
             <div><span class="text-muted">Категория:</span> <span class="ml-1 text-offwhite/90">{{ $categoryName ?: '—' }}</span></div>
             <div><span class="text-muted">Подкатегория:</span> <span class="ml-1 text-offwhite/90">{{ $subcategoryName ?: '—' }}</span></div>
+            <div><span class="text-muted">Цена:</span> <span class="ml-1 text-gold">{{ !empty($productPriceValue) ? number_format((float) $productPriceValue, 0, '.', ' ') . ' тг' : 'по запросу' }}</span></div>
           </div>
 
           <div class="mt-6">
@@ -88,6 +89,8 @@
               <input type="hidden" name="name" value="{{ $productName }}">
               <input type="hidden" name="slug" value="{{ request()->route('slug') }}">
               <input type="hidden" name="image_url" value="{{ $productImage ?? '' }}">
+              <input type="hidden" name="price_value" value="{{ $productPriceValue ?? '' }}">
+              <input type="hidden" name="price_currency" value="{{ $productPriceCurrency ?? 'KZT' }}">
               <input type="hidden" name="qty" value="1">
               <button type="submit" class="rounded-full bg-gold px-7 py-3 text-sm font-bold uppercase tracking-wider text-nearblack hover:opacity-90 transition">Добавить в корзину</button>
             </form>

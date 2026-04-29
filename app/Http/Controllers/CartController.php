@@ -15,11 +15,18 @@ class CartController extends Controller
         $lang = $this->detectLang($request);
         $items = collect((array) $request->session()->get('cart.items', []))->values();
         $totalQty = (int) $items->sum('qty');
+        $totalAmount = (float) $items->sum(function ($item) {
+            $qty = max(1, (int) ($item['qty'] ?? 1));
+            $price = (float) ($item['price_value'] ?? 0);
+
+            return $qty * $price;
+        });
 
         return view('real-brick.cart.index', [
             'lang' => $lang,
             'items' => $items,
             'totalQty' => $totalQty,
+            'totalAmount' => $totalAmount,
         ]);
     }
 
@@ -31,6 +38,8 @@ class CartController extends Controller
             'slug' => ['nullable', 'string', 'max:255'],
             'image_url' => ['nullable', 'string', 'max:2048'],
             'qty' => ['nullable', 'integer', 'min:1', 'max:999'],
+            'price_value' => ['nullable', 'numeric', 'min:0'],
+            'price_currency' => ['nullable', 'string', 'max:10'],
             'lang' => ['nullable', 'in:ru,kz'],
         ]);
 
@@ -46,6 +55,8 @@ class CartController extends Controller
                 'name' => $data['name'],
                 'slug' => (string) ($data['slug'] ?? ''),
                 'image_url' => (string) ($data['image_url'] ?? ''),
+                'price_value' => isset($data['price_value']) ? (float) $data['price_value'] : null,
+                'price_currency' => isset($data['price_currency']) ? (string) $data['price_currency'] : 'KZT',
                 'qty' => $qty,
             ];
         }
@@ -55,7 +66,7 @@ class CartController extends Controller
         return back()->with('success', 'Товар добавлен в корзину');
     }
 
-    public function update(Request $request): RedirectResponse
+    public function update(Request $request)
     {
         $data = $request->validate([
             'id' => ['required'],
@@ -66,13 +77,39 @@ class CartController extends Controller
         $qty = (int) $data['qty'];
         $items = (array) $request->session()->get('cart.items', []);
 
+        $removed = false;
         if (isset($items[$id])) {
             if ($qty === 0) {
                 unset($items[$id]);
+                $removed = true;
             } else {
                 $items[$id]['qty'] = $qty;
             }
             $request->session()->put('cart.items', $items);
+        }
+
+        if ($request->expectsJson()) {
+            $updatedItems = collect((array) $request->session()->get('cart.items', []))->values();
+            $totalQty = (int) $updatedItems->sum('qty');
+            $totalAmount = (float) $updatedItems->sum(function ($item) {
+                $itemQty = max(1, (int) ($item['qty'] ?? 1));
+                $itemPrice = (float) ($item['price_value'] ?? 0);
+
+                return $itemQty * $itemPrice;
+            });
+            $currentItem = collect($updatedItems)->firstWhere('id', $id);
+            $currentQty = (int) ($currentItem['qty'] ?? 0);
+            $itemAmount = (float) (($currentItem['price_value'] ?? 0) * $currentQty);
+
+            return response()->json([
+                'ok' => true,
+                'removed' => $removed,
+                'item_id' => $id,
+                'item_qty' => $currentQty,
+                'item_amount' => $itemAmount,
+                'total_qty' => $totalQty,
+                'total_amount' => $totalAmount,
+            ]);
         }
 
         return back()->with('success', 'Корзина обновлена');
@@ -149,7 +186,9 @@ class CartController extends Controller
         foreach ($items as $item) {
             $name = trim((string) ($item['name'] ?? 'Товар'));
             $qty = max(1, (int) ($item['qty'] ?? 1));
-            $lines[] = "- {$name} x {$qty}";
+            $price = (float) ($item['price_value'] ?? 0);
+            $amount = $price * $qty;
+            $lines[] = "- {$name} x {$qty}".($price > 0 ? " ({$price} KZT, сумма {$amount} KZT)" : '');
         }
 
         return implode("\n", $lines);

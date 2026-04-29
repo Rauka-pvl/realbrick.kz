@@ -74,6 +74,9 @@
                 <div class="absolute inset-0 bg-gradient-to-t from-nearblack/90 via-nearblack/40 to-transparent"></div>
                 <div class="absolute bottom-0 left-0 right-0 px-6 py-5 pr-24">
                   <div class="text-sm font-semibold text-offwhite/90">{{ $product['name'] }}</div>
+                  @if(!empty($product['price_value']))
+                    <div class="mt-1 text-sm font-semibold text-gold">{{ number_format((float) $product['price_value'], 0, '.', ' ') }} тг</div>
+                  @endif
                   <div class="mt-2 text-xs font-medium text-gold/90">товар <span class="text-offwhite/70" aria-hidden="true">→</span></div>
                 </div>
               </a>
@@ -83,6 +86,8 @@
                 <input type="hidden" name="name" value="{{ $product['name'] }}">
                 <input type="hidden" name="slug" value="{{ $product['slug'] }}">
                 <input type="hidden" name="image_url" value="{{ $product['image_url'] ?? '' }}">
+                <input type="hidden" name="price_value" value="{{ $product['price_value'] ?? '' }}">
+                <input type="hidden" name="price_currency" value="{{ $product['price_currency'] ?? 'KZT' }}">
                 <input type="hidden" name="qty" value="1">
                 <button type="submit" class="rounded-full border border-gold/70 bg-nearblack/70 px-3 py-1 text-xs font-medium text-gold hover:bg-gold/15">В корзину</button>
               </form>

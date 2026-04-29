@@ -30,7 +30,7 @@
         url('Stem-Bold.woff2') format('woff2'),
         url('Stem-Bold.woff') format('woff'),
         url('Stem-Bold.ttf') format('truetype');
-    font-weight: bold;
+    font-weight: 200;
     font-style: normal;
 }
 

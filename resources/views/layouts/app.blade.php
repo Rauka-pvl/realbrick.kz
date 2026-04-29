@@ -218,6 +218,55 @@
       .rb-global-social { display: none; }
       .rb-global-burger { display: inline-flex; }
     }
+    .rb-floating-cart {
+      position: fixed;
+      right: 24px;
+      bottom: 24px;
+      width: 62px;
+      height: 62px;
+      border-radius: 999px;
+      border: 1px solid rgba(201, 169, 110, 0.5);
+      background:
+        radial-gradient(circle at 80% 20%, rgba(201, 169, 110, 0.25), transparent 42%),
+        linear-gradient(145deg, rgba(20, 20, 20, 0.96), rgba(8, 8, 8, 0.96));
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 10px 28px rgba(0, 0, 0, 0.45);
+      z-index: 85;
+      transition: transform 0.24s ease, border-color 0.24s ease, filter 0.24s ease;
+    }
+    .rb-floating-cart:hover {
+      transform: translateY(-2px);
+      border-color: rgba(201, 169, 110, 0.8);
+      filter: brightness(1.08);
+    }
+    .rb-floating-cart__badge {
+      position: absolute;
+      top: -4px;
+      right: -4px;
+      min-width: 22px;
+      height: 22px;
+      border-radius: 999px;
+      background: #d1ad70;
+      color: #0e0e0e;
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      font-size: 11px;
+      font-weight: 700;
+      line-height: 1;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0 6px;
+    }
+    @media (max-width: 760px) {
+      .rb-floating-cart {
+        width: 56px;
+        height: 56px;
+        right: 16px;
+        bottom: 16px;
+      }
+    }
   </style>
   @stack('styles')
 </head>
@@ -299,6 +348,19 @@
       </div>
     </div>
   </footer>
+  @if(request()->routeIs('catalog.*'))
+    @php($floatingCartCount = (int) collect((array) session('cart.items', []))->sum('qty'))
+    <a href="{{ route('cart.index', ['lang' => request('lang', 'ru')]) }}" class="rb-floating-cart" aria-label="Открыть корзину">
+      <svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M3 4.5h2.4c.48 0 .9.32 1.03.78l.35 1.22h11.96c.7 0 1.2.68.98 1.35l-1.5 4.9a1.1 1.1 0 0 1-1.04.77H9.07a1.1 1.1 0 0 1-1.05-.79L6.1 6.9" fill="none" stroke="#d6b57b" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+        <circle cx="10.2" cy="18.2" r="1.4" fill="#d6b57b"/>
+        <circle cx="16.7" cy="18.2" r="1.4" fill="#d6b57b"/>
+      </svg>
+      @if($floatingCartCount > 0)
+        <span class="rb-floating-cart__badge">{{ $floatingCartCount > 99 ? '99+' : $floatingCartCount }}</span>
+      @endif
+    </a>
+  @endif
   <script>
     (() => {
       const burger = document.querySelector('.rb-global-burger');

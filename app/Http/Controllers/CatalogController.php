@@ -83,7 +83,7 @@ class CatalogController extends Controller
 
         $products = DB::connection('diller')
             ->table('bitrix24_catalog_products')
-            ->select('bitrix_id', 'name', 'image_url', 'path_parts')
+            ->select('bitrix_id', 'name', 'image_url', 'path_parts', 'price_value', 'price_currency')
             ->where('section_bitrix_id', $sectionId)
             ->where('active', true)
             ->orderBy('name')
@@ -98,6 +98,8 @@ class CatalogController extends Controller
                     'image_url' => $this->resolveProductImageDisplayUrl(
                         isset($row->image_url) && $row->image_url !== '' ? (string) $row->image_url : null
                     ),
+                    'price_value' => isset($row->price_value) ? (float) $row->price_value : null,
+                    'price_currency' => isset($row->price_currency) ? (string) $row->price_currency : null,
                 ];
             })
             ->values();
@@ -119,7 +121,7 @@ class CatalogController extends Controller
 
         $product = DB::connection('diller')
             ->table('bitrix24_catalog_products')
-            ->select('bitrix_id', 'name', 'image_url', 'path_parts', 'section_bitrix_id')
+            ->select('bitrix_id', 'name', 'image_url', 'path_parts', 'section_bitrix_id', 'price_value', 'price_currency')
             ->where('active', true)
             ->orderBy('name')
             ->get()
@@ -148,7 +150,7 @@ class CatalogController extends Controller
         if ($sectionId > 0) {
             $relatedProducts = DB::connection('diller')
                 ->table('bitrix24_catalog_products')
-                ->select('bitrix_id', 'name', 'image_url', 'path_parts')
+                ->select('bitrix_id', 'name', 'image_url', 'path_parts', 'price_value', 'price_currency')
                 ->where('section_bitrix_id', $sectionId)
                 ->where('active', true)
                 ->orderBy('name')
@@ -162,7 +164,9 @@ class CatalogController extends Controller
                         'slug' => $this->slugFromPathParts($parts),
                         'image_url' => $this->resolveProductImageDisplayUrl(
                             isset($row->image_url) && $row->image_url !== '' ? (string) $row->image_url : null
-                        ),
+                        ),                        
+                        'price_value' => isset($row->price_value) ? (float) $row->price_value : null,
+                        'price_currency' => isset($row->price_currency) ? (string) $row->price_currency : null,
                     ];
                 })
                 ->values();
@@ -178,6 +182,8 @@ class CatalogController extends Controller
             'productBitrixId' => (int) $product->bitrix_id,
             'productImage' => $mainImage,
             'productImages' => $productImages,
+            'productPriceValue' => isset($product->price_value) ? (float) $product->price_value : null,
+            'productPriceCurrency' => isset($product->price_currency) ? (string) $product->price_currency : null,
             'pathParts' => $pathParts,
             'productBreadcrumbs' => $productBreadcrumbs,
             'relatedProducts' => $relatedProducts,
