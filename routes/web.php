@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\CatalogController;
 use App\Http\Controllers\BlogController;
+use App\Http\Controllers\CalculatorController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\GalleryController;
 use App\Http\Controllers\ProjectController;
@@ -26,6 +27,8 @@ Route::get('/blog/{slug}', [BlogController::class, 'show'])->name('blog.show');
 Route::get('/contacts', function () {
     return view('real-brick.pages', ['page' => 'contacts']);
 });
+
+Route::get('/calculator', [CalculatorController::class, 'index'])->name('calculator');
 
 Route::get('/catalog', [CatalogController::class, 'index'])->name('catalog.index');
 Route::get('/catalog/collection/{slug}', [CatalogController::class, 'collection'])->name('catalog.collection');

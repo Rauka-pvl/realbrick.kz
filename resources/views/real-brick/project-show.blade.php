@@ -100,7 +100,7 @@
                 Получить 3D визуализацию
               </a>
               <a
-                href="/contacts"
+                href="{{ route('calculator') }}"
                 class="inline-flex min-h-[48px] items-center justify-center rounded-full border border-gold/70 px-6 py-3 text-center text-xs font-bold uppercase tracking-wider text-gold transition hover:bg-gold/10 sm:min-h-0 sm:px-8"
               >
                 Рассчитать материалы

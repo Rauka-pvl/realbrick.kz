@@ -251,7 +251,7 @@
             <h3>Попробуйте<br>Real Brick в<br>вашем проекте</h3>
             <p>Получите 3D-визуализацию<br>или расчёт материалов для<br>проекта прямо сейчас.</p>
             <a href="#" class="btn btn_collection projects_btn-gold">Получить 3D-визуализацию</a>
-            <a href="#" class="btn btn_catalog projects_btn-outline">Рассчитать материалы</a>
+            <a href="{{ route('calculator') }}" class="btn btn_catalog projects_btn-outline">Рассчитать материалы</a>
           </div>
 
         </div>

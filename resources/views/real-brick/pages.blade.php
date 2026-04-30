@@ -146,6 +146,18 @@
 @section('content')
     @php
       $page = $page ?? 'home';
+      $featured = null;
+      $active = '';
+      $topics = [];
+      $cards = collect();
+      $posts = collect();
+      $post = null;
+      $featuredPost = $featuredPost ?? null;
+      $blogPosts = $blogPosts ?? collect();
+      $blogTopics = $blogTopics ?? [];
+      $activeTopic = $activeTopic ?? '';
+      $blogPost = $blogPost ?? null;
+      $calculatorMaterials = $calculatorMaterials ?? collect();
       $aboutStats = [
         ['value' => '15+', 'label' => 'лет на рынке'],
         ['value' => '500', 'label' => 'реализованных проектов'],
@@ -739,8 +751,7 @@
                 Получить 3D-визуализацию
               </a>
               <a
-                href="/contacts"
-                data-scroll
+                href="{{ route('calculator') }}"
                 class="inline-flex w-full items-center justify-center rounded-xl border border-gold/50 bg-transparent px-6 py-4 text-sm font-semibold uppercase tracking-wider text-gold transition hover:bg-gold/10 hover:border-gold active:scale-[0.98] md:w-auto"
               >
                 Рассчитать материалы
@@ -750,6 +761,79 @@
         </div>
       </div>
     </section>
+    @endif
+
+    @if($page === 'calculator')
+    <section class="bg-black pb-16 pt-24 md:pb-20 md:pt-28">
+      <div class="mx-auto max-w-5xl px-4 lg:px-8">
+        <div class="mb-6 text-xs text-offwhite/65">
+          <a href="/" class="hover:text-offwhite">Главная</a><span class="px-1.5">/</span><span>Калькулятор</span>
+        </div>
+
+        <div class="rounded-[28px] border border-gold/40 bg-[radial-gradient(circle_at_center,rgba(201,169,110,0.10)_0%,rgba(8,8,8,0.96)_58%)] p-4 shadow-[0_20px_60px_rgba(0,0,0,0.55)] md:p-8">
+          <div class="grid gap-4 md:grid-cols-[1.35fr_0.95fr] md:gap-6">
+            <div class="rounded-3xl border border-white/10 bg-black/45 p-5 md:p-7">
+              <h1 class="text-3xl font-semibold leading-none text-gold md:text-[2.2rem]">Калькулятор</h1>
+              <p class="mt-4 text-xs uppercase tracking-wide text-offwhite/70">тип помещения / конструктив</p>
+
+              <label class="mt-2 block">
+                <select id="calc-room-type" class="h-11 w-full rounded-full border border-white/10 bg-[#1d1d1f] px-4 text-sm text-offwhite outline-none transition focus:border-gold/70">
+                  <option value="walls" selected>Фасады / Стены (м²)</option>
+                  <option value="floor">Пол (м²)</option>
+                </select>
+              </label>
+
+              <div class="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-3">
+                <label class="block">
+                  <span class="mb-1.5 block text-xs text-offwhite/80">Длина (м)</span>
+                  <input id="calc-length" type="number" min="0.1" step="0.1" value="10" class="h-11 w-full rounded-full border border-white/10 bg-[#1d1d1f] px-4 text-sm text-offwhite outline-none transition focus:border-gold/70" />
+                </label>
+                <label class="block">
+                  <span class="mb-1.5 block text-xs text-offwhite/80">Ширина (м)</span>
+                  <input id="calc-width" type="number" min="0.1" step="0.1" value="10" class="h-11 w-full rounded-full border border-white/10 bg-[#1d1d1f] px-4 text-sm text-offwhite outline-none transition focus:border-gold/70" />
+                </label>
+                <label class="block">
+                  <span class="mb-1.5 block text-xs text-offwhite/80">Высота (м)</span>
+                  <input id="calc-height" type="number" min="0.1" step="0.1" value="3" class="h-11 w-full rounded-full border border-white/10 bg-[#1d1d1f] px-4 text-sm text-offwhite outline-none transition focus:border-gold/70" />
+                </label>
+              </div>
+
+              <p class="mt-4 text-xs text-offwhite/80">Выберите материал</p>
+              <div class="mt-2" id="calc-material-picker">
+                <button type="button" id="calc-material-trigger" class="flex h-11 w-full items-center justify-between rounded-full border border-white/10 bg-[#1d1d1f] px-4 text-left text-sm text-offwhite outline-none transition hover:border-gold/45 focus:border-gold/70">
+                  <span id="calc-material-selected-label" class="truncate">Выберите товар из каталога</span>
+                  <span class="ml-3 text-offwhite/60">⌄</span>
+                </button>
+                <div id="calc-material-panel" class="absolute z-50 mt-2 hidden w-[min(680px,92vw)] overflow-hidden rounded-2xl border border-gold/30 bg-[#111113] shadow-[0_16px_40px_rgba(0,0,0,0.45)]">
+                  <div class="border-b border-white/10 p-3">
+                    <input id="calc-product-search" type="text" placeholder="Поиск товара..." class="h-10 w-full rounded-xl border border-white/10 bg-[#1d1d1f] px-3 text-sm text-offwhite placeholder:text-offwhite/40 outline-none transition focus:border-gold/70" />
+                  </div>
+                  <div id="calc-material-tree" class="max-h-80 overflow-y-auto p-2"></div>
+                </div>
+                <select id="calc-material" class="hidden"></select>
+              </div>
+            </div>
+
+            <aside class="rounded-3xl border border-gold/35 bg-black/55 p-5 md:p-7">
+              <p class="text-xs font-semibold uppercase tracking-[0.03em] text-offwhite">ИТОГО МАТЕРИАЛОВ</p>
+              <div class="mt-1 flex items-end gap-2">
+                <span id="calc-total-pieces" class="text-5xl font-bold leading-none text-gold md:text-6xl">6240</span>
+                <span class="pb-1 text-sm text-offwhite/90">шт/м²</span>
+              </div>
+              <p class="mt-2 text-sm text-offwhite/80">Ориентировочная стоимость</p>
+              <p id="calc-total-price" class="mt-1 text-2xl font-semibold text-gold">2 496 000 ₸</p>
+
+              <div class="mt-5 space-y-2 border-t border-white/15 pt-4 text-sm">
+                <div class="flex items-center justify-between gap-3"><span class="text-offwhite/85">Общая площадь</span><strong id="calc-total-area" class="text-right font-medium text-offwhite">120.0 м²</strong></div>
+                <div class="flex items-center justify-between gap-3"><span class="text-offwhite/85">Площадь c запасом</span><strong id="calc-total-area-extra" class="text-right font-medium text-offwhite">126.0 м²</strong></div>
+                <div class="flex items-center justify-between gap-3"><span class="text-offwhite/85">Рекомендуемый раствор</span><strong id="calc-mix" class="text-right font-medium text-offwhite">24 мест (мешков)</strong></div>
+              </div>
+            </aside>
+          </div>
+        </div>
+      </div>
+    </section>
+    <script id="calc-tree-data" type="application/json">@json(['materials' => $calculatorMaterials ?? [], 'sections' => $calculatorSections ?? []])</script>
     @endif
 
     <!-- Benefits -->
