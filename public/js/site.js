@@ -329,6 +329,18 @@
       });
     }
 
+    function shortenLabel(text, maxLen) {
+      var src = String(text || '').trim();
+      if (src.length <= maxLen) return src;
+      return src.slice(0, Math.max(0, maxLen - 1)).trimEnd() + '…';
+    }
+
+    function normalizeSearchText(text) {
+      return String(text || '')
+        .toLowerCase()
+        .replace(/[,\s]+/g, '');
+    }
+
     function normalizePath(path) {
       if (!Array.isArray(path) || path.length === 0) return [];
       return path.map(function (part) { return String(part || '').trim(); }).filter(Boolean);
@@ -371,8 +383,9 @@
           id: item.id,
           name: item.name || 'Материал',
           price: item.price_value || 0,
-          currency: item.price_currency || 'KZT',
+          currency: item.price_currency || 'USD',
           perM2: item.per_m2 || 52,
+          packSize: item.pack_size || 1,
           path: normalizePath(item.path),
         };
       });
@@ -381,14 +394,20 @@
 
     function fillHiddenSelect() {
       materialEl.innerHTML = '';
+      var placeholder = document.createElement('option');
+      placeholder.value = '';
+      placeholder.textContent = 'Выберите материал';
+      placeholder.selected = true;
+      materialEl.appendChild(placeholder);
+
       flattenedProducts.forEach(function (product, idx) {
         var option = document.createElement('option');
         option.value = String(product.id || '');
         option.textContent = String(product.name || 'Материал');
         option.dataset.price = String(product.price || 0);
         option.dataset.perM2 = String(product.perM2 || 52);
-        option.dataset.currency = String(product.currency || 'KZT');
-        if (idx === 0) option.selected = true;
+        option.dataset.packSize = String(product.packSize || 1);
+        option.dataset.currency = String(product.currency || 'USD');
         materialEl.appendChild(option);
       });
     }
@@ -399,7 +418,8 @@
       });
       if (!option) return;
       option.selected = true;
-      selectedLabelEl.textContent = option.textContent;
+      selectedLabelEl.textContent = shortenLabel(option.textContent, 52);
+      selectedLabelEl.title = option.textContent;
       recalc();
       panelEl.classList.add('hidden');
     }
@@ -425,7 +445,7 @@
         var item = node[name];
         var childHtml = renderNode(item.children || {}, depth + 1, query);
         var products = (item.products || []).filter(function (p) {
-          return query === '' || String(p.name || '').toLowerCase().indexOf(query) !== -1;
+          return query === '' || normalizeSearchText(p.name || '').indexOf(query) !== -1;
         });
 
         var productsHtml = products.map(function (p) {
@@ -452,7 +472,7 @@
     }
 
     function renderTree() {
-      var query = String(searchEl.value || '').trim().toLowerCase();
+      var query = normalizeSearchText(searchEl.value || '');
       var html = renderNode(tree, 0, query);
       treeEl.innerHTML = html || '<div class="px-2 py-4 text-sm text-offwhite/55">Ничего не найдено</div>';
       treeEl.querySelectorAll('.calc-tree-product').forEach(function (btn) {
@@ -484,15 +504,27 @@
       var width = Math.max(parseFloat(widthEl.value) || 0, 0);
       var height = Math.max(parseFloat(heightEl.value) || 0, 0);
       var selectedOption = materialEl.options[materialEl.selectedIndex];
+      var hasMaterial = !!(selectedOption && selectedOption.value);
+
+      if (!hasMaterial) {
+        if (piecesEl) piecesEl.textContent = '0';
+        if (priceEl) priceEl.textContent = '0';
+        if (areaEl) areaEl.textContent = '0';
+        if (areaExtraEl) areaExtraEl.textContent = '0';
+        if (mixEl) mixEl.textContent = '0';
+        return;
+      }
+
       var perM2 = Math.max(parseFloat(selectedOption && selectedOption.dataset ? selectedOption.dataset.perM2 : '') || 52, 1);
+      var packSize = Math.max(parseFloat(selectedOption && selectedOption.dataset ? selectedOption.dataset.packSize : '') || 1, 1);
       var price = Math.max(parseFloat(selectedOption && selectedOption.dataset ? selectedOption.dataset.price : '') || 0, 0);
-      var currency = (selectedOption && selectedOption.dataset ? selectedOption.dataset.currency : '') || 'KZT';
+      var currency = ((selectedOption && selectedOption.dataset ? selectedOption.dataset.currency : '') || 'USD').toUpperCase();
 
       var area = roomType === 'floor' ? (length * width) : (2 * (length + width) * height);
       var areaWithReserve = area * 1.05;
       var pieces = Math.ceil(areaWithReserve * perM2);
-      var totalPrice = Math.round(pieces * price);
-      var mixBags = Math.max(Math.ceil(areaWithReserve * 0.19), 1);
+      var packs = Math.max(Math.ceil(pieces / packSize), 1);
+      var totalPrice = Math.round(packs * price);
 
       heightEl.disabled = roomType === 'floor';
       if (heightEl.parentElement) {
@@ -500,10 +532,13 @@
       }
 
       if (piecesEl) piecesEl.textContent = fmt(pieces, 0);
-      if (priceEl) priceEl.textContent = fmt(totalPrice, 0) + (currency === 'KZT' ? ' ₸' : (' ' + currency));
+      if (priceEl) {
+        var currencySuffix = currency === 'USD' ? ' $' : (currency === 'KZT' ? ' ₸' : (' ' + currency));
+        priceEl.textContent = fmt(totalPrice, 0) + currencySuffix;
+      }
       if (areaEl) areaEl.textContent = fmt(area, 1) + ' м²';
       if (areaExtraEl) areaExtraEl.textContent = fmt(areaWithReserve, 1) + ' м²';
-      if (mixEl) mixEl.textContent = fmt(mixBags, 0) + ' мест (мешков)';
+      if (mixEl) mixEl.textContent = fmt(packs, 0) + ' упаковок (по ' + fmt(packSize, 0) + ' шт)';
     }
 
     [roomTypeEl, lengthEl, widthEl, heightEl, materialEl].forEach(function (field) {
@@ -513,9 +548,8 @@
 
     buildTree();
     fillHiddenSelect();
-    if (materialEl.options.length > 0) {
-      selectedLabelEl.textContent = materialEl.options[0].textContent;
-    }
+    selectedLabelEl.textContent = 'Выберите материал';
+    selectedLabelEl.title = 'Выберите материал';
     renderTree();
     recalc();
   }

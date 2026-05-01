@@ -75,10 +75,13 @@
 
           <div class="mt-6">
             <div class="text-sm font-medium text-offwhite/80">Размеры товара</div>
+            @php($sizeChips = collect(explode(',', (string) ($productSize ?? '')))->map(fn ($v) => trim($v))->filter()->values())
             <div class="mt-3 flex flex-wrap gap-2">
-              @foreach(['250x120x65','250x120x65','250x120x65','250x120x65'] as $chip)
+              @forelse($sizeChips as $chip)
                 <span class="rounded-full border border-white/15 bg-charcoal/40 px-3 py-1 text-[12px] text-offwhite/70">{{ $chip }}</span>
-              @endforeach
+              @empty
+                <span class="rounded-full border border-white/15 bg-charcoal/40 px-3 py-1 text-[12px] text-offwhite/60">—</span>
+              @endforelse
             </div>
           </div>
 

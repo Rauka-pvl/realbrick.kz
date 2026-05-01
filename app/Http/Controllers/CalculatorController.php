@@ -42,9 +42,12 @@ class CalculatorController extends Controller
 
             $materials = DB::connection('diller')
                 ->table('bitrix24_catalog_products')
-                ->select('bitrix_id', 'name', 'price_value', 'price_currency', 'path_parts', 'section_bitrix_id')
+                ->select('bitrix_id', 'name', 'price_value', 'price_currency', 'path_parts', 'section_bitrix_id', 'property_186', 'property_130')
                 ->where('active', true)
                 ->whereNotNull('price_value')
+                ->whereNotNull('property_186')
+                ->where('property_186', '!=', '')
+                ->where('property_186', '!=', 'N')
                 ->orderBy('name')
                 ->limit(1000)
                 ->get()
@@ -52,6 +55,8 @@ class CalculatorController extends Controller
                     $rawName = trim((string) ($row->name ?? ''));
                     $displayName = $this->localizeName($rawName !== '' ? $rawName : 'Материал');
                     $sectionId = (int) ($row->section_bitrix_id ?? 0);
+                    $perM2 = $this->extractConsumptionPerM2((string) ($row->property_186 ?? ''));
+                    $packSize = $this->extractPackSize((string) ($row->property_130 ?? ''));
 
                     $path = [];
                     if ($sectionId > 0 && isset($sections[$sectionId])) {
@@ -75,12 +80,13 @@ class CalculatorController extends Controller
                         'id' => (int) ($row->bitrix_id ?? 0),
                         'name' => $displayName,
                         'price_value' => (float) ($row->price_value ?? 0),
-                        'price_currency' => (string) ($row->price_currency ?? 'KZT'),
-                        'per_m2' => $this->detectConsumptionPerM2($displayName),
+                        'price_currency' => (string) ($row->price_currency ?? 'USD'),
+                        'per_m2' => $perM2,
+                        'pack_size' => $packSize,
                         'path' => array_values($path),
                     ];
                 })
-                ->filter(fn (array $item) => $item['id'] > 0 && $item['price_value'] > 0)
+                ->filter(fn (array $item) => $item['id'] > 0 && $item['price_value'] > 0 && $item['per_m2'] !== null && $item['pack_size'] !== null)
                 ->values();
         } catch (Throwable) {
             $materials = collect();
@@ -89,9 +95,9 @@ class CalculatorController extends Controller
 
         if ($materials->isEmpty()) {
             $materials = collect([
-                ['id' => 1, 'name' => 'Кирпич ручной формовки', 'price_value' => 400, 'price_currency' => 'KZT', 'per_m2' => 52, 'path' => ['Кирпичи', 'Коллекции', 'Antic']],
-                ['id' => 2, 'name' => 'Плитка ручной формовки', 'price_value' => 320, 'price_currency' => 'KZT', 'per_m2' => 36, 'path' => ['Плитки', 'Коллекции', '1 коллекция Antic']],
-                ['id' => 3, 'name' => 'Клинкерный кирпич', 'price_value' => 500, 'price_currency' => 'KZT', 'per_m2' => 48, 'path' => ['Кирпичи', 'Коллекции', 'Classic']],
+                ['id' => 1, 'name' => 'Кирпич ручной формовки', 'price_value' => 400, 'price_currency' => 'USD', 'per_m2' => 52, 'pack_size' => 1, 'path' => ['Кирпичи', 'Коллекции', 'Antic']],
+                ['id' => 2, 'name' => 'Плитка ручной формовки', 'price_value' => 320, 'price_currency' => 'USD', 'per_m2' => 36, 'pack_size' => 1, 'path' => ['Плитки', 'Коллекции', '1 коллекция Antic']],
+                ['id' => 3, 'name' => 'Клинкерный кирпич', 'price_value' => 500, 'price_currency' => 'USD', 'per_m2' => 48, 'pack_size' => 1, 'path' => ['Кирпичи', 'Коллекции', 'Classic']],
             ]);
         }
 
@@ -114,17 +120,43 @@ class CalculatorController extends Controller
         ]);
     }
 
-    private function detectConsumptionPerM2(string $name): int
+    private function extractConsumptionPerM2(string $rawValue): ?int
     {
-        $needle = mb_strtolower($name);
-        if (str_contains($needle, 'плитк')) {
-            return 36;
-        }
-        if (str_contains($needle, 'клинкер')) {
-            return 48;
+        $rawValue = trim($rawValue);
+        if ($rawValue === '') {
+            return null;
         }
 
-        return 52;
+        // Bitrix property can be "1", "1,5", "1.5" or composite string.
+        if (preg_match('/\d+(?:[.,]\d+)?/', $rawValue, $matches) !== 1) {
+            return null;
+        }
+
+        $number = (float) str_replace(',', '.', $matches[0]);
+        if ($number <= 0) {
+            return null;
+        }
+
+        return (int) round($number);
+    }
+
+    private function extractPackSize(string $rawValue): ?int
+    {
+        $rawValue = trim($rawValue);
+        if ($rawValue === '') {
+            return null;
+        }
+
+        if (preg_match('/\d+(?:[.,]\d+)?/', $rawValue, $matches) !== 1) {
+            return null;
+        }
+
+        $number = (float) str_replace(',', '.', $matches[0]);
+        if ($number <= 0) {
+            return null;
+        }
+
+        return (int) round($number);
     }
 
     private function decodePathParts(string $rawPathParts, string $fallbackName): array

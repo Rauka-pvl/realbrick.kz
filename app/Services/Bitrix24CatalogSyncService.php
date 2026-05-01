@@ -11,6 +11,7 @@ class Bitrix24CatalogSyncService
 {
     protected string $dbConnection;
     protected bool $verifySsl;
+    protected bool $debugRaw;
 
     protected int $iblockId;
 
@@ -24,6 +25,7 @@ class Bitrix24CatalogSyncService
     {
         $this->dbConnection = (string) config('services.bitrix24.db_connection', 'diller');
         $this->verifySsl = (bool) config('services.bitrix24.verify_ssl', true);
+        $this->debugRaw = (bool) env('BITRIX24_DEBUG_RAW', false);
         $this->iblockId = (int) config('services.bitrix24.iblock_id', 14);
         $this->productIblockId = (int) config('services.bitrix24.product_iblock_id', 14);
         $this->rootSectionId = (int) config('services.bitrix24.root_section_id', 22);
@@ -116,6 +118,9 @@ class Bitrix24CatalogSyncService
                     'active' => ($p['active'] ?? 'Y') === 'Y',
                     'price_value' => $p['priceValue'] ?? null,
                     'price_currency' => $p['priceCurrency'] ?? null,
+                    'property_50' => $p['property50'] ?? null,
+                    'property_130' => $p['property130'] ?? null,
+                    'property_186' => $p['property186'] ?? null,
                     'synced_at' => $now,
                 ]);
             }
@@ -191,7 +196,18 @@ class Bitrix24CatalogSyncService
 
         do {
             $response = Http::timeout(30)->withOptions(['verify' => $this->verifySsl])->get($url, [
-                'select' => ['id', 'iblockId', 'name', 'iblockSectionId', 'active', 'price', 'currencyId'],
+                'select' => [
+                    'id',
+                    'iblockId',
+                    'name',
+                    'iblockSectionId',
+                    'active',
+                    'price',
+                    'currencyId',
+                    'property50',
+                    'property130',
+                    'property186',
+                ],
                 'filter' => ['iblockId' => $this->productIblockId],
                 'order' => ['name' => 'ASC'],
                 'start' => $start,
@@ -212,6 +228,14 @@ class Bitrix24CatalogSyncService
             }
             $raw = isset($result['products']) ? $result['products'] : $result;
             $list = array_values(is_array($raw) ? $raw : (array) $raw);
+            if ($this->debugRaw && $start === 0 && ! empty($list)) {
+                $firstRaw = is_object($list[0]) ? (array) $list[0] : (array) $list[0];
+                Log::info('Bitrix24CatalogSync: raw product sample', [
+                    'endpoint' => 'catalog.product.list',
+                    'keys' => array_keys($firstRaw),
+                    'product' => $firstRaw,
+                ]);
+            }
 
             foreach ($list as $p) {
                 $arr = is_object($p) ? (array) $p : $p;
@@ -228,6 +252,9 @@ class Bitrix24CatalogSyncService
                     'active' => $arr['active'] ?? $arr['ACTIVE'] ?? 'Y',
                     'priceValue' => $this->extractProductPrice($arr),
                     'priceCurrency' => $this->extractProductCurrency($arr),
+                    'property50' => $this->extractProductProperty($arr, 'property50'),
+                    'property130' => $this->extractProductProperty($arr, 'property130'),
+                    'property186' => $this->extractProductProperty($arr, 'property186'),
                 ];
             }
             $start += $pageSize;
@@ -265,6 +292,14 @@ class Bitrix24CatalogSyncService
             }
             $raw = isset($result['prices']) ? $result['prices'] : $result;
             $list = array_values(is_array($raw) ? $raw : (array) $raw);
+            if ($this->debugRaw && $start === 0 && ! empty($list)) {
+                $firstRaw = is_object($list[0]) ? (array) $list[0] : (array) $list[0];
+                Log::info('Bitrix24CatalogSync: raw price sample', [
+                    'endpoint' => 'catalog.price.list',
+                    'keys' => array_keys($firstRaw),
+                    'price' => $firstRaw,
+                ]);
+            }
 
             foreach ($list as $priceRow) {
                 $arr = is_object($priceRow) ? (array) $priceRow : $priceRow;
@@ -424,5 +459,67 @@ class Bitrix24CatalogSyncService
         }
 
         return null;
+    }
+
+    protected function extractProductProperty(array $arr, string $propertyKey): ?string
+    {
+        $candidates = [
+            $arr[$propertyKey] ?? null,
+            $arr[mb_strtoupper($propertyKey)] ?? null,
+            $arr[ucfirst($propertyKey)] ?? null,
+        ];
+
+        foreach ($candidates as $value) {
+            $normalized = $this->normalizeProductPropertyValue($value);
+            if ($normalized !== null) {
+                return $normalized;
+            }
+        }
+
+        return null;
+    }
+
+    protected function normalizeProductPropertyValue(mixed $value): ?string
+    {
+        if ($value === null || $value === '') {
+            return null;
+        }
+
+        if (is_array($value)) {
+            if (array_key_exists('value', $value) || array_key_exists('VALUE', $value)) {
+                $direct = $value['value'] ?? $value['VALUE'] ?? null;
+                if ($direct === null || $direct === '') {
+                    return null;
+                }
+                $direct = trim((string) $direct);
+                return ($direct === '' || mb_strtoupper($direct) === 'N') ? null : $direct;
+            }
+
+            $flattened = [];
+            foreach ($value as $item) {
+                if (is_array($item)) {
+                    $nested = $item['value'] ?? $item['VALUE'] ?? null;
+                    if ($nested !== null && $nested !== '') {
+                        $flattened[] = trim((string) $nested);
+                    }
+                    continue;
+                }
+                if ($item !== null && $item !== '') {
+                    $flattened[] = trim((string) $item);
+                }
+            }
+            $flattened = array_values(array_filter($flattened, fn (string $v) => $v !== '' && mb_strtoupper($v) !== 'N'));
+            if ($flattened === []) {
+                return null;
+            }
+            return implode(', ', array_unique($flattened));
+        }
+
+        $scalar = trim((string) $value);
+        if ($scalar === '' || mb_strtoupper($scalar) === 'N') {
+            return null;
+        }
+
+        return $scalar;
     }
 }

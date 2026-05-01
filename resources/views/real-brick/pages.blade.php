@@ -799,12 +799,12 @@
               </div>
 
               <p class="mt-4 text-xs text-offwhite/80">Выберите материал</p>
-              <div class="mt-2" id="calc-material-picker">
+              <div class="relative mt-2 w-full" id="calc-material-picker">
                 <button type="button" id="calc-material-trigger" class="flex h-11 w-full items-center justify-between rounded-full border border-white/10 bg-[#1d1d1f] px-4 text-left text-sm text-offwhite outline-none transition hover:border-gold/45 focus:border-gold/70">
-                  <span id="calc-material-selected-label" class="truncate">Выберите товар из каталога</span>
+                  <span id="calc-material-selected-label" class="min-w-0 flex-1 truncate pr-2">Выберите товар из каталога</span>
                   <span class="ml-3 text-offwhite/60">⌄</span>
                 </button>
-                <div id="calc-material-panel" class="absolute z-50 mt-2 hidden w-[min(680px,92vw)] overflow-hidden rounded-2xl border border-gold/30 bg-[#111113] shadow-[0_16px_40px_rgba(0,0,0,0.45)]">
+                <div id="calc-material-panel" class="absolute left-0 right-0 z-50 mt-2 hidden w-full overflow-hidden rounded-2xl border border-gold/30 bg-[#111113] shadow-[0_16px_40px_rgba(0,0,0,0.45)]">
                   <div class="border-b border-white/10 p-3">
                     <input id="calc-product-search" type="text" placeholder="Поиск товара..." class="h-10 w-full rounded-xl border border-white/10 bg-[#1d1d1f] px-3 text-sm text-offwhite placeholder:text-offwhite/40 outline-none transition focus:border-gold/70" />
                   </div>
@@ -817,16 +817,16 @@
             <aside class="rounded-3xl border border-gold/35 bg-black/55 p-5 md:p-7">
               <p class="text-xs font-semibold uppercase tracking-[0.03em] text-offwhite">ИТОГО МАТЕРИАЛОВ</p>
               <div class="mt-1 flex items-end gap-2">
-                <span id="calc-total-pieces" class="text-5xl font-bold leading-none text-gold md:text-6xl">6240</span>
-                <span class="pb-1 text-sm text-offwhite/90">шт/м²</span>
+                <span id="calc-total-pieces" class="text-5xl font-bold leading-none text-gold md:text-6xl">0</span>
+                <span class="pb-1 text-sm text-offwhite/90">шт</span>
               </div>
               <p class="mt-2 text-sm text-offwhite/80">Ориентировочная стоимость</p>
-              <p id="calc-total-price" class="mt-1 text-2xl font-semibold text-gold">2 496 000 ₸</p>
+              <p id="calc-total-price" class="mt-1 text-2xl font-semibold text-gold">0</p>
 
               <div class="mt-5 space-y-2 border-t border-white/15 pt-4 text-sm">
-                <div class="flex items-center justify-between gap-3"><span class="text-offwhite/85">Общая площадь</span><strong id="calc-total-area" class="text-right font-medium text-offwhite">120.0 м²</strong></div>
-                <div class="flex items-center justify-between gap-3"><span class="text-offwhite/85">Площадь c запасом</span><strong id="calc-total-area-extra" class="text-right font-medium text-offwhite">126.0 м²</strong></div>
-                <div class="flex items-center justify-between gap-3"><span class="text-offwhite/85">Рекомендуемый раствор</span><strong id="calc-mix" class="text-right font-medium text-offwhite">24 мест (мешков)</strong></div>
+                <div class="flex items-center justify-between gap-3"><span class="text-offwhite/85">Общая площадь</span><strong id="calc-total-area" class="text-right font-medium text-offwhite">0</strong></div>
+                <div class="flex items-center justify-between gap-3"><span class="text-offwhite/85">Площадь c запасом</span><strong id="calc-total-area-extra" class="text-right font-medium text-offwhite">0</strong></div>
+                <div class="flex items-center justify-between gap-3"><span class="text-offwhite/85">Рекомендуемое количество упаковок</span><strong id="calc-mix" class="text-right font-medium text-offwhite">0</strong></div>
               </div>
             </aside>
           </div>

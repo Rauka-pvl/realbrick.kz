@@ -32,8 +32,8 @@
               <h1 class="text-[20px] sm:text-2xl lg:text-3xl 2xl:text-4xl max-[1023px]:!max-w-[320px] max-[1023px]:!text-[20px] max-[1023px]:!leading-[1.15]">1 В МИРЕ МИНЕРАЛЬНЫЙ КИРПИЧ <br class="hidden lg:block"> РУЧНОЙ ФОРМОВКИ </h1>
               <p class="text-base sm:text-lg lg:text-2xl 2xl:text-3xl max-[1023px]:!text-[16px] max-[1023px]:!leading-[1.15]">для архитектуры <br class="hidden lg:block"> и интерьеров </p>
               <div class="header_footer-buttons w-full items-center lg:w-auto lg:items-start max-[1023px]:!mt-3 max-[1023px]:!w-auto max-[1023px]:!items-start max-[1023px]:!gap-2.5">
-                <a href="#" class="btn btn_collection w-full sm:w-auto max-[1023px]:!w-auto max-[1023px]:!min-w-[190px] max-[1023px]:!px-6 max-[1023px]:!py-3 max-[1023px]:!text-[14px]">смотреть коллекцию</a>
-                <a href="#" class="btn btn_catalog w-full sm:w-auto max-[1023px]:!w-auto max-[1023px]:!min-w-[190px] max-[1023px]:!px-6 max-[1023px]:!py-3 max-[1023px]:!text-[14px]">скачать каталог</a>
+                <a href="{{ route('catalog.index') }}" class="btn btn_collection w-full sm:w-auto max-[1023px]:!w-auto max-[1023px]:!min-w-[190px] max-[1023px]:!px-6 max-[1023px]:!py-3 max-[1023px]:!text-[14px]">смотреть коллекцию</a>
+                <a href="{{ route('catalog.index') }}" class="btn btn_catalog w-full sm:w-auto max-[1023px]:!w-auto max-[1023px]:!min-w-[190px] max-[1023px]:!px-6 max-[1023px]:!py-3 max-[1023px]:!text-[14px]">скачать каталог</a>
               </div>
             </div>
             <!-- decorative image between left and right footer columns -->
@@ -92,7 +92,7 @@
                 <div class="usage_card-content">
                   <h2>Жилые дома</h2>
                   <p>Фасады из кирпича и плитки ручной формовки</p>
-                  <a href="#" class="usage_link">смотреть проекты <span>→</span></a>
+                  <a href="{{ route('projects.index') }}" class="usage_link">смотреть проекты <span>→</span></a>
                 </div>
               </div>
 
@@ -101,7 +101,7 @@
                 <div class="usage_card-content">
                   <h2>Интерьеры</h2>
                   <p>Живая фактура кирпича для выразительных интерьеров.</p>
-                  <a href="#" class="usage_link">смотреть проекты <span>→</span></a>
+                  <a href="{{ route('projects.index') }}" class="usage_link">смотреть проекты <span>→</span></a>
                 </div>
               </div>
 
@@ -110,7 +110,7 @@
                 <div class="usage_card-content">
                   <h2>Фасады</h2>
                   <p>Современные решения для внешней отделки зданий.</p>
-                  <a href="#" class="usage_link">смотреть проекты <span>→</span></a>
+                  <a href="{{ route('projects.index') }}" class="usage_link">смотреть проекты <span>→</span></a>
                 </div>
               </div>
 
@@ -119,7 +119,7 @@
                 <div class="usage_card-content">
                   <h2>Коммерческие объекты</h2>
                   <p>Офисы, рестораны и общественные пространства.</p>
-                  <a href="#" class="usage_link">смотреть проекты <span>→</span></a>
+                  <a href="{{ route('projects.index') }}" class="usage_link">смотреть проекты <span>→</span></a>
                 </div>
               </div>
 
@@ -128,7 +128,7 @@
                 <div class="usage_card-content">
                   <h2>Ландшафт</h2>
                   <p>Дорожки, подпорные стены и малые архитектурные формы.</p>
-                  <a href="#" class="usage_link">смотреть проекты <span>→</span></a>
+                  <a href="{{ route('projects.index') }}" class="usage_link">смотреть проекты <span>→</span></a>
                 </div>
               </div>
 
@@ -145,7 +145,7 @@
 
           <div class="usage_bottom">
             <p>Кирпич ручной формовки создаёт фактуру,<br>которая делает архитектуру выразительной.</p>
-            <a href="#" class="btn btn_collection usage_cta">подобрать кирпич</a>
+            <a href="{{ route('catalog.index') }}" class="btn btn_collection usage_cta">подобрать кирпич</a>
           </div>
 </section>
 
@@ -154,7 +154,7 @@
 
       <div class="collections_header">
         <h2 class="collections_title text-[28px] leading-tight sm:text-[32px] lg:text-[36px]">Коллекции <span>Real Brick</span></h2>
-        <a href="#" class="collections_all">смотреть весь каталог <span>→</span></a>
+        <a href="{{ route('catalog.index') }}" class="collections_all">смотреть весь каталог <span>→</span></a>
       </div>
 
       <div class="collections_grid">
@@ -163,7 +163,7 @@
           <img src="{{ asset('storage/img/sloi-18.png')}}" alt="Кирпич ручной формовки">
           <div class="collections_card-content">
             <h3>Кирпич ручной формовки</h3>
-            <a href="#" class="collections_link">каталог <span>→</span></a>
+            <a href="{{ route('catalog.index') }}" class="collections_link">каталог <span>→</span></a>
           </div>
         </div>
 
@@ -171,7 +171,7 @@
           <img src="{{ asset('storage/img/sloi-17.png') }}" alt="Плитка ручной формовки">
           <div class="collections_card-content">
             <h3>Плитка ручной формовки</h3>
-            <a href="#" class="collections_link">каталог <span>→</span></a>
+            <a href="{{ route('catalog.index') }}" class="collections_link">каталог <span>→</span></a>
           </div>
         </div>
 
@@ -179,7 +179,7 @@
           <img src="{{ asset('storage/img/sloi-19.png') }}" alt="Декоративные элементы">
           <div class="collections_card-content">
             <h3>Декоративные элементы</h3>
-            <a href="#" class="collections_link">каталог <span>→</span></a>
+            <a href="{{ route('catalog.index') }}" class="collections_link">каталог <span>→</span></a>
           </div>
         </div>
 
@@ -187,7 +187,7 @@
           <img src="{{ asset('storage/img/sloi-15.png') }}" alt="Напольное покрытие">
           <div class="collections_card-content">
             <h3>Напольное покрытие</h3>
-            <a href="#" class="collections_link">каталог <span>→</span></a>
+            <a href="{{ route('catalog.index') }}" class="collections_link">каталог <span>→</span></a>
           </div>
         </div>
 
@@ -195,7 +195,7 @@
           <img src="{{ asset('storage/img/sloi-19.png') }}" alt="Лимитированные серии">
           <div class="collections_card-content">
             <h3>Лимитированные серии</h3>
-            <a href="#" class="collections_link">каталог <span>→</span></a>
+            <a href="{{ route('catalog.index') }}" class="collections_link">каталог <span>→</span></a>
           </div>
         </div>
 
@@ -203,7 +203,7 @@
           <img src="{{ asset('storage/img/sloi-27.png') }}" alt="Черепица">
           <div class="collections_card-content">
             <h3>Черепица</h3>
-            <a href="#" class="collections_link">каталог <span>→</span></a>
+            <a href="{{ route('catalog.index') }}" class="collections_link">каталог <span>→</span></a>
           </div>
         </div>
 
@@ -211,7 +211,7 @@
           <img src="{{ asset('storage/img/sloi-28.png') }}" alt="Сопутствующие материалы">
           <div class="collections_card-content">
             <h3>Сопутствующие материалы</h3>
-            <a href="#" class="collections_link">каталог <span>→</span></a>
+            <a href="{{ route('catalog.index') }}" class="collections_link">каталог <span>→</span></a>
           </div>
         </div>
 
@@ -250,7 +250,7 @@
           <div class="projects_cta-card">
             <h3>Попробуйте<br>Real Brick в<br>вашем проекте</h3>
             <p>Получите 3D-визуализацию<br>или расчёт материалов для<br>проекта прямо сейчас.</p>
-            <a href="#" class="btn btn_collection projects_btn-gold">Получить 3D-визуализацию</a>
+            <a href="{{ url('/contacts') }}" class="btn btn_collection projects_btn-gold">Получить 3D-визуализацию</a>
             <a href="{{ route('calculator') }}" class="btn btn_catalog projects_btn-outline">Рассчитать материалы</a>
           </div>
 
@@ -322,7 +322,7 @@
     <div class="blog-promo_inner">
       <h2 class="blog-promo_title">Блог <span>Real Brick</span></h2>
       <p class="blog-promo_desc">Идеи, советы и вдохновение для архитектуры<br>и интерьеров из кирпича ручной формовки.</p>
-      <a href="#" class="blog-promo_btn">Читать блог</a>
+      <a href="{{ route('blog.index') }}" class="blog-promo_btn">Читать блог</a>
     </div>
   </section>
 

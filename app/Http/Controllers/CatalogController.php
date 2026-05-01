@@ -54,7 +54,7 @@ class CatalogController extends Controller
 
                 return $this->slugFromPathParts($parts) === $pathSlug;
             });
-
+        
         abort_if(! $currentSection, 404);
 
         $sectionId = (int) $currentSection->bitrix_id;
@@ -80,7 +80,7 @@ class CatalogController extends Controller
                 ];
             })
             ->values();
-
+        
         $products = DB::connection('diller')
             ->table('bitrix24_catalog_products')
             ->select('bitrix_id', 'name', 'image_url', 'path_parts', 'price_value', 'price_currency')
@@ -103,7 +103,7 @@ class CatalogController extends Controller
                 ];
             })
             ->values();
-
+   
         return view('real-brick.catalog.collection', [
             'sectionName' => $this->localizeName((string) $currentSection->name, $lang),
             'sectionPath' => $sectionPath,
@@ -121,7 +121,7 @@ class CatalogController extends Controller
 
         $product = DB::connection('diller')
             ->table('bitrix24_catalog_products')
-            ->select('bitrix_id', 'name', 'image_url', 'path_parts', 'section_bitrix_id', 'price_value', 'price_currency')
+            ->select('bitrix_id', 'name', 'image_url', 'path_parts', 'section_bitrix_id', 'price_value', 'price_currency', 'property_50')
             ->where('active', true)
             ->orderBy('name')
             ->get()
@@ -132,7 +132,7 @@ class CatalogController extends Controller
             });
 
         abort_if(! $product, 404);
-
+       
         $sectionId = (int) ($product->section_bitrix_id ?? 0);
         $section = null;
         if ($sectionId > 0) {
@@ -184,6 +184,7 @@ class CatalogController extends Controller
             'productImages' => $productImages,
             'productPriceValue' => isset($product->price_value) ? (float) $product->price_value : null,
             'productPriceCurrency' => isset($product->price_currency) ? (string) $product->price_currency : null,
+            'productSize' => isset($product->property_50) ? trim((string) $product->property_50) : null,
             'pathParts' => $pathParts,
             'productBreadcrumbs' => $productBreadcrumbs,
             'relatedProducts' => $relatedProducts,
