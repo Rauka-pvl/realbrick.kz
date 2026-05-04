@@ -23,6 +23,7 @@ class CatalogController extends Controller
             ->get()
             ->map(function ($row) use ($lang) {
                 $parts = $this->decodePathParts($row->path_parts, $row->name);
+
                 return [
                     'id' => (int) $row->bitrix_id,
                     'name' => $this->localizeName((string) $row->name, $lang),
@@ -32,7 +33,6 @@ class CatalogController extends Controller
             })
             ->values();
 
-  
         return view('real-brick.catalog.index', [
             'sections' => $sections,
             'lang' => $lang,
@@ -54,7 +54,7 @@ class CatalogController extends Controller
 
                 return $this->slugFromPathParts($parts) === $pathSlug;
             });
-        
+
         abort_if(! $currentSection, 404);
 
         $sectionId = (int) $currentSection->bitrix_id;
@@ -80,7 +80,7 @@ class CatalogController extends Controller
                 ];
             })
             ->values();
-        
+
         $products = DB::connection('diller')
             ->table('bitrix24_catalog_products')
             ->select('bitrix_id', 'name', 'image_url', 'path_parts', 'price_value', 'price_currency')
@@ -103,7 +103,7 @@ class CatalogController extends Controller
                 ];
             })
             ->values();
-   
+
         return view('real-brick.catalog.collection', [
             'sectionName' => $this->localizeName((string) $currentSection->name, $lang),
             'sectionPath' => $sectionPath,
@@ -121,7 +121,7 @@ class CatalogController extends Controller
 
         $product = DB::connection('diller')
             ->table('bitrix24_catalog_products')
-            ->select('bitrix_id', 'name', 'image_url', 'path_parts', 'section_bitrix_id', 'price_value', 'price_currency', 'property_50')
+            ->select('bitrix_id', 'name', 'image_url', 'gallery_json', 'path_parts', 'section_bitrix_id', 'price_value', 'price_currency', 'property_50')
             ->where('active', true)
             ->orderBy('name')
             ->get()
@@ -132,7 +132,7 @@ class CatalogController extends Controller
             });
 
         abort_if(! $product, 404);
-       
+
         $sectionId = (int) ($product->section_bitrix_id ?? 0);
         $section = null;
         if ($sectionId > 0) {
@@ -164,7 +164,7 @@ class CatalogController extends Controller
                         'slug' => $this->slugFromPathParts($parts),
                         'image_url' => $this->resolveProductImageDisplayUrl(
                             isset($row->image_url) && $row->image_url !== '' ? (string) $row->image_url : null
-                        ),                        
+                        ),
                         'price_value' => isset($row->price_value) ? (float) $row->price_value : null,
                         'price_currency' => isset($row->price_currency) ? (string) $row->price_currency : null,
                     ];
@@ -172,10 +172,28 @@ class CatalogController extends Controller
                 ->values();
         }
 
-        $mainImage = $this->resolveProductImageDisplayUrl(
+        $galleryPaths = [];
+        if (isset($product->gallery_json) && $product->gallery_json !== null && $product->gallery_json !== '') {
+            $decoded = json_decode((string) $product->gallery_json, true);
+            if (is_array($decoded)) {
+                foreach ($decoded as $path) {
+                    if (is_string($path) && $path !== '') {
+                        $galleryPaths[] = $path;
+                    }
+                }
+            }
+        }
+        $galleryUrls = collect($galleryPaths)
+            ->map(fn (string $p) => $this->resolveProductImageDisplayUrl($p))
+            ->filter()
+            ->unique()
+            ->values()
+            ->all();
+
+        $mainImage = $galleryUrls[0] ?? $this->resolveProductImageDisplayUrl(
             isset($product->image_url) && $product->image_url !== '' ? (string) $product->image_url : null
         );
-        $productImages = $mainImage ? [$mainImage] : [];
+        $productImages = $galleryUrls !== [] ? $galleryUrls : ($mainImage ? [$mainImage] : []);
 
         return view('real-brick.catalog.product', [
             'productName' => $this->localizeName((string) $product->name, $lang),
@@ -207,11 +225,15 @@ class CatalogController extends Controller
         if ($raw === null || trim($raw) === '') {
             return null;
         }
+        $rawTrim = trim($raw);
+        if (preg_match('#^storage/#', $rawTrim)) {
+            return asset($rawTrim);
+        }
         $webhook = rtrim((string) env('DILLER_BITRIX24_REST_URL', ''), '/');
         if ($webhook === '') {
-            return preg_match('#^https?://#i', trim($raw)) ? trim($raw) : null;
+            return preg_match('#^https?://#i', $rawTrim) ? $rawTrim : null;
         }
-        $normalized = Bitrix24CatalogImageUrls::pathForStorage(trim($raw));
+        $normalized = Bitrix24CatalogImageUrls::pathForStorage($rawTrim);
         if ($normalized === null || $normalized === '') {
             return null;
         }

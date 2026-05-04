@@ -34,7 +34,7 @@ return [
             'channel' => env('SLACK_BOT_USER_DEFAULT_CHANNEL'),
         ],
     ],
-    
+
     'bitrix24' => [
         'db_connection' => env('BITRIX24_DB_CONNECTION', 'diller'),
         'verify_ssl' => env('BITRIX24_VERIFY_SSL', true),
@@ -42,6 +42,12 @@ return [
         'iblock_id' => (int) env('BITRIX24_CATALOG_IBLOCK_ID', 14),
         'product_iblock_id' => (int) env('BITRIX24_PRODUCT_IBLOCK_ID', 14), // если товары в др. инфоблоке — задайте BITRIX24_PRODUCT_IBLOCK_ID=16
         'root_section_id' => (int) env('BITRIX24_ROOT_SECTION_ID', 22),
+        // Имя поля файла в catalog.product.list / catalog.product.download (например property172).
+        'photo_property_field' => env('BITRIX24_PHOTO_PROPERTY', 'property172'),
+        // Таймаут одного catalog.product.download (сек.) и повторы при обрыве/таймауте.
+        'photo_download_timeout' => (int) env('BITRIX24_PHOTO_DOWNLOAD_TIMEOUT', 300),
+        'photo_download_retries' => max(1, (int) env('BITRIX24_PHOTO_DOWNLOAD_RETRIES', 4)),
+        'photo_download_retry_sleep_ms' => max(0, (int) env('BITRIX24_PHOTO_DOWNLOAD_RETRY_SLEEP_MS', 3000)),
         // Исключить разделы верхнего уровня (только RealBrick). Точное совпадение имени.
         'excluded_root_section_names' => array_values(array_filter(array_map('trim', explode(',', env('BITRIX24_EXCLUDED_SECTION_NAMES', 'Модная одежда,Одежда,Товары,Галерея Дизайна'))))),
     ],
