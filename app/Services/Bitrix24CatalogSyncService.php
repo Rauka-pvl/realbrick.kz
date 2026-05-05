@@ -98,7 +98,8 @@ class Bitrix24CatalogSyncService
         $db = DB::connection($this->dbConnection);
         $schema = Schema::connection($this->dbConnection);
         $hasImageCols = $schema->hasColumn('bitrix24_catalog_products', 'image_url');
-        $hasProperty172Col = $schema->hasColumn('bitrix24_catalog_products', 'property_172');
+        $hasPhotoPropertyRawCol = $schema->hasColumn('bitrix24_catalog_products', 'photo_property_raw');
+        $hasArticleCol = $schema->hasColumn('bitrix24_catalog_products', 'article');
 
         $preservedMedia = [];
         if ($hasImageCols) {
@@ -117,7 +118,7 @@ class Bitrix24CatalogSyncService
             }
         }
 
-        $db->transaction(function () use ($sections, $productsToInsert, $productPaths, $db, $preservedMedia, $hasImageCols, $hasProperty172Col) {
+        $db->transaction(function () use ($sections, $productsToInsert, $productPaths, $db, $preservedMedia, $hasImageCols, $hasPhotoPropertyRawCol, $hasArticleCol) {
             $db->table('bitrix24_catalog_products')->delete();
             $db->table('bitrix24_catalog_sections')->delete();
 
@@ -146,9 +147,9 @@ class Bitrix24CatalogSyncService
                     'active' => ($p['active'] ?? 'Y') === 'Y',
                     'price_value' => $p['priceValue'] ?? null,
                     'price_currency' => $p['priceCurrency'] ?? null,
-                    'property_50' => $p['property50'] ?? null,
-                    'property_130' => $p['property130'] ?? null,
-                    'property_186' => $p['property186'] ?? null,
+                    'size' => $p['property50'] ?? null,
+                    'pieces_per_pack' => $p['property130'] ?? null,
+                    'units_per_sq_or_lm' => $p['property186'] ?? null,
                     'synced_at' => $now,
                 ];
                 if ($hasImageCols) {
@@ -156,8 +157,11 @@ class Bitrix24CatalogSyncService
                     $row['image_url'] = $prev['image_url'] ?? null;
                     $row['gallery_json'] = $prev['gallery_json'] ?? null;
                 }
-                if ($hasProperty172Col) {
-                    $row['property_172'] = $p['property172Stored'] ?? null;
+                if ($hasPhotoPropertyRawCol) {
+                    $row['photo_property_raw'] = $p['property172Stored'] ?? null;
+                }
+                if ($hasArticleCol) {
+                    $row['article'] = $p['property164'] ?? null;
                 }
                 $db->table('bitrix24_catalog_products')->insert($row);
             }
@@ -245,6 +249,7 @@ class Bitrix24CatalogSyncService
                     'property50',
                     'property130',
                     'property186',
+                    'property164',
                 ], $this->photoFieldName !== '' ? [$this->photoFieldName] : []))),
                 'filter' => ['iblockId' => $this->productIblockId],
                 'order' => ['name' => 'ASC'],
@@ -297,6 +302,7 @@ class Bitrix24CatalogSyncService
                     'property50' => $this->extractProductProperty($arr, 'property50'),
                     'property130' => $this->extractProductProperty($arr, 'property130'),
                     'property186' => $this->extractProductProperty($arr, 'property186'),
+                    'property164' => $this->extractProductProperty($arr, 'property164'),
                     'property172Stored' => $this->serializeProperty172ForStorage($rawPhoto),
                 ];
             }

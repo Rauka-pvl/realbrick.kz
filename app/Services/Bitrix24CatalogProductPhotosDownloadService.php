@@ -159,7 +159,7 @@ class Bitrix24CatalogProductPhotosDownloadService
                 ->update([
                     'image_url' => $first,
                     'gallery_json' => $galleryJson,
-                    'property_172' => $serialized,
+                    'photo_property_raw' => $serialized,
                 ]);
 
             $ok++;

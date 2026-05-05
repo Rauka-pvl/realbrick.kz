@@ -285,211 +285,80 @@
     var lengthEl = document.getElementById('calc-length');
     var widthEl = document.getElementById('calc-width');
     var heightEl = document.getElementById('calc-height');
-    var pickerEl = document.getElementById('calc-material-picker');
-    var triggerEl = document.getElementById('calc-material-trigger');
-    var panelEl = document.getElementById('calc-material-panel');
-    var selectedLabelEl = document.getElementById('calc-material-selected-label');
-    var searchEl = document.getElementById('calc-product-search');
-    var treeEl = document.getElementById('calc-material-tree');
     var dataEl = document.getElementById('calc-tree-data');
-    var materialEl = document.getElementById('calc-material');
-    if (!roomTypeEl || !lengthEl || !widthEl || !heightEl || !materialEl || !pickerEl || !triggerEl || !panelEl || !selectedLabelEl || !searchEl || !treeEl || !dataEl) return;
+    if (!roomTypeEl || !lengthEl || !widthEl || !heightEl || !dataEl) return;
 
     var piecesEl = document.getElementById('calc-total-pieces');
     var priceEl = document.getElementById('calc-total-price');
     var areaEl = document.getElementById('calc-total-area');
+    var totalOpeningsEl = document.getElementById('calc-total-openings');
+    var netAreaEl = document.getElementById('calc-total-net-area');
     var areaExtraEl = document.getElementById('calc-total-area-extra');
+    var packCoverageEl = document.getElementById('calc-pack-coverage');
     var mixEl = document.getElementById('calc-mix');
-    var materials = [];
+    var verticalCornersLmEl = document.getElementById('calc-vertical-corners-lm');
+    var horizontalCornersLmEl = document.getElementById('calc-horizontal-corners-lm');
+    var totalCornersLmEl = document.getElementById('calc-corners-lm-total');
+    var wallsPriceEl = document.getElementById('calc-walls-price');
+    var cornersPriceEl = document.getElementById('calc-corners-price');
+    var infoTileEl = document.getElementById('calc-info-tile');
+    var infoVCornerEl = document.getElementById('calc-info-v-corner');
+    var infoPackPriceEl = document.getElementById('calc-info-pack-price');
+    var infoHCornerEl = document.getElementById('calc-info-h-corner');
+    var calcRunBtn = document.getElementById('calc-run');
+    var calcResetBtn = document.getElementById('calc-reset');
+    var verticalMinusBtn = document.getElementById('calc-vertical-corners-minus');
+    var verticalPlusBtn = document.getElementById('calc-vertical-corners-plus');
+    var horizontalMinusBtn = document.getElementById('calc-horizontal-corners-minus');
+    var horizontalPlusBtn = document.getElementById('calc-horizontal-corners-plus');
+
+    var wallsContainerEl = document.getElementById('calc-walls');
+    var addWallBtn = document.getElementById('calc-add-wall');
+    var verticalCornersCountEl = document.getElementById('calc-vertical-corners-count');
+    var verticalCornersHeightEl = document.getElementById('calc-vertical-corners-height');
+    var horizontalCornersCountEl = document.getElementById('calc-horizontal-corners-count');
+    var horizontalCornersLengthEl = document.getElementById('calc-horizontal-corners-length');
+
+    if (!wallsContainerEl || !addWallBtn || !verticalCornersCountEl || !verticalCornersHeightEl || !horizontalCornersCountEl || !horizontalCornersLengthEl) return;
+
+    var wallMaterials = [];
+    var verticalCornerMaterials = [];
+    var horizontalCornerMaterials = [];
     var sections = [];
-    var flattenedProducts = [];
-    var tree = {};
-    var topOrder = [
-      'Кирпичи',
-      'Напольная программа',
-      'Отливы и Колпаки-парапеты',
-      'Подсистема ППС',
-      'Плитки',
-      'Фуга и Клей',
-      'Черепица',
-    ];
+    var walls = [];
 
     try {
       var parsed = JSON.parse(dataEl.textContent || '{}');
-      materials = Array.isArray(parsed.materials) ? parsed.materials : [];
+      wallMaterials = Array.isArray(parsed.materials) ? parsed.materials : [];
+      verticalCornerMaterials = Array.isArray(parsed.verticalCornerMaterials) ? parsed.verticalCornerMaterials : [];
+      horizontalCornerMaterials = Array.isArray(parsed.horizontalCornerMaterials) ? parsed.horizontalCornerMaterials : [];
       sections = Array.isArray(parsed.sections) ? parsed.sections : [];
     } catch (e) {
-      materials = [];
+      wallMaterials = [];
+      verticalCornerMaterials = [];
+      horizontalCornerMaterials = [];
       sections = [];
     }
 
-    function esc(v) {
-      return String(v || '').replace(/[&<>"']/g, function (char) {
-        return ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[char];
-      });
-    }
-
-    function shortenLabel(text, maxLen) {
-      var src = String(text || '').trim();
-      if (src.length <= maxLen) return src;
-      return src.slice(0, Math.max(0, maxLen - 1)).trimEnd() + '…';
-    }
-
-    function normalizeSearchText(text) {
-      return String(text || '')
-        .toLowerCase()
-        .replace(/[,\s]+/g, '');
-    }
-
     function normalizePath(path) {
-      if (!Array.isArray(path) || path.length === 0) return [];
-      return path.map(function (part) { return String(part || '').trim(); }).filter(Boolean);
+      return Array.isArray(path) ? path.map(function (part) { return String(part || '').trim(); }).filter(Boolean) : [];
     }
 
-    function ensurePath(path) {
-      if (!Array.isArray(path) || path.length === 0) return;
-      if (String(path[0] || '').trim().toLowerCase() === 'материалы') return;
-      var node = tree;
-      path.forEach(function (part) {
-        if (!node[part]) node[part] = { children: {}, products: [] };
-        node = node[part].children;
-      });
+    function normalizeItem(item) {
+      var dims = item.corner_dims || null;
+      return {
+        id: item.id,
+        name: item.name || 'Материал',
+        article: item.article || '',
+        currency: (item.price_currency || 'USD').toUpperCase(),
+        price: Math.max(parseFloat(item.price_value) || 0, 0),
+        perM2: Math.max(parseFloat(item.per_m2) || 0, 0),
+        packSize: Math.max(parseFloat(item.pack_size) || 0, 0),
+        cornerHeightM: dims && dims.height_m ? Math.max(parseFloat(dims.height_m) || 0, 0) : 0,
+        cornerWidthM: dims && dims.width_m ? Math.max(parseFloat(dims.width_m) || 0, 0) : 0,
+        path: normalizePath(item.path || []),
+      };
     }
-
-    function insertIntoTree(product) {
-      ensurePath(product.path);
-      if (!Array.isArray(product.path) || product.path.length === 0) return;
-      if (String(product.path[0] || '').trim().toLowerCase() === 'материалы') return;
-
-      var leafNode = tree;
-      product.path.forEach(function (part) {
-        if (!leafNode[part]) leafNode[part] = { children: {}, products: [] };
-        if (part === product.path[product.path.length - 1]) {
-          leafNode[part].products.push(product);
-        } else {
-          leafNode = leafNode[part].children;
-        }
-      });
-    }
-
-    function buildTree() {
-      tree = {};
-      sections.forEach(function (rawPath) {
-        var path = normalizePath(rawPath);
-        ensurePath(path);
-      });
-      flattenedProducts = materials.map(function (item) {
-        return {
-          id: item.id,
-          name: item.name || 'Материал',
-          price: item.price_value || 0,
-          currency: item.price_currency || 'USD',
-          perM2: item.per_m2 || 52,
-          packSize: item.pack_size || 1,
-          path: normalizePath(item.path),
-        };
-      });
-      flattenedProducts.forEach(insertIntoTree);
-    }
-
-    function fillHiddenSelect() {
-      materialEl.innerHTML = '';
-      var placeholder = document.createElement('option');
-      placeholder.value = '';
-      placeholder.textContent = 'Выберите материал';
-      placeholder.selected = true;
-      materialEl.appendChild(placeholder);
-
-      flattenedProducts.forEach(function (product, idx) {
-        var option = document.createElement('option');
-        option.value = String(product.id || '');
-        option.textContent = String(product.name || 'Материал');
-        option.dataset.price = String(product.price || 0);
-        option.dataset.perM2 = String(product.perM2 || 52);
-        option.dataset.packSize = String(product.packSize || 1);
-        option.dataset.currency = String(product.currency || 'USD');
-        materialEl.appendChild(option);
-      });
-    }
-
-    function selectProduct(productId) {
-      var option = Array.prototype.find.call(materialEl.options, function (opt) {
-        return String(opt.value) === String(productId);
-      });
-      if (!option) return;
-      option.selected = true;
-      selectedLabelEl.textContent = shortenLabel(option.textContent, 52);
-      selectedLabelEl.title = option.textContent;
-      recalc();
-      panelEl.classList.add('hidden');
-    }
-
-    function sortedKeys(node, depth) {
-      var keys = Object.keys(node || {}).filter(function (key) {
-        return String(key || '').trim().toLowerCase() !== 'материалы';
-      });
-      if (depth === 0) {
-        return keys.sort(function (a, b) {
-          var ai = topOrder.indexOf(a); if (ai < 0) ai = 999;
-          var bi = topOrder.indexOf(b); if (bi < 0) bi = 999;
-          if (ai !== bi) return ai - bi;
-          return a.localeCompare(b, 'ru');
-        });
-      }
-      return keys.sort(function (a, b) { return a.localeCompare(b, 'ru'); });
-    }
-
-    function renderNode(node, depth, query) {
-      var html = '';
-      sortedKeys(node, depth).forEach(function (name) {
-        var item = node[name];
-        var childHtml = renderNode(item.children || {}, depth + 1, query);
-        var products = (item.products || []).filter(function (p) {
-          return query === '' || normalizeSearchText(p.name || '').indexOf(query) !== -1;
-        });
-
-        var productsHtml = products.map(function (p) {
-          return '<button type="button" class="calc-tree-product block w-full rounded-lg px-3 py-1.5 text-left text-[13px] text-offwhite/80 transition hover:bg-white/5 hover:text-gold" data-product-id="' + esc(p.id) + '">' + esc(p.name) + '</button>';
-        }).join('');
-
-        var emptyHtml = (childHtml === '' && productsHtml === '')
-          ? '<div class="ml-4 mt-1 border-l border-white/10 pl-2"><div class="px-3 py-1.5 text-[12px] text-offwhite/45">Пусто</div></div>'
-          : '';
-
-        html += ''
-          + '<details class="' + (depth > 0 ? 'ml-4 mt-1' : 'mb-1') + '" open>'
-          + '<summary class="list-none cursor-pointer rounded-md px-2 py-1.5 ' + (depth === 0 ? 'text-sm font-semibold text-offwhite' : 'text-[13px] font-medium text-offwhite/90') + ' hover:bg-white/5">'
-          + '<span class="mr-1 text-offwhite/45">▾</span>' + esc(name)
-          + '</summary>'
-          + '<div class="' + (depth > 0 ? 'ml-3 border-l border-white/10 pl-2' : '') + '">'
-          + childHtml
-          + (productsHtml ? '<div class="ml-4 mt-1 border-l border-white/10 pl-2">' + productsHtml + '</div>' : '')
-          + emptyHtml
-          + '</div>'
-          + '</details>';
-      });
-      return html;
-    }
-
-    function renderTree() {
-      var query = normalizeSearchText(searchEl.value || '');
-      var html = renderNode(tree, 0, query);
-      treeEl.innerHTML = html || '<div class="px-2 py-4 text-sm text-offwhite/55">Ничего не найдено</div>';
-      treeEl.querySelectorAll('.calc-tree-product').forEach(function (btn) {
-        btn.addEventListener('click', function () {
-          selectProduct(btn.getAttribute('data-product-id'));
-        });
-      });
-    }
-
-    triggerEl.addEventListener('click', function () {
-      panelEl.classList.toggle('hidden');
-      if (!panelEl.classList.contains('hidden')) searchEl.focus();
-    });
-    document.addEventListener('click', function (e) {
-      if (!e.target.closest('#calc-material-picker')) panelEl.classList.add('hidden');
-    });
-    searchEl.addEventListener('input', renderTree);
 
     function fmt(value, digits) {
       return Number(value || 0).toLocaleString('ru-RU', {
@@ -498,59 +367,503 @@
       });
     }
 
-    function recalc() {
-      var roomType = roomTypeEl.value;
-      var length = Math.max(parseFloat(lengthEl.value) || 0, 0);
-      var width = Math.max(parseFloat(widthEl.value) || 0, 0);
-      var height = Math.max(parseFloat(heightEl.value) || 0, 0);
-      var selectedOption = materialEl.options[materialEl.selectedIndex];
-      var hasMaterial = !!(selectedOption && selectedOption.value);
-
-      if (!hasMaterial) {
-        if (piecesEl) piecesEl.textContent = '0';
-        if (priceEl) priceEl.textContent = '0';
-        if (areaEl) areaEl.textContent = '0';
-        if (areaExtraEl) areaExtraEl.textContent = '0';
-        if (mixEl) mixEl.textContent = '0';
-        return;
-      }
-
-      var perM2 = Math.max(parseFloat(selectedOption && selectedOption.dataset ? selectedOption.dataset.perM2 : '') || 52, 1);
-      var packSize = Math.max(parseFloat(selectedOption && selectedOption.dataset ? selectedOption.dataset.packSize : '') || 1, 1);
-      var price = Math.max(parseFloat(selectedOption && selectedOption.dataset ? selectedOption.dataset.price : '') || 0, 0);
-      var currency = ((selectedOption && selectedOption.dataset ? selectedOption.dataset.currency : '') || 'USD').toUpperCase();
-
-      var area = roomType === 'floor' ? (length * width) : (2 * (length + width) * height);
-      var areaWithReserve = area * 1.05;
-      var pieces = Math.ceil(areaWithReserve * perM2);
-      var packs = Math.max(Math.ceil(pieces / packSize), 1);
-      var totalPrice = Math.round(packs * price);
-
-      heightEl.disabled = roomType === 'floor';
-      if (heightEl.parentElement) {
-        heightEl.parentElement.style.opacity = roomType === 'floor' ? '0.45' : '1';
-      }
-
-      if (piecesEl) piecesEl.textContent = fmt(pieces, 0);
-      if (priceEl) {
-        var currencySuffix = currency === 'USD' ? ' $' : (currency === 'KZT' ? ' ₸' : (' ' + currency));
-        priceEl.textContent = fmt(totalPrice, 0) + currencySuffix;
-      }
-      if (areaEl) areaEl.textContent = fmt(area, 1) + ' м²';
-      if (areaExtraEl) areaExtraEl.textContent = fmt(areaWithReserve, 1) + ' м²';
-      if (mixEl) mixEl.textContent = fmt(packs, 0) + ' упаковок (по ' + fmt(packSize, 0) + ' шт)';
+    function formatCurrency(value, currency) {
+      var suffix = currency === 'USD' ? ' $' : (currency === 'KZT' ? ' ₸' : (' ' + currency));
+      return fmt(value, 0) + suffix;
     }
 
-    [roomTypeEl, lengthEl, widthEl, heightEl, materialEl].forEach(function (field) {
+    function createPicker(config) {
+      var triggerEl = document.getElementById(config.triggerId);
+      var panelEl = document.getElementById(config.panelId);
+      var searchEl = document.getElementById(config.searchId);
+      var listEl = document.getElementById(config.treeId);
+      var labelEl = document.getElementById(config.labelId);
+      var selectEl = document.getElementById(config.selectId);
+      var rootEl = document.getElementById(config.rootId);
+      if (!triggerEl || !panelEl || !searchEl || !listEl || !labelEl || !selectEl || !rootEl) return null;
+
+      var items = (config.items || []).map(normalizeItem);
+
+      selectEl.innerHTML = '';
+      var placeholder = document.createElement('option');
+      placeholder.value = '';
+      placeholder.textContent = 'Выберите материал';
+      placeholder.selected = true;
+      selectEl.appendChild(placeholder);
+
+      items.forEach(function (item) {
+        var option = document.createElement('option');
+        option.value = String(item.id || '');
+        option.textContent = item.name;
+        option.dataset.price = String(item.price || 0);
+        option.dataset.currency = item.currency || 'USD';
+        option.dataset.perM2 = String(item.perM2 || 0);
+        option.dataset.packSize = String(item.packSize || 0);
+        option.dataset.cornerHeightM = String(item.cornerHeightM || 0);
+        option.dataset.cornerWidthM = String(item.cornerWidthM || 0);
+        option.dataset.article = item.article || '';
+        selectEl.appendChild(option);
+      });
+
+      function escapeHtml(value) {
+        return String(value || '')
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;')
+          .replace(/"/g, '&quot;')
+          .replace(/'/g, '&#39;');
+      }
+
+      function buildGroupedTree(list) {
+        var root = { children: {}, products: [] };
+        list.forEach(function (item) {
+          var path = Array.isArray(item.path) ? item.path.filter(Boolean) : [];
+          var node = root;
+          path.forEach(function (part) {
+            if (!node.children[part]) {
+              node.children[part] = { children: {}, products: [] };
+            }
+            node = node.children[part];
+          });
+          node.products.push(item);
+        });
+        return root;
+      }
+
+      function renderGroupedNode(node, depth) {
+        var html = '';
+        var childKeys = Object.keys(node.children || {}).sort(function (a, b) {
+          return a.localeCompare(b, 'ru');
+        });
+
+        childKeys.forEach(function (groupName) {
+          var child = node.children[groupName];
+          var childHtml = renderGroupedNode(child, depth + 1);
+          var productsHtml = (child.products || []).map(function (item) {
+            var article = item.article ? (' <span class="text-white/40">· ' + escapeHtml(item.article) + '</span>') : '';
+            return '<button type="button" class="calc-list-item block w-full rounded-lg px-3 py-2 text-left text-[13px] text-white/85 transition hover:bg-white/5 hover:text-gold" data-id="' + String(item.id) + '">' + escapeHtml(item.name) + article + '</button>';
+          }).join('');
+
+          var openAttr = depth < 1 ? ' open' : '';
+          html += ''
+            + '<details class="' + (depth > 0 ? 'ml-3 mt-1' : 'mt-1') + '"' + openAttr + '>'
+            + '<summary class="list-none cursor-pointer rounded-md px-2 py-1.5 text-[12px] font-semibold text-white/85 hover:bg-white/5">'
+            + '<span class="mr-1 text-white/45">▸</span>' + escapeHtml(groupName)
+            + '</summary>'
+            + '<div class="' + (depth >= 0 ? 'ml-2 border-l border-white/10 pl-2' : '') + '">'
+            + childHtml
+            + productsHtml
+            + '</div>'
+            + '</details>';
+        });
+
+        if (depth === 0) {
+          html += (node.products || []).map(function (item) {
+            var article = item.article ? (' <span class="text-white/40">· ' + escapeHtml(item.article) + '</span>') : '';
+            return '<button type="button" class="calc-list-item block w-full rounded-lg px-3 py-2 text-left text-[13px] text-white/85 transition hover:bg-white/5 hover:text-gold" data-id="' + String(item.id) + '">' + escapeHtml(item.name) + article + '</button>';
+          }).join('');
+        }
+
+        return html;
+      }
+
+      function render() {
+        var q = String(searchEl.value || '').trim().toLowerCase();
+        var filtered = items.filter(function (item) {
+          if (q === '') return true;
+          var pathText = (Array.isArray(item.path) ? item.path.join(' / ') : '').toLowerCase();
+          return String(item.name || '').toLowerCase().indexOf(q) !== -1
+            || String(item.article || '').toLowerCase().indexOf(q) !== -1
+            || pathText.indexOf(q) !== -1;
+        });
+        if (filtered.length === 0) {
+          listEl.innerHTML = '<div class="px-2 py-4 text-sm text-offwhite/55">Ничего не найдено</div>';
+          return;
+        }
+        var tree = buildGroupedTree(filtered);
+        listEl.innerHTML = renderGroupedNode(tree, 0);
+
+        listEl.querySelectorAll('.calc-list-item').forEach(function (btn) {
+          btn.addEventListener('click', function () {
+            var id = btn.getAttribute('data-id');
+            var option = Array.prototype.find.call(selectEl.options, function (opt) {
+              return String(opt.value) === String(id);
+            });
+            if (!option) return;
+            option.selected = true;
+            labelEl.textContent = option.textContent;
+            labelEl.title = option.textContent;
+            panelEl.classList.add('hidden');
+            recalc();
+          });
+        });
+      }
+
+      triggerEl.addEventListener('click', function () {
+        panelEl.classList.toggle('hidden');
+        if (!panelEl.classList.contains('hidden')) searchEl.focus();
+      });
+      searchEl.addEventListener('input', render);
+      document.addEventListener('click', function (e) {
+        if (!e.target.closest('#' + config.rootId)) panelEl.classList.add('hidden');
+      });
+
+      render();
+      return {
+        selectEl: selectEl,
+      };
+    }
+
+    var wallPicker = createPicker({
+      rootId: 'calc-material-picker',
+      triggerId: 'calc-material-trigger',
+      panelId: 'calc-material-panel',
+      searchId: 'calc-product-search',
+      treeId: 'calc-material-tree',
+      labelId: 'calc-material-selected-label',
+      selectId: 'calc-material',
+      items: wallMaterials,
+    });
+
+    var verticalPicker = createPicker({
+      rootId: 'calc-vertical-picker',
+      triggerId: 'calc-vertical-trigger',
+      panelId: 'calc-vertical-panel',
+      searchId: 'calc-vertical-search',
+      treeId: 'calc-vertical-tree',
+      labelId: 'calc-vertical-selected-label',
+      selectId: 'calc-vertical-material',
+      items: verticalCornerMaterials,
+    });
+
+    var horizontalPicker = createPicker({
+      rootId: 'calc-horizontal-picker',
+      triggerId: 'calc-horizontal-trigger',
+      panelId: 'calc-horizontal-panel',
+      searchId: 'calc-horizontal-search',
+      treeId: 'calc-horizontal-tree',
+      labelId: 'calc-horizontal-selected-label',
+      selectId: 'calc-horizontal-material',
+      items: horizontalCornerMaterials,
+    });
+
+    if (!wallPicker || !verticalPicker || !horizontalPicker) return;
+
+    function createWall(width, height) {
+      return {
+        width: Math.max(parseFloat(width) || 0, 0),
+        height: Math.max(parseFloat(height) || 0, 0),
+        openings: [],
+      };
+    }
+
+    function createOpening(defaultName) {
+      return { name: defaultName || 'Проем', width: 0, height: 0 };
+    }
+
+    function renderWalls() {
+      wallsContainerEl.innerHTML = '';
+      walls.forEach(function (wall, wallIndex) {
+        var wallArea = Math.max((wall.width || 0) * (wall.height || 0), 0);
+        var openingsArea = (wall.openings || []).reduce(function (sum, o) {
+          return sum + Math.max((parseFloat(o.width) || 0) * (parseFloat(o.height) || 0), 0);
+        }, 0);
+        var openingCount = (wall.openings || []).length;
+
+        var row = document.createElement('div');
+        row.className = 'rounded-xl border border-white/10 bg-[#151515] p-3.5';
+        row.setAttribute('data-wall-card', String(wallIndex));
+        row.innerHTML = ''
+          + '<div class="flex items-center justify-between gap-2 text-[12px] text-white/75">'
+          + '  <div class="flex items-center gap-2"><span class="flex h-6 w-6 items-center justify-center rounded-full border border-[#c9a96e]/55 text-[11px] text-[#c9a96e]">' + (wallIndex + 1) + '</span><span class="font-semibold text-white">Стена ' + (wallIndex + 1) + '</span></div>'
+          + '  <button type="button" data-action="remove-wall" data-wall="' + wallIndex + '" class="rounded-md border border-white/15 px-2 py-1 text-[11px] text-white/60 hover:border-red-400/60 hover:text-red-300">🗑</button>'
+          + '</div>'
+          + '<div class="mt-2 grid grid-cols-1 gap-3 lg:grid-cols-[1fr_320px]">'
+          + '  <div class="grid grid-cols-3 gap-2">'
+          + '    <label class="text-[11px] text-white/58">Ширина (м)<input data-action="wall-width" data-wall="' + wallIndex + '" type="number" min="0" step="0.01" value="' + wall.width + '" class="mt-1 h-10 w-full rounded-lg border border-white/10 bg-[#1d1d1f] px-2 text-sm text-white outline-none focus:border-[#c9a96e]/75"></label>'
+          + '    <label class="text-[11px] text-white/58">Высота (м)<input data-action="wall-height" data-wall="' + wallIndex + '" type="number" min="0" step="0.01" value="' + wall.height + '" class="mt-1 h-10 w-full rounded-lg border border-white/10 bg-[#1d1d1f] px-2 text-sm text-white outline-none focus:border-[#c9a96e]/75"></label>'
+          + '    <div class="text-[11px] text-white/58">Площадь стены<div data-wall-area="' + wallIndex + '" class="mt-1 h-10 rounded-lg border border-white/10 bg-[#1d1d1f] px-2 text-sm leading-10 text-[#c9a96e]">' + fmt(wallArea, 2) + ' м²</div></div>'
+          + '  </div>'
+          + '  <div class="border-l border-white/10 pl-3">'
+          + '    <div class="mb-1 flex items-center justify-between text-[12px] text-white/62"><span>Проемы <span class="text-[#c9a96e]">' + openingCount + '</span></span><button type="button" data-action="add-opening" data-wall="' + wallIndex + '" class="rounded-md border border-white/15 px-2 py-1 text-[11px] text-white/85 hover:border-[#c9a96e]/65 hover:text-[#c9a96e]">+ Добавить</button></div>'
+          + '    <div data-openings="' + wallIndex + '" class="space-y-1"></div>'
+          + '  </div>'
+          + '</div>'
+          + '<div class="mt-2 text-[11px] text-white/52">Площадь проемов: <span data-wall-openings-total="' + wallIndex + '" class="text-white/85">' + fmt(openingsArea, 2) + ' м²</span></div>';
+        wallsContainerEl.appendChild(row);
+
+        var openingsContainer = row.querySelector('[data-openings="' + wallIndex + '"]');
+        (wall.openings || []).forEach(function (opening, openingIndex) {
+          var item = document.createElement('div');
+          var openingArea = Math.max((parseFloat(opening.width) || 0) * (parseFloat(opening.height) || 0), 0);
+          item.className = 'rounded-md border border-white/10 bg-[#1d1d1f] p-2';
+          var openingName = String(opening.name || ('Проем ' + (openingIndex + 1)))
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;');
+          item.innerHTML = ''
+            + '<div class="mb-1 flex items-center justify-between gap-2 text-[11px] text-white/80">'
+            + '<input data-action="opening-name" data-wall="' + wallIndex + '" data-opening="' + openingIndex + '" type="text" value="' + openingName + '" class="h-8 min-w-0 flex-1 rounded border border-white/10 bg-[#232323] px-2 text-[11px] text-white outline-none focus:border-[#c9a96e]/75">'
+            + '<div class="flex items-center gap-1"><button type="button" data-action="remove-opening" data-wall="' + wallIndex + '" data-opening="' + openingIndex + '" class="rounded border border-white/20 px-1.5 py-0.5 text-[10px] text-white/70 hover:border-red-400/60 hover:text-red-300">🗑</button></div>'
+            + '</div>'
+            + '<div class="grid grid-cols-2 gap-1">'
+            + '<input data-action="opening-width" data-wall="' + wallIndex + '" data-opening="' + openingIndex + '" type="number" min="0" step="0.01" value="' + (opening.width || 0) + '" placeholder="Ширина (м)" class="h-9 rounded border border-white/10 bg-[#232323] px-2 text-[11px] text-white outline-none focus:border-[#c9a96e]/75">'
+            + '<input data-action="opening-height" data-wall="' + wallIndex + '" data-opening="' + openingIndex + '" type="number" min="0" step="0.01" value="' + (opening.height || 0) + '" placeholder="Высота (м)" class="h-9 rounded border border-white/10 bg-[#232323] px-2 text-[11px] text-white outline-none focus:border-[#c9a96e]/75">'
+            + '</div>'
+            + '<div class="mt-1 text-[10px] text-white/55">Площадь: <span data-opening-area="' + wallIndex + '-' + openingIndex + '" class="text-white">' + fmt(openingArea, 2) + ' м²</span></div>';
+          openingsContainer.appendChild(item);
+        });
+
+        if (openingCount === 0) {
+          var emptyRow = document.createElement('div');
+          emptyRow.className = 'rounded-lg border border-white/10 bg-[#1d1d1f] px-2 py-1.5 text-[10px] text-white/48';
+          emptyRow.textContent = 'Нет проемов';
+          openingsContainer.appendChild(emptyRow);
+        }
+      });
+    }
+
+    function updateWallMetricsView(wallIndex) {
+      if (!Number.isInteger(wallIndex) || !walls[wallIndex]) return;
+      var wall = walls[wallIndex];
+      var wallArea = Math.max((wall.width || 0) * (wall.height || 0), 0);
+      var openingsArea = (wall.openings || []).reduce(function (sum, o) {
+        return sum + Math.max((parseFloat(o.width) || 0) * (parseFloat(o.height) || 0), 0);
+      }, 0);
+
+      var wallAreaEl = wallsContainerEl.querySelector('[data-wall-area="' + wallIndex + '"]');
+      if (wallAreaEl) wallAreaEl.textContent = fmt(wallArea, 2) + ' м²';
+
+      var openingsTotalEl = wallsContainerEl.querySelector('[data-wall-openings-total="' + wallIndex + '"]');
+      if (openingsTotalEl) openingsTotalEl.textContent = fmt(openingsArea, 2) + ' м²';
+    }
+
+    function syncWallsByPerimeter() {
+      var l = Math.max(parseFloat(lengthEl.value) || 0, 0);
+      var w = Math.max(parseFloat(widthEl.value) || 0, 0);
+      var h = Math.max(parseFloat(heightEl.value) || 0, 0);
+      var target = [l, w, l, w];
+      while (walls.length < 4) walls.push(createWall(l, h));
+      if (walls.length > 4) walls = walls.slice(0, 4);
+      walls.forEach(function (wall, idx) {
+        wall.width = Math.max(target[idx] || 0, 0);
+        wall.height = h;
+      });
+      renderWalls();
+    }
+
+    function recalc() {
+      var wallOption = wallPicker.selectEl.options[wallPicker.selectEl.selectedIndex];
+      var verticalOption = verticalPicker.selectEl.options[verticalPicker.selectEl.selectedIndex];
+      var horizontalOption = horizontalPicker.selectEl.options[horizontalPicker.selectEl.selectedIndex];
+
+      var totalWallArea = walls.reduce(function (sum, wall) {
+        return sum + Math.max((wall.width || 0) * (wall.height || 0), 0);
+      }, 0);
+      var totalOpeningsArea = walls.reduce(function (sum, wall) {
+        var openingSum = (wall.openings || []).reduce(function (s, o) {
+          return s + Math.max((parseFloat(o.width) || 0) * (parseFloat(o.height) || 0), 0);
+        }, 0);
+        return sum + openingSum;
+      }, 0);
+      var netArea = Math.max(totalWallArea - totalOpeningsArea, 0);
+      var areaWithReserve = netArea * 1.05;
+
+      var packs = 0;
+      var wallsPrice = 0;
+      var currency = 'USD';
+      var packPieces = 0;
+      var piecesPerM2 = 0;
+      var totalWallPieces = 0;
+      if (wallOption && wallOption.value) {
+        packPieces = Math.max(parseFloat(wallOption.dataset.packSize || '0') || 0, 0);
+        piecesPerM2 = Math.max(parseFloat(wallOption.dataset.perM2 || '0') || 0, 0);
+        var wallPackPrice = Math.max(parseFloat(wallOption.dataset.price || '0') || 0, 0);
+        currency = (wallOption.dataset.currency || 'USD').toUpperCase();
+        if (piecesPerM2 > 0) {
+          totalWallPieces = areaWithReserve * piecesPerM2;
+        }
+        if (packPieces > 0 && totalWallPieces > 0) {
+          packs = Math.ceil(totalWallPieces / packPieces);
+          wallsPrice = packs * wallPackPrice;
+        }
+      }
+
+      var verticalLm = Math.max((parseFloat(verticalCornersCountEl.value) || 0) * (parseFloat(verticalCornersHeightEl.value) || 0), 0);
+      var horizontalLm = Math.max((parseFloat(horizontalCornersCountEl.value) || 0) * (parseFloat(horizontalCornersLengthEl.value) || 0), 0);
+
+      var verticalPrice = 0;
+      var verticalQty = 0;
+      if (verticalOption && verticalOption.value) {
+        var verticalRatePerLm = Math.max(parseFloat(verticalOption.dataset.perM2 || '0') || 0, 0);
+        var verticalUnitPrice = Math.max(parseFloat(verticalOption.dataset.price || '0') || 0, 0);
+        if (verticalRatePerLm > 0) {
+          verticalQty = Math.ceil(verticalLm * verticalRatePerLm);
+          verticalPrice = verticalQty * verticalUnitPrice;
+        }
+      }
+
+      var horizontalPrice = 0;
+      var horizontalQty = 0;
+      if (horizontalOption && horizontalOption.value) {
+        var horizontalRatePerLm = Math.max(parseFloat(horizontalOption.dataset.perM2 || '0') || 0, 0);
+        var horizontalUnitPrice = Math.max(parseFloat(horizontalOption.dataset.price || '0') || 0, 0);
+        if (horizontalRatePerLm > 0) {
+          horizontalQty = Math.ceil(horizontalLm * horizontalRatePerLm);
+          horizontalPrice = horizontalQty * horizontalUnitPrice;
+        }
+      }
+
+      var cornersPrice = verticalPrice + horizontalPrice;
+      var totalPrice = wallsPrice + cornersPrice;
+
+      if (piecesEl) piecesEl.textContent = fmt(packs, 0) + ' уп';
+      if (priceEl) priceEl.textContent = formatCurrency(totalPrice, currency);
+      if (areaEl) areaEl.textContent = fmt(totalWallArea, 2) + ' м²';
+      if (totalOpeningsEl) totalOpeningsEl.textContent = fmt(totalOpeningsArea, 2) + ' м²';
+      if (netAreaEl) netAreaEl.textContent = fmt(netArea, 2) + ' м²';
+      if (areaExtraEl) areaExtraEl.textContent = fmt(areaWithReserve, 2) + ' м²';
+      if (packCoverageEl) packCoverageEl.textContent = fmt(packPieces, 0) + ' шт';
+      if (mixEl) mixEl.textContent = fmt(packs, 0) + ' уп';
+      if (verticalCornersLmEl) verticalCornersLmEl.textContent = fmt(verticalLm, 2) + ' п.м.';
+      if (horizontalCornersLmEl) horizontalCornersLmEl.textContent = fmt(horizontalLm, 2) + ' п.м.';
+      if (totalCornersLmEl) totalCornersLmEl.textContent = fmt(verticalQty + horizontalQty, 0) + ' шт';
+      if (wallsPriceEl) wallsPriceEl.textContent = formatCurrency(wallsPrice, currency);
+      if (cornersPriceEl) cornersPriceEl.textContent = formatCurrency(cornersPrice, currency);
+      if (infoTileEl) infoTileEl.textContent = fmt(piecesPerM2, 2) + ' шт/м²';
+      if (infoVCornerEl) infoVCornerEl.textContent = fmt(verticalLm, 2) + ' п.м.';
+      if (infoPackPriceEl) infoPackPriceEl.textContent = formatCurrency(packs > 0 ? (wallsPrice / packs) : 0, currency);
+      if (infoHCornerEl) infoHCornerEl.textContent = fmt(horizontalLm, 2) + ' п.м.';
+    }
+
+    wallsContainerEl.addEventListener('input', function (e) {
+      var actionNode = e.target && e.target.closest ? e.target.closest('[data-action]') : null;
+      if (!actionNode) return;
+      var action = actionNode.dataset.action || '';
+      var wallIndex = parseInt(actionNode.getAttribute('data-wall'), 10);
+      var openingIndex = parseInt(actionNode.getAttribute('data-opening'), 10);
+      if (!Number.isInteger(wallIndex) || !walls[wallIndex]) return;
+
+      if (action === 'wall-width') walls[wallIndex].width = Math.max(parseFloat(actionNode.value) || 0, 0);
+      if (action === 'wall-height') walls[wallIndex].height = Math.max(parseFloat(actionNode.value) || 0, 0);
+      if (action === 'opening-name' && Number.isInteger(openingIndex) && walls[wallIndex].openings[openingIndex]) {
+        walls[wallIndex].openings[openingIndex].name = String(actionNode.value || '').trim();
+      }
+      if (action === 'opening-width' && Number.isInteger(openingIndex) && walls[wallIndex].openings[openingIndex]) {
+        walls[wallIndex].openings[openingIndex].width = Math.max(parseFloat(actionNode.value) || 0, 0);
+      }
+      if (action === 'opening-height' && Number.isInteger(openingIndex) && walls[wallIndex].openings[openingIndex]) {
+        walls[wallIndex].openings[openingIndex].height = Math.max(parseFloat(actionNode.value) || 0, 0);
+      }
+
+      if ((action === 'opening-width' || action === 'opening-height') && Number.isInteger(openingIndex) && walls[wallIndex].openings[openingIndex]) {
+        var opening = walls[wallIndex].openings[openingIndex];
+        var openingArea = Math.max((parseFloat(opening.width) || 0) * (parseFloat(opening.height) || 0), 0);
+        var openingAreaEl = wallsContainerEl.querySelector('[data-opening-area="' + wallIndex + '-' + openingIndex + '"]');
+        if (openingAreaEl) openingAreaEl.textContent = fmt(openingArea, 2) + ' м²';
+      }
+
+      updateWallMetricsView(wallIndex);
+      recalc();
+    });
+
+    wallsContainerEl.addEventListener('click', function (e) {
+      var actionNode = e.target && e.target.closest ? e.target.closest('[data-action]') : null;
+      if (!actionNode) return;
+      var action = actionNode.dataset.action || '';
+      var wallIndex = parseInt(actionNode.getAttribute('data-wall'), 10);
+      var openingIndex = parseInt(actionNode.getAttribute('data-opening'), 10);
+      var changed = false;
+
+      if (action === 'add-opening' && Number.isInteger(wallIndex) && walls[wallIndex]) {
+        var nextNum = walls[wallIndex].openings.length + 1;
+        walls[wallIndex].openings.push(createOpening('Проем ' + nextNum));
+        changed = true;
+      }
+      if (action === 'remove-opening' && Number.isInteger(wallIndex) && Number.isInteger(openingIndex) && walls[wallIndex]) {
+        walls[wallIndex].openings.splice(openingIndex, 1);
+        changed = true;
+      }
+      if (action === 'remove-wall' && Number.isInteger(wallIndex) && walls.length > 1) {
+        walls.splice(wallIndex, 1);
+        changed = true;
+      }
+
+      if (changed) {
+        renderWalls();
+        recalc();
+      }
+    });
+
+    addWallBtn.addEventListener('click', function () {
+      var baseHeight = Math.max(parseFloat(heightEl.value) || 0, 0);
+      walls.push(createWall(0, baseHeight));
+      renderWalls();
+      recalc();
+    });
+
+    if (calcRunBtn) {
+      calcRunBtn.addEventListener('click', function () {
+        recalc();
+      });
+    }
+
+    if (calcResetBtn) {
+      calcResetBtn.addEventListener('click', function () {
+        lengthEl.value = '10';
+        widthEl.value = '10';
+        heightEl.value = '3';
+        verticalCornersCountEl.value = '4';
+        verticalCornersHeightEl.value = '3';
+        horizontalCornersCountEl.value = '2';
+        horizontalCornersLengthEl.value = '10';
+        wallPicker.selectEl.selectedIndex = 0;
+        verticalPicker.selectEl.selectedIndex = 0;
+        horizontalPicker.selectEl.selectedIndex = 0;
+
+        var wallLabel = document.getElementById('calc-material-selected-label');
+        var vLabel = document.getElementById('calc-vertical-selected-label');
+        var hLabel = document.getElementById('calc-horizontal-selected-label');
+        if (wallLabel) wallLabel.textContent = 'Выберите материал';
+        if (vLabel) vLabel.textContent = 'Выберите материал';
+        if (hLabel) hLabel.textContent = 'Выберите материал';
+
+        syncWallsByPerimeter();
+        walls.forEach(function (wall) {
+          wall.openings = [];
+        });
+        renderWalls();
+        recalc();
+      });
+    }
+
+    function applyStepper(inputEl, delta) {
+      var next = Math.max((parseInt(inputEl.value, 10) || 0) + delta, 0);
+      inputEl.value = String(next);
+      recalc();
+    }
+
+    if (verticalMinusBtn) verticalMinusBtn.addEventListener('click', function () { applyStepper(verticalCornersCountEl, -1); });
+    if (verticalPlusBtn) verticalPlusBtn.addEventListener('click', function () { applyStepper(verticalCornersCountEl, 1); });
+    if (horizontalMinusBtn) horizontalMinusBtn.addEventListener('click', function () { applyStepper(horizontalCornersCountEl, -1); });
+    if (horizontalPlusBtn) horizontalPlusBtn.addEventListener('click', function () { applyStepper(horizontalCornersCountEl, 1); });
+
+    [roomTypeEl, lengthEl, widthEl, heightEl].forEach(function (field) {
+      field.addEventListener('input', syncWallsByPerimeter);
+      field.addEventListener('change', syncWallsByPerimeter);
+    });
+
+    [verticalCornersCountEl, verticalCornersHeightEl, horizontalCornersCountEl, horizontalCornersLengthEl, wallPicker.selectEl, verticalPicker.selectEl, horizontalPicker.selectEl].forEach(function (field) {
       field.addEventListener('input', recalc);
       field.addEventListener('change', recalc);
     });
 
-    buildTree();
-    fillHiddenSelect();
-    selectedLabelEl.textContent = 'Выберите материал';
-    selectedLabelEl.title = 'Выберите материал';
-    renderTree();
+    if (sections.length === 0) {
+      // keep linter happy, sections are passed for future grouped rendering
+    }
+
+    syncWallsByPerimeter();
     recalc();
   }
 

@@ -121,7 +121,7 @@ class CatalogController extends Controller
 
         $product = DB::connection('diller')
             ->table('bitrix24_catalog_products')
-            ->select('bitrix_id', 'name', 'image_url', 'gallery_json', 'path_parts', 'section_bitrix_id', 'price_value', 'price_currency', 'property_50')
+            ->select('bitrix_id', 'name', 'image_url', 'gallery_json', 'path_parts', 'section_bitrix_id', 'price_value', 'price_currency', 'size')
             ->where('active', true)
             ->orderBy('name')
             ->get()
@@ -202,7 +202,7 @@ class CatalogController extends Controller
             'productImages' => $productImages,
             'productPriceValue' => isset($product->price_value) ? (float) $product->price_value : null,
             'productPriceCurrency' => isset($product->price_currency) ? (string) $product->price_currency : null,
-            'productSize' => isset($product->property_50) ? trim((string) $product->property_50) : null,
+            'productSize' => isset($product->size) ? trim((string) $product->size) : null,
             'pathParts' => $pathParts,
             'productBreadcrumbs' => $productBreadcrumbs,
             'relatedProducts' => $relatedProducts,

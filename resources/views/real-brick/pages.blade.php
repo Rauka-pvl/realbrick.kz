@@ -138,6 +138,104 @@
       transform: scale(1.08);
     }
 
+    .rb-calc {
+      --rb-bg: #030303;
+      --rb-panel: #101010;
+      --rb-panel-2: #1a1a1a;
+      --rb-stroke: rgba(255, 255, 255, 0.13);
+      --rb-text: #eef2f8;
+      --rb-muted: rgba(226, 234, 247, 0.62);
+      --rb-gold: #c9a96e;
+      --rb-gold-soft: rgba(201, 169, 110, 0.24);
+    }
+    .rb-calc-card {
+      border: 1px solid var(--rb-stroke);
+      background: linear-gradient(180deg, rgba(24, 24, 24, 0.97) 0%, rgba(14, 14, 14, 0.97) 100%);
+      border-radius: 18px;
+      box-shadow: 0 10px 28px rgba(0, 0, 0, 0.35);
+    }
+    .rb-calc-input,
+    .rb-calc-select {
+      height: 46px;
+      width: 100%;
+      border-radius: 12px;
+      border: 1px solid var(--rb-stroke);
+      background: #1b1b1b;
+      color: var(--rb-text);
+      padding: 0 14px;
+      font-size: 14px;
+      outline: none;
+    }
+    .rb-calc-input:focus,
+    .rb-calc-select:focus {
+      border-color: rgba(201, 169, 110, 0.8);
+      box-shadow: 0 0 0 1px rgba(201, 169, 110, 0.45), 0 0 0 4px rgba(201, 169, 110, 0.12);
+    }
+    .rb-calc-btn-gold {
+      background: linear-gradient(180deg, #d8bd8f 0%, #c59a5c 100%);
+      color: #14110b;
+      border-radius: 12px;
+      font-size: 13px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      border: 1px solid rgba(216, 189, 143, 0.95);
+      box-shadow: 0 8px 18px rgba(201, 169, 110, 0.28);
+    }
+    .rb-calc-btn-dark {
+      background: #161616;
+      color: var(--rb-text);
+      border-radius: 12px;
+      font-size: 13px;
+      font-weight: 600;
+      border: 1px solid var(--rb-stroke);
+    }
+    .rb-calc .calc-tree-product,
+    .rb-calc .calc-list-item {
+      border-radius: 8px;
+    }
+    .rb-calc-stepper {
+      display: grid;
+      grid-template-columns: 30px 1fr 30px;
+      gap: 6px;
+      align-items: center;
+    }
+    .rb-calc-stepper-btn {
+      height: 38px;
+      border-radius: 10px;
+      border: 1px solid var(--rb-stroke);
+      background: #1b1b1f;
+      color: #d9e2f3;
+      font-size: 18px;
+      line-height: 1;
+      cursor: pointer;
+    }
+    .rb-calc-stepper-btn:hover {
+      border-color: rgba(201, 169, 110, 0.72);
+      color: #c9a96e;
+    }
+    .rb-calc-mini-card {
+      border: 1px solid var(--rb-stroke);
+      background: #161616;
+      border-radius: 12px;
+      padding: 12px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .rb-calc-mini-icon {
+      width: 28px;
+      height: 28px;
+      border-radius: 8px;
+      border: 1px solid rgba(201, 169, 110, 0.5);
+      color: #c9a96e;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+      flex: 0 0 auto;
+    }
+
 
 
   </style>
@@ -764,76 +862,215 @@
     @endif
 
     @if($page === 'calculator')
-    <section class="bg-black pb-16 pt-24 md:pb-20 md:pt-28">
-      <div class="mx-auto max-w-5xl px-4 lg:px-8">
-        <div class="mb-6 text-xs text-offwhite/65">
-          <a href="/" class="hover:text-offwhite">Главная</a><span class="px-1.5">/</span><span>Калькулятор</span>
+    <section class="rb-calc min-h-screen bg-[rgb(3,3,3)] pb-8 pt-24 md:pt-28">
+      <div class="w-full px-3 md:px-6 xl:px-8">
+        <div class="mb-3 text-[11px] text-white/45">
+          <a href="/" class="hover:text-white/80">Главная</a><span class="px-1.5 text-white/35">/</span><span class="text-white/65">Калькулятор</span>
         </div>
 
-        <div class="rounded-[28px] border border-gold/40 bg-[radial-gradient(circle_at_center,rgba(201,169,110,0.10)_0%,rgba(8,8,8,0.96)_58%)] p-4 shadow-[0_20px_60px_rgba(0,0,0,0.55)] md:p-8">
-          <div class="grid gap-4 md:grid-cols-[1.35fr_0.95fr] md:gap-6">
-            <div class="rounded-3xl border border-white/10 bg-black/45 p-5 md:p-7">
-              <h1 class="text-3xl font-semibold leading-none text-gold md:text-[2.2rem]">Калькулятор</h1>
-              <p class="mt-4 text-xs uppercase tracking-wide text-offwhite/70">тип помещения / конструктив</p>
+        <div class="rb-calc-card p-4 md:p-5">
+          <h1 class="text-[38px] font-semibold leading-none text-gold">Калькулятор</h1>
+          <p class="mt-1 text-[12px] text-white/65">Расчет количества материалов и стоимости облицовки</p>
 
-              <label class="mt-2 block">
-                <select id="calc-room-type" class="h-11 w-full rounded-full border border-white/10 bg-[#1d1d1f] px-4 text-sm text-offwhite outline-none transition focus:border-gold/70">
-                  <option value="walls" selected>Фасады / Стены (м²)</option>
-                  <option value="floor">Пол (м²)</option>
-                </select>
-              </label>
+          <div class="mt-4 grid grid-cols-1 gap-2 lg:grid-cols-[1fr_0.38fr_0.38fr_0.38fr_1fr]">
+            <label class="block">
+              <span class="mb-1 block text-[11px] text-white/55">Тип помещения / конструктив</span>
+              <select id="calc-room-type" class="rb-calc-select">
+                <option value="walls" selected>Фасады / Стены (м²)</option>
+              </select>
+            </label>
+            <label class="block">
+              <span class="mb-1 block text-[11px] text-white/55">Длина (м)</span>
+              <input id="calc-length" type="number" min="0.1" step="0.1" value="10" class="rb-calc-input" />
+            </label>
+            <label class="block">
+              <span class="mb-1 block text-[11px] text-white/55">Ширина (м)</span>
+              <input id="calc-width" type="number" min="0.1" step="0.1" value="10" class="rb-calc-input" />
+            </label>
+            <label class="block">
+              <span class="mb-1 block text-[11px] text-white/55">Высота (м)</span>
+              <input id="calc-height" type="number" min="0.1" step="0.1" value="3" class="rb-calc-input" />
+            </label>
+            <div class="relative" id="calc-material-picker">
+              <span class="mb-1 block text-[11px] text-white/55">Материал стены</span>
+              <button type="button" id="calc-material-trigger" class="rb-calc-input flex items-center justify-between text-left">
+                <span id="calc-material-selected-label" class="min-w-0 flex-1 truncate pr-2 text-sm">Выберите материал</span>
+                <span class="text-white/45">⌄</span>
+              </button>
+              <div id="calc-material-panel" class="absolute left-0 right-0 z-50 mt-2 hidden overflow-hidden rounded-xl border border-white/15 bg-[#161616] shadow-[0_16px_40px_rgba(0,0,0,0.55)]">
+                <div class="border-b border-white/10 p-2">
+                  <input id="calc-product-search" type="text" placeholder="Поиск..." class="rb-calc-input h-9" />
+                </div>
+                <div id="calc-material-tree" class="max-h-72 overflow-y-auto p-2"></div>
+              </div>
+              <select id="calc-material" class="hidden"></select>
+            </div>
+          </div>
 
-              <div class="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-3">
-                <label class="block">
-                  <span class="mb-1.5 block text-xs text-offwhite/80">Длина (м)</span>
-                  <input id="calc-length" type="number" min="0.1" step="0.1" value="10" class="h-11 w-full rounded-full border border-white/10 bg-[#1d1d1f] px-4 text-sm text-offwhite outline-none transition focus:border-gold/70" />
-                </label>
-                <label class="block">
-                  <span class="mb-1.5 block text-xs text-offwhite/80">Ширина (м)</span>
-                  <input id="calc-width" type="number" min="0.1" step="0.1" value="10" class="h-11 w-full rounded-full border border-white/10 bg-[#1d1d1f] px-4 text-sm text-offwhite outline-none transition focus:border-gold/70" />
-                </label>
-                <label class="block">
-                  <span class="mb-1.5 block text-xs text-offwhite/80">Высота (м)</span>
-                  <input id="calc-height" type="number" min="0.1" step="0.1" value="3" class="h-11 w-full rounded-full border border-white/10 bg-[#1d1d1f] px-4 text-sm text-offwhite outline-none transition focus:border-gold/70" />
-                </label>
+          <div class="mt-4 grid gap-3 lg:grid-cols-[1.38fr_0.82fr]">
+            <div>
+              <div class="mb-2 flex items-center justify-between">
+                <div>
+                  <p class="text-[22px] font-semibold text-gold">Стены</p>
+                  <p class="text-[12px] text-white/58">Добавьте стены и укажите проемы</p>
+                </div>
+                <button type="button" id="calc-add-wall" class="rb-calc-btn-dark h-10 px-4">+ Добавить стену</button>
+              </div>
+              <div id="calc-walls" class="space-y-2"></div>
+            </div>
+
+            <aside class="space-y-2">
+              <div class="rb-calc-card p-4">
+                <p class="text-[20px] font-semibold text-gold">📊 Результаты расчета</p>
+                <div class="mt-3 space-y-2.5 text-[13px]">
+                  <div class="flex items-center justify-between"><span class="text-white/60">Общая площадь стен</span><strong id="calc-total-area" class="text-white">0 м²</strong></div>
+                  <div class="flex items-center justify-between"><span class="text-white/60">Площадь проемов</span><strong id="calc-total-openings" class="text-white">0 м²</strong></div>
+                  <div class="flex items-center justify-between"><span class="text-white/60">Площадь облицовки</span><strong id="calc-total-net-area" class="text-white">0 м²</strong></div>
+                  <div class="flex items-center justify-between"><span class="text-white/60">Общая площадь с запасом 5%</span><strong id="calc-total-area-extra" class="text-white">0 м²</strong></div>
+                  <div class="flex items-center justify-between"><span class="text-white/60">Количество штук в упаковке</span><strong id="calc-pack-coverage" class="text-white">0 шт</strong></div>
+                  <div class="flex items-center justify-between"><span class="text-white/60">Рекомендуемое количество упаковок</span><strong id="calc-total-pieces" class="text-white">0 уп</strong></div>
+                </div>
               </div>
 
-              <p class="mt-4 text-xs text-offwhite/80">Выберите материал</p>
-              <div class="relative mt-2 w-full" id="calc-material-picker">
-                <button type="button" id="calc-material-trigger" class="flex h-11 w-full items-center justify-between rounded-full border border-white/10 bg-[#1d1d1f] px-4 text-left text-sm text-offwhite outline-none transition hover:border-gold/45 focus:border-gold/70">
-                  <span id="calc-material-selected-label" class="min-w-0 flex-1 truncate pr-2">Выберите товар из каталога</span>
-                  <span class="ml-3 text-offwhite/60">⌄</span>
-                </button>
-                <div id="calc-material-panel" class="absolute left-0 right-0 z-50 mt-2 hidden w-full overflow-hidden rounded-2xl border border-gold/30 bg-[#111113] shadow-[0_16px_40px_rgba(0,0,0,0.45)]">
-                  <div class="border-b border-white/10 p-3">
-                    <input id="calc-product-search" type="text" placeholder="Поиск товара..." class="h-10 w-full rounded-xl border border-white/10 bg-[#1d1d1f] px-3 text-sm text-offwhite placeholder:text-offwhite/40 outline-none transition focus:border-gold/70" />
-                  </div>
-                  <div id="calc-material-tree" class="max-h-80 overflow-y-auto p-2"></div>
+              <div class="rb-calc-card p-4">
+                <p class="text-[20px] font-semibold text-gold">📐 Углы</p>
+                <div class="mt-3 space-y-2.5 text-[13px]">
+                  <div class="flex items-center justify-between"><span class="text-white/60">Вертикальные углы</span><strong id="calc-vertical-corners-lm" class="text-white">0 п.м.</strong></div>
+                  <div class="flex items-center justify-between"><span class="text-white/60">Горизонтальные углы</span><strong id="calc-horizontal-corners-lm" class="text-white">0 п.м.</strong></div>
+                  <div class="flex items-center justify-between"><span class="text-white/60">Рекомендуемое количество угловых элементов</span><strong id="calc-corners-lm-total" class="text-white">0 п.м.</strong></div>
                 </div>
-                <select id="calc-material" class="hidden"></select>
+              </div>
+
+              <div class="rb-calc-card p-4">
+                <p class="text-[20px] font-semibold text-gold">💰 Ориентировочная стоимость</p>
+                <p id="calc-total-price" class="mt-2 text-[40px] leading-none text-gold">0 ₽</p>
+                <div class="mt-3 space-y-1.5 text-[13px] text-white/63">
+                  <div class="flex items-center justify-between"><span>Стоимость плитки</span><strong id="calc-walls-price" class="text-white">0</strong></div>
+                  <div class="flex items-center justify-between"><span>Стоимость углов</span><strong id="calc-corners-price" class="text-white">0</strong></div>
+                </div>
+                <div id="calc-mix" class="hidden"></div>
+              </div>
+            </aside>
+          </div>
+
+          <div class="mt-3 grid gap-3 lg:grid-cols-[1.38fr_0.82fr]">
+            <div class="grid gap-2 sm:grid-cols-2">
+              <div class="rb-calc-card p-3">
+                <p class="mb-2 text-[15px] font-semibold text-gold">↕ Вертикальные углы</p>
+                <div class="mb-2 grid grid-cols-2 gap-2">
+                  <label class="block">
+                    <span class="mb-1 block text-[11px] text-white/55">Количество углов</span>
+                    <div class="rb-calc-stepper">
+                      <button type="button" id="calc-vertical-corners-minus" class="rb-calc-stepper-btn">−</button>
+                      <input id="calc-vertical-corners-count" type="number" min="0" step="1" value="4" class="rb-calc-input h-[34px] text-center" />
+                      <button type="button" id="calc-vertical-corners-plus" class="rb-calc-stepper-btn">+</button>
+                    </div>
+                  </label>
+                  <label class="block">
+                    <span class="mb-1 block text-[11px] text-white/55">Высота (м)</span>
+                    <input id="calc-vertical-corners-height" type="number" min="0" step="0.01" value="3" class="rb-calc-input h-9" />
+                  </label>
+                </div>
+                <div class="relative" id="calc-vertical-picker">
+                  <span class="mb-1 block text-[11px] text-white/55">Материал вертикальных углов</span>
+                  <button type="button" id="calc-vertical-trigger" class="rb-calc-input h-9 flex items-center justify-between text-left">
+                    <span id="calc-vertical-selected-label" class="min-w-0 flex-1 truncate pr-2">Выберите материал</span>
+                    <span class="text-white/45">⌄</span>
+                  </button>
+                  <div id="calc-vertical-panel" class="absolute left-0 right-0 z-50 mt-2 hidden overflow-hidden rounded-xl border border-white/15 bg-[#161616] shadow-[0_16px_40px_rgba(0,0,0,0.55)]">
+                    <div class="border-b border-white/10 p-2">
+                      <input id="calc-vertical-search" type="text" placeholder="Поиск..." class="rb-calc-input h-9" />
+                    </div>
+                    <div id="calc-vertical-tree" class="max-h-72 overflow-y-auto p-2"></div>
+                  </div>
+                  <select id="calc-vertical-material" class="hidden"></select>
+                </div>
+              </div>
+
+              <div class="rb-calc-card p-3">
+                <p class="mb-2 text-[15px] font-semibold text-gold">↔ Горизонтальные углы</p>
+                <div class="mb-2 grid grid-cols-2 gap-2">
+                  <label class="block">
+                    <span class="mb-1 block text-[11px] text-white/55">Количество линий</span>
+                    <div class="rb-calc-stepper">
+                      <button type="button" id="calc-horizontal-corners-minus" class="rb-calc-stepper-btn">−</button>
+                      <input id="calc-horizontal-corners-count" type="number" min="0" step="1" value="2" class="rb-calc-input h-[34px] text-center" />
+                      <button type="button" id="calc-horizontal-corners-plus" class="rb-calc-stepper-btn">+</button>
+                    </div>
+                  </label>
+                  <label class="block">
+                    <span class="mb-1 block text-[11px] text-white/55">Длина (м)</span>
+                    <input id="calc-horizontal-corners-length" type="number" min="0" step="0.01" value="10" class="rb-calc-input h-9" />
+                  </label>
+                </div>
+                <div class="relative" id="calc-horizontal-picker">
+                  <span class="mb-1 block text-[11px] text-white/55">Материал горизонтальных углов</span>
+                  <button type="button" id="calc-horizontal-trigger" class="rb-calc-input h-9 flex items-center justify-between text-left">
+                    <span id="calc-horizontal-selected-label" class="min-w-0 flex-1 truncate pr-2">Выберите материал</span>
+                    <span class="text-white/45">⌄</span>
+                  </button>
+                  <div id="calc-horizontal-panel" class="absolute left-0 right-0 z-50 mt-2 hidden overflow-hidden rounded-xl border border-white/15 bg-[#161616] shadow-[0_16px_40px_rgba(0,0,0,0.55)]">
+                    <div class="border-b border-white/10 p-2">
+                      <input id="calc-horizontal-search" type="text" placeholder="Поиск..." class="rb-calc-input h-9" />
+                    </div>
+                    <div id="calc-horizontal-tree" class="max-h-72 overflow-y-auto p-2"></div>
+                  </div>
+                  <select id="calc-horizontal-material" class="hidden"></select>
+                </div>
+              </div>
+
+              <div class="flex items-center gap-2 sm:col-span-2">
+                <button type="button" id="calc-run" class="rb-calc-btn-gold h-11 px-7">Рассчитать</button>
+                <button type="button" id="calc-reset" class="rb-calc-btn-dark h-11 px-7">Сбросить</button>
               </div>
             </div>
 
-            <aside class="rounded-3xl border border-gold/35 bg-black/55 p-5 md:p-7">
-              <p class="text-xs font-semibold uppercase tracking-[0.03em] text-offwhite">ИТОГО МАТЕРИАЛОВ</p>
-              <div class="mt-1 flex items-end gap-2">
-                <span id="calc-total-pieces" class="text-5xl font-bold leading-none text-gold md:text-6xl">0</span>
-                <span class="pb-1 text-sm text-offwhite/90">шт</span>
+            <div class="rb-calc-card p-3">
+              <p class="text-[15px] font-semibold text-gold">📦 Информация о материалах</p>
+              <div class="mt-2 grid grid-cols-2 gap-2 text-[12px] sm:grid-cols-4">
+                <div class="rb-calc-mini-card">
+                  <div class="rb-calc-mini-icon">⬡</div>
+                  <div>
+                    <p class="text-white/45">Расход плитки</p>
+                    <p id="calc-info-tile" class="mt-1 text-white">0 шт/м²</p>
+                  </div>
+                </div>
+                <div class="rb-calc-mini-card">
+                  <div class="rb-calc-mini-icon">⌞</div>
+                  <div>
+                    <p class="text-white/45">Вертикальный угол</p>
+                    <p id="calc-info-v-corner" class="mt-1 text-white">0 п.м.</p>
+                  </div>
+                </div>
+                <div class="rb-calc-mini-card">
+                  <div class="rb-calc-mini-icon">₸</div>
+                  <div>
+                    <p class="text-white/45">Цена за упаковку</p>
+                    <p id="calc-info-pack-price" class="mt-1 text-white">0</p>
+                  </div>
+                </div>
+                <div class="rb-calc-mini-card">
+                  <div class="rb-calc-mini-icon">⌟</div>
+                  <div>
+                    <p class="text-white/45">Горизонтальный угол</p>
+                    <p id="calc-info-h-corner" class="mt-1 text-white">0 п.м.</p>
+                  </div>
+                </div>
               </div>
-              <p class="mt-2 text-sm text-offwhite/80">Ориентировочная стоимость</p>
-              <p id="calc-total-price" class="mt-1 text-2xl font-semibold text-gold">0</p>
-
-              <div class="mt-5 space-y-2 border-t border-white/15 pt-4 text-sm">
-                <div class="flex items-center justify-between gap-3"><span class="text-offwhite/85">Общая площадь</span><strong id="calc-total-area" class="text-right font-medium text-offwhite">0</strong></div>
-                <div class="flex items-center justify-between gap-3"><span class="text-offwhite/85">Площадь c запасом</span><strong id="calc-total-area-extra" class="text-right font-medium text-offwhite">0</strong></div>
-                <div class="flex items-center justify-between gap-3"><span class="text-offwhite/85">Рекомендуемое количество упаковок</span><strong id="calc-mix" class="text-right font-medium text-offwhite">0</strong></div>
-              </div>
-            </aside>
+            </div>
           </div>
         </div>
       </div>
     </section>
-    <script id="calc-tree-data" type="application/json">@json(['materials' => $calculatorMaterials ?? [], 'sections' => $calculatorSections ?? []])</script>
+    @php
+      $calcTreeData = [
+        'materials' => $calculatorMaterials ?? [],
+        'verticalCornerMaterials' => $calculatorVerticalCornerMaterials ?? [],
+        'horizontalCornerMaterials' => $calculatorHorizontalCornerMaterials ?? [],
+        'sections' => $calculatorSections ?? [],
+      ];
+    @endphp
+    <script id="calc-tree-data" type="application/json">@json($calcTreeData)</script>
     @endif
 
     <!-- Benefits -->

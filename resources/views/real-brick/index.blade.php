@@ -158,62 +158,25 @@
       </div>
 
       <div class="collections_grid">
-
-        <div class="collections_card">
-          <img src="{{ asset('storage/img/sloi-18.png')}}" alt="Кирпич ручной формовки">
-          <div class="collections_card-content">
-            <h3>Кирпич ручной формовки</h3>
-            <a href="{{ route('catalog.index') }}" class="collections_link">каталог <span>→</span></a>
+        @forelse(($collections ?? []) as $collection)
+          <div class="collections_card">
+            @if(!empty($collection['cover_url']))
+              <img src="{{ $collection['cover_url'] }}" alt="{{ $collection['name'] }}">
+            @endif
+            <div class="collections_card-content">
+              <h3>{{ $collection['name'] }}</h3>
+              <a href="{{ route('catalog.collection', ['slug' => $collection['slug']]) }}" class="collections_link">каталог <span>→</span></a>
+            </div>
           </div>
-        </div>
-
-        <div class="collections_card">
-          <img src="{{ asset('storage/img/sloi-17.png') }}" alt="Плитка ручной формовки">
-          <div class="collections_card-content">
-            <h3>Плитка ручной формовки</h3>
-            <a href="{{ route('catalog.index') }}" class="collections_link">каталог <span>→</span></a>
+        @empty
+          <div class="collections_card">
+            <img src="{{ asset('storage/img/sloi-18.png')}}" alt="Каталог">
+            <div class="collections_card-content">
+              <h3>Каталог</h3>
+              <a href="{{ route('catalog.index') }}" class="collections_link">каталог <span>→</span></a>
+            </div>
           </div>
-        </div>
-
-        <div class="collections_card">
-          <img src="{{ asset('storage/img/sloi-19.png') }}" alt="Декоративные элементы">
-          <div class="collections_card-content">
-            <h3>Декоративные элементы</h3>
-            <a href="{{ route('catalog.index') }}" class="collections_link">каталог <span>→</span></a>
-          </div>
-        </div>
-
-        <div class="collections_card">
-          <img src="{{ asset('storage/img/sloi-15.png') }}" alt="Напольное покрытие">
-          <div class="collections_card-content">
-            <h3>Напольное покрытие</h3>
-            <a href="{{ route('catalog.index') }}" class="collections_link">каталог <span>→</span></a>
-          </div>
-        </div>
-
-        <div class="collections_card">
-          <img src="{{ asset('storage/img/sloi-19.png') }}" alt="Лимитированные серии">
-          <div class="collections_card-content">
-            <h3>Лимитированные серии</h3>
-            <a href="{{ route('catalog.index') }}" class="collections_link">каталог <span>→</span></a>
-          </div>
-        </div>
-
-        <div class="collections_card">
-          <img src="{{ asset('storage/img/sloi-27.png') }}" alt="Черепица">
-          <div class="collections_card-content">
-            <h3>Черепица</h3>
-            <a href="{{ route('catalog.index') }}" class="collections_link">каталог <span>→</span></a>
-          </div>
-        </div>
-
-        <div class="collections_card">
-          <img src="{{ asset('storage/img/sloi-28.png') }}" alt="Сопутствующие материалы">
-          <div class="collections_card-content">
-            <h3>Сопутствующие материалы</h3>
-            <a href="{{ route('catalog.index') }}" class="collections_link">каталог <span>→</span></a>
-          </div>
-        </div>
+        @endforelse
 
       </div>
     </div>
