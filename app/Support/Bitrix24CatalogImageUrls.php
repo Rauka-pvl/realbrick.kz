@@ -9,6 +9,41 @@ namespace App\Support;
 final class Bitrix24CatalogImageUrls
 {
     /**
+     * Локальный файл из storage/app/public: в БД может быть storage/cataglog/..., storage/app/public/... или cataglog/...
+     */
+    public static function publicAssetUrl(?string $raw): ?string
+    {
+        if ($raw === null) {
+            return null;
+        }
+
+        $trim = str_replace('\\', '/', trim($raw));
+        if ($trim === '') {
+            return null;
+        }
+
+        if (preg_match('#^https?://#i', $trim)) {
+            return $trim;
+        }
+
+        $trim = ltrim($trim, '/');
+        if (str_starts_with($trim, 'storage/app/public/')) {
+            $trim = 'storage/'.substr($trim, strlen('storage/app/public/'));
+        } elseif (str_starts_with($trim, 'app/public/')) {
+            $trim = 'storage/'.substr($trim, strlen('app/public/'));
+        } elseif (! str_starts_with($trim, 'storage/')
+            && preg_match('#^(?:cataglog|catalog|bitrix-catalog|gallery|img|assets)/#i', $trim)) {
+            $trim = 'storage/'.$trim;
+        }
+
+        if (str_starts_with($trim, 'storage/')) {
+            return asset($trim);
+        }
+
+        return null;
+    }
+
+    /**
      * Путь для нормализации: "/catalog.product.download?..." (без /rest/ и без user/token).
      */
     public static function pathForStorage(?string $rel): ?string

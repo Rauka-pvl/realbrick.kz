@@ -98,8 +98,9 @@ class HomeController extends Controller
             return null;
         }
         $rawTrim = trim($raw);
-        if (preg_match('#^storage/#', $rawTrim)) {
-            return asset($rawTrim);
+        $localUrl = Bitrix24CatalogImageUrls::publicAssetUrl($rawTrim);
+        if ($localUrl !== null) {
+            return $localUrl;
         }
         $webhook = rtrim((string) env('DILLER_BITRIX24_REST_URL', ''), '/');
         if ($webhook === '') {
