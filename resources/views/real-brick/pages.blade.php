@@ -142,51 +142,50 @@
       --rb-bg: #030303;
       --rb-panel: #101010;
       --rb-panel-2: #1a1a1a;
-      --rb-stroke: rgba(255, 255, 255, 0.13);
+      --rb-stroke: rgba(255, 255, 255, 0.11);
       --rb-text: #eef2f8;
       --rb-muted: rgba(226, 234, 247, 0.62);
       --rb-gold: #c9a96e;
       --rb-gold-soft: rgba(201, 169, 110, 0.24);
     }
     .rb-calc-card {
-      border: 1px solid var(--rb-stroke);
-      background: linear-gradient(180deg, rgba(24, 24, 24, 0.97) 0%, rgba(14, 14, 14, 0.97) 100%);
-      border-radius: 18px;
-      box-shadow: 0 10px 28px rgba(0, 0, 0, 0.35);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      background: linear-gradient(180deg, rgba(26, 26, 26, 0.97) 0%, rgba(13, 13, 13, 0.97) 100%);
+      border-radius: 16px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
     }
     .rb-calc-input,
     .rb-calc-select {
-      height: 46px;
+      height: 40px;
       width: 100%;
-      border-radius: 12px;
+      border-radius: 10px;
       border: 1px solid var(--rb-stroke);
-      background: #1b1b1b;
+      background: #101010;
       color: var(--rb-text);
-      padding: 0 14px;
-      font-size: 14px;
+      padding: 0 12px;
+      font-size: 12px;
       outline: none;
     }
     .rb-calc-input:focus,
     .rb-calc-select:focus {
-      border-color: rgba(201, 169, 110, 0.8);
-      box-shadow: 0 0 0 1px rgba(201, 169, 110, 0.45), 0 0 0 4px rgba(201, 169, 110, 0.12);
+      border-color: rgba(201, 169, 110, 0.75);
+      box-shadow: 0 0 0 1px rgba(201, 169, 110, 0.35), 0 0 0 3px rgba(201, 169, 110, 0.1);
     }
     .rb-calc-btn-gold {
       background: linear-gradient(180deg, #d8bd8f 0%, #c59a5c 100%);
       color: #14110b;
-      border-radius: 12px;
-      font-size: 13px;
+      border-radius: 999px;
+      font-size: 11px;
       font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.04em;
+      letter-spacing: 0.02em;
       border: 1px solid rgba(216, 189, 143, 0.95);
-      box-shadow: 0 8px 18px rgba(201, 169, 110, 0.28);
+      box-shadow: 0 6px 14px rgba(201, 169, 110, 0.22);
     }
     .rb-calc-btn-dark {
-      background: #161616;
+      background: #121212;
       color: var(--rb-text);
-      border-radius: 12px;
-      font-size: 13px;
+      border-radius: 999px;
+      font-size: 11px;
       font-weight: 600;
       border: 1px solid var(--rb-stroke);
     }
@@ -196,17 +195,17 @@
     }
     .rb-calc-stepper {
       display: grid;
-      grid-template-columns: 30px 1fr 30px;
-      gap: 6px;
+      grid-template-columns: 28px 1fr 28px;
+      gap: 4px;
       align-items: center;
     }
     .rb-calc-stepper-btn {
-      height: 38px;
-      border-radius: 10px;
+      height: 32px;
+      border-radius: 9px;
       border: 1px solid var(--rb-stroke);
-      background: #1b1b1f;
+      background: #141414;
       color: #d9e2f3;
-      font-size: 18px;
+      font-size: 14px;
       line-height: 1;
       cursor: pointer;
     }
@@ -216,12 +215,12 @@
     }
     .rb-calc-mini-card {
       border: 1px solid var(--rb-stroke);
-      background: #161616;
-      border-radius: 12px;
-      padding: 12px;
+      background: #111;
+      border-radius: 10px;
+      padding: 9px;
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap: 8px;
     }
     .rb-calc-mini-icon {
       width: 28px;
@@ -234,6 +233,405 @@
       justify-content: center;
       font-size: 13px;
       flex: 0 0 auto;
+    }
+    .rb-calc-shell {
+      border: 1px solid rgba(201, 169, 110, 0.22);
+      background: linear-gradient(180deg, rgba(7, 7, 7, 0.97) 0%, rgba(4, 4, 4, 0.96) 100%);
+      border-radius: 18px;
+      min-height: 690px;
+      box-shadow: 0 16px 42px rgba(0, 0, 0, 0.52);
+    }
+    .rb-calc-left-stack .rb-calc-card {
+      background: #1b1b1d;
+    }
+    .rb-calc-summary-card {
+      border: 1px solid rgba(201, 169, 110, 0.45);
+      background: linear-gradient(180deg, rgba(10, 10, 10, 0.98) 0%, rgba(6, 6, 6, 0.98) 100%);
+      border-radius: 14px;
+      box-shadow: 0 14px 30px rgba(0, 0, 0, 0.48);
+    }
+    .rb-calc #calc-material-panel,
+    .rb-calc #calc-vertical-panel,
+    .rb-calc #calc-horizontal-panel {
+      background: #101010;
+      border-color: rgba(255, 255, 255, 0.1);
+    }
+    .rb-calc-wall-card {
+      border: 1px solid rgba(255, 255, 255, 0.09);
+      background: #131313;
+      border-radius: 12px;
+      padding: 10px;
+    }
+    .rb-calc-wall-openings {
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+      margin-top: 8px;
+      padding-top: 8px;
+    }
+    .rb-calc-opening-row {
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      background: #0f0f0f;
+      border-radius: 10px;
+      padding: 7px;
+    }
+    .rb-calc-meta-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      font-size: 11px;
+      color: rgba(255, 255, 255, 0.72);
+    }
+    .rb-calc-grid {
+      display: grid;
+      grid-template-columns: 320px 300px minmax(0, 1fr);
+      gap: 16px;
+      align-items: start;
+    }
+    .rb-calc-title {
+      font-size: 42px;
+    }
+    .rb-calc-left-stack .rb-calc-card {
+      border-radius: 14px;
+      padding: 13px;
+    }
+    .rb-calc-ghost-btn {
+      height: 30px;
+      border-radius: 999px;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      background: #151515;
+      color: rgba(255, 255, 255, 0.85);
+      font-size: 10px;
+      width: 100%;
+    }
+    .rb-calc-wall-main {
+      background: #2a2b2f !important;
+      border-color: rgba(255, 255, 255, 0.06) !important;
+      border-radius: 24px !important;
+      padding: 14px 14px 14px !important;
+    }
+    .rb-calc-wall-title {
+      font-size: 17px;
+      line-height: 1;
+      letter-spacing: 0.01em;
+      font-weight: 700;
+    }
+    .rb-calc-wall-delete {
+      color: #ff1f1f;
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: lowercase;
+      line-height: 1;
+    }
+    .rb-calc-pill-wrap {
+      background: #000;
+      border-radius: 999px;
+      height: 58px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      display: grid;
+      grid-template-columns: 1fr 16px;
+      align-items: center;
+      padding: 0 12px;
+    }
+    .rb-calc-pill-input {
+      width: 100%;
+      border: 0;
+      background: transparent;
+      color: #fff;
+      text-align: center;
+      font-size: 34px;
+      line-height: 1;
+      font-weight: 700;
+      outline: none;
+      appearance: textfield;
+      -moz-appearance: textfield;
+    }
+    .rb-calc-pill-input::-webkit-outer-spin-button,
+    .rb-calc-pill-input::-webkit-inner-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+    }
+    .rb-calc-pill-arrows {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+      justify-content: center;
+      align-items: center;
+      color: rgba(255, 255, 255, 0.88);
+      font-size: 12px;
+      line-height: 0.8;
+      user-select: none;
+      pointer-events: none;
+    }
+    .rb-calc-wall-btn-dark {
+      height: 58px;
+      border-radius: 999px;
+      background: #070707;
+      border: 1px solid rgba(201, 169, 110, 0.7);
+      color: #fff;
+      font-size: 16px;
+      line-height: 1.1;
+      font-weight: 700;
+      width: 100%;
+      text-align: center;
+      padding: 0 16px;
+    }
+    .rb-calc-wall-btn-gold {
+      height: 52px;
+      border-radius: 999px;
+      background: #d6b679;
+      border: 1px solid rgba(216, 189, 143, 0.96);
+      color: #fff;
+      font-size: 16px;
+      line-height: 1;
+      font-weight: 700;
+      width: 100%;
+      text-align: center;
+      padding: 0 16px;
+      margin-top: 6px;
+    }
+    .rb-calc-inline-label {
+      font-size: 14px;
+      color: rgba(255, 255, 255, 0.92);
+      text-align: center;
+      font-weight: 600;
+      margin-bottom: 6px;
+      line-height: 1;
+    }
+    .rb-calc-wall-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-top: 10px;
+    }
+    .rb-calc-wall-actions {
+      margin-top: 10px;
+      display: grid;
+      gap: 8px;
+    }
+    .rb-calc-inline-openings {
+      display: grid;
+      gap: 8px;
+      margin-top: 2px;
+    }
+    .rb-calc-inline-opening {
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      background: #111216;
+      border-radius: 12px;
+      padding: 8px;
+    }
+    .rb-calc-inline-opening-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      margin-bottom: 6px;
+      font-size: 10px;
+      color: rgba(255, 255, 255, 0.78);
+    }
+    .rb-calc-inline-opening-remove {
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      border-radius: 999px;
+      padding: 1px 8px;
+      background: #0a0b0e;
+      color: rgba(255, 255, 255, 0.8);
+      font-size: 10px;
+      line-height: 1.1;
+    }
+    .rb-calc-inline-opening-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 6px;
+    }
+    .rb-calc-inline-opening-input {
+      height: 30px;
+      border-radius: 8px;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      background: #07080b;
+      color: #fff;
+      text-align: center;
+      font-size: 12px;
+      outline: none;
+      padding: 0 8px;
+    }
+    .rb-calc-secondary-card {
+      background: #2a2b2f !important;
+      border-color: rgba(255, 255, 255, 0.06) !important;
+      border-radius: 24px !important;
+      padding: 14px 14px 14px !important;
+    }
+    .rb-calc-secondary-title {
+      font-size: 17px;
+      line-height: 1;
+      letter-spacing: 0.01em;
+      font-weight: 700;
+      text-transform: uppercase;
+      color: #fff;
+    }
+    .rb-calc-secondary-sub {
+      margin-top: 6px;
+      font-size: 11px;
+      color: rgba(255, 255, 255, 0.72);
+      line-height: 1.1;
+    }
+    .rb-calc-dropdown-pill {
+      height: 44px !important;
+      border-radius: 999px !important;
+      border-color: rgba(255, 255, 255, 0.12) !important;
+      background: #070707 !important;
+      padding-left: 14px !important;
+      padding-right: 14px !important;
+      font-size: 12px !important;
+    }
+    .rb-calc-corner-group-title {
+      font-size: 11px;
+      color: rgba(255, 255, 255, 0.8);
+      line-height: 1.1;
+      margin-bottom: 6px;
+    }
+    .rb-calc-mini-action {
+      height: 34px;
+      border-radius: 999px;
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      background: #0a0a0a;
+      color: #fff;
+      font-size: 11px;
+      width: 100%;
+      text-align: center;
+      margin-top: 6px;
+    }
+    .rb-calc-summary-card {
+      border-radius: 16px;
+      padding: 14px !important;
+      min-height: 540px;
+    }
+    .rb-calc-summary-card .rb-calc-meta-row {
+      font-size: 11px;
+      line-height: 1.2;
+    }
+    .rb-calc-summary-card .rb-calc-btn-gold {
+      height: 34px;
+      font-size: 10px;
+    }
+    .rb-calc-wall-item {
+      border: 1px solid rgba(255, 255, 255, 0.09);
+      background: #15161a;
+      border-radius: 16px;
+      padding: 10px;
+    }
+    .rb-calc-wall-item-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      margin-bottom: 8px;
+      font-size: 12px;
+      color: #fff;
+      font-weight: 600;
+    }
+    .rb-calc-wall-item-remove {
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 999px;
+      padding: 2px 10px;
+      background: #0b0c0e;
+      color: rgba(255, 255, 255, 0.75);
+      font-size: 10px;
+      line-height: 1.1;
+    }
+    .rb-calc-wall-item-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 7px;
+    }
+    .rb-calc-wall-item-label {
+      font-size: 10px;
+      color: rgba(255, 255, 255, 0.75);
+      display: block;
+      margin-bottom: 4px;
+    }
+    .rb-calc-wall-item-control {
+      height: 32px;
+      width: 100%;
+      border-radius: 10px;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      background: #090a0d;
+      color: #fff;
+      font-size: 14px;
+      line-height: 1;
+      text-align: center;
+      padding: 0 8px;
+      outline: none;
+    }
+    .rb-calc-wall-item-area {
+      height: 32px;
+      border-radius: 10px;
+      border: 1px solid rgba(201, 169, 110, 0.55);
+      background: #090a0d;
+      color: #d6b679;
+      font-size: 14px;
+      line-height: 32px;
+      text-align: center;
+      font-weight: 700;
+    }
+    .rb-calc-wall-item-openings {
+      margin-top: 8px;
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+      padding-top: 8px;
+    }
+    .rb-calc-wall-openings-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 10px;
+      color: rgba(255, 255, 255, 0.72);
+      margin-bottom: 6px;
+    }
+    .rb-calc-wall-openings-add {
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 999px;
+      padding: 2px 10px;
+      background: #0b0c0e;
+      color: rgba(255, 255, 255, 0.85);
+      font-size: 10px;
+      line-height: 1.1;
+    }
+    .rb-calc-wall-openings-total {
+      margin-top: 6px;
+      font-size: 10px;
+      color: rgba(255, 255, 255, 0.68);
+    }
+    .rb-calc-wall-openings-total strong {
+      color: #fff;
+    }
+    @media (max-width: 1279px) {
+      .rb-calc-grid {
+        grid-template-columns: 1fr;
+      }
+      .rb-calc-title {
+        font-size: 34px;
+      }
+      .rb-calc-wall-title {
+        font-size: 17px;
+      }
+      .rb-calc-wall-delete {
+        font-size: 12px;
+      }
+      .rb-calc-inline-label {
+        font-size: 13px;
+      }
+      .rb-calc-pill-wrap {
+        height: 54px;
+      }
+      .rb-calc-pill-input {
+        font-size: 30px;
+      }
+      .rb-calc-wall-btn-dark,
+      .rb-calc-wall-btn-gold {
+        height: 52px;
+        font-size: 15px;
+      }
+      .rb-calc-secondary-card {
+        border-radius: 20px !important;
+      }
     }
 
 
@@ -863,202 +1261,192 @@
 
     @if($page === 'calculator')
     <section class="rb-calc min-h-screen bg-[rgb(3,3,3)] pb-8 pt-24 md:pt-28">
-      <div class="w-full px-3 md:px-6 xl:px-8">
+      <div class="mx-auto w-full max-w-[1080px] px-3 md:px-6">
         <div class="mb-3 text-[11px] text-white/45">
           <a href="/" class="hover:text-white/80">Главная</a><span class="px-1.5 text-white/35">/</span><span class="text-white/65">Калькулятор</span>
         </div>
 
-        <div class="rb-calc-card p-4 md:p-5">
-          <h1 class="text-[38px] font-semibold leading-none text-gold">Калькулятор</h1>
-          <p class="mt-1 text-[12px] text-white/65">Расчет количества материалов и стоимости облицовки</p>
-
-          <div class="mt-4 grid grid-cols-1 gap-2 lg:grid-cols-[1fr_0.38fr_0.38fr_0.38fr_1fr]">
-            <label class="block">
-              <span class="mb-1 block text-[11px] text-white/55">Тип помещения / конструктив</span>
-              <select id="calc-room-type" class="rb-calc-select">
-                <option value="walls" selected>Фасады / Стены (м²)</option>
-              </select>
-            </label>
-            <label class="block">
-              <span class="mb-1 block text-[11px] text-white/55">Длина (м)</span>
-              <input id="calc-length" type="number" min="0.1" step="0.1" value="10" class="rb-calc-input" />
-            </label>
-            <label class="block">
-              <span class="mb-1 block text-[11px] text-white/55">Ширина (м)</span>
-              <input id="calc-width" type="number" min="0.1" step="0.1" value="10" class="rb-calc-input" />
-            </label>
-            <label class="block">
-              <span class="mb-1 block text-[11px] text-white/55">Высота (м)</span>
-              <input id="calc-height" type="number" min="0.1" step="0.1" value="3" class="rb-calc-input" />
-            </label>
-            <div class="relative" id="calc-material-picker">
-              <span class="mb-1 block text-[11px] text-white/55">Материал стены</span>
-              <button type="button" id="calc-material-trigger" class="rb-calc-input flex items-center justify-between text-left">
-                <span id="calc-material-selected-label" class="min-w-0 flex-1 truncate pr-2 text-sm">Выберите материал</span>
-                <span class="text-white/45">⌄</span>
-              </button>
-              <div id="calc-material-panel" class="absolute left-0 right-0 z-50 mt-2 hidden overflow-hidden rounded-xl border border-white/15 bg-[#161616] shadow-[0_16px_40px_rgba(0,0,0,0.55)]">
-                <div class="border-b border-white/10 p-2">
-                  <input id="calc-product-search" type="text" placeholder="Поиск..." class="rb-calc-input h-9" />
-                </div>
-                <div id="calc-material-tree" class="max-h-72 overflow-y-auto p-2"></div>
-              </div>
-              <select id="calc-material" class="hidden"></select>
-            </div>
-          </div>
-
-          <div class="mt-4 grid gap-3 lg:grid-cols-[1.38fr_0.82fr]">
+        <div class="rb-calc-shell p-4 md:p-5">
+          <div class="mb-4 flex items-start justify-between gap-3">
             <div>
-              <div class="mb-2 flex items-center justify-between">
-                <div>
-                  <p class="text-[22px] font-semibold text-gold">Стены</p>
-                  <p class="text-[12px] text-white/58">Добавьте стены и укажите проемы</p>
+              <h1 class="rb-calc-title font-semibold leading-none text-gold">Онлайн калькулятор</h1>
+            </div>
+            <a href="/" class="inline-flex h-9 w-9 items-center justify-center rounded-full border border-white/20 text-white/70 transition hover:border-gold/70 hover:text-gold">×</a>
+          </div>
+
+          <select id="calc-room-type" class="hidden">
+            <option value="walls" selected>Фасады / Стены (м²)</option>
+          </select>
+
+          <div class="rb-calc-grid">
+            <div class="rb-calc-left-stack space-y-3">
+              <div class="rb-calc-card rb-calc-wall-main p-3">
+                <div class="mb-2 flex items-center justify-between gap-2">
+                  <p class="rb-calc-wall-title uppercase text-white">Стены фасада</p>
+                  <span class="rb-calc-wall-delete">удалить</span>
                 </div>
-                <button type="button" id="calc-add-wall" class="rb-calc-btn-dark h-10 px-4">+ Добавить стену</button>
+                <div class="rb-calc-wall-grid">
+                  <label class="block">
+                    <span class="rb-calc-inline-label block">Ширина (м)</span>
+                    <div class="rb-calc-pill-wrap">
+                      <input id="calc-length" type="number" min="0.1" step="0.1" value="10" class="rb-calc-pill-input" />
+                      <span class="rb-calc-pill-arrows"><span>⌃</span><span>⌄</span></span>
+                    </div>
+                  </label>
+                  <label class="block">
+                    <span class="rb-calc-inline-label block">Высота (м)</span>
+                    <div class="rb-calc-pill-wrap">
+                      <input id="calc-height" type="number" min="0.1" step="0.1" value="3" class="rb-calc-pill-input" />
+                      <span class="rb-calc-pill-arrows"><span>⌃</span><span>⌄</span></span>
+                    </div>
+                  </label>
+                </div>
+                <input id="calc-width" type="hidden" value="10" />
+                <div class="rb-calc-wall-actions">
+                  <button type="button" id="calc-add-opening-quick" class="rb-calc-wall-btn-dark">+ Добавить проём<br>(окно/дверь)</button>
+                  <div id="calc-inline-openings" class="rb-calc-inline-openings"></div>
+                  <div id="calc-walls" class="hidden"></div>
+                  <button type="button" id="calc-add-wall" class="rb-calc-wall-btn-gold">+ Добавить стену</button>
+                </div>
               </div>
-              <div id="calc-walls" class="space-y-2"></div>
+
+              <div class="rb-calc-card rb-calc-secondary-card p-3">
+                <p class="rb-calc-secondary-title">Основной материал</p>
+                <p class="rb-calc-secondary-sub">Выберите плитку/кирпич</p>
+                <div class="relative mt-2" id="calc-material-picker">
+                  <button type="button" id="calc-material-trigger" class="rb-calc-input rb-calc-dropdown-pill flex items-center justify-between text-left">
+                    <span id="calc-material-selected-label" class="min-w-0 flex-1 truncate pr-2 text-[11px]">Выберите материал</span>
+                    <span class="text-white/45">⌄</span>
+                  </button>
+                  <div id="calc-material-panel" class="absolute left-0 right-0 z-50 mt-2 hidden overflow-hidden rounded-xl border border-white/15 bg-[#161616] shadow-[0_16px_40px_rgba(0,0,0,0.55)]">
+                    <div class="border-b border-white/10 p-2">
+                      <input id="calc-product-search" type="text" placeholder="Поиск..." class="rb-calc-input h-9" />
+                    </div>
+                    <div id="calc-material-tree" class="max-h-72 overflow-y-auto p-2"></div>
+                  </div>
+                  <select id="calc-material" class="hidden"></select>
+                </div>
+              </div>
+
+              <div class="rb-calc-card rb-calc-secondary-card p-3">
+                <p class="rb-calc-secondary-title">Угловые элементы</p>
+                <div class="mt-2 space-y-3">
+                  <div>
+                    <p class="rb-calc-corner-group-title">Вертикальные углы (по высоте)</p>
+                    <div class="mt-1 grid grid-cols-2 gap-2">
+                      <label class="block">
+                        <span class="mb-1 block text-[10px] text-white/50">Кол-во углов</span>
+                        <div class="rb-calc-stepper">
+                          <button type="button" id="calc-vertical-corners-minus" class="rb-calc-stepper-btn">−</button>
+                          <input id="calc-vertical-corners-count" type="number" min="0" step="1" value="4" class="rb-calc-input h-[32px] text-center" />
+                          <button type="button" id="calc-vertical-corners-plus" class="rb-calc-stepper-btn">+</button>
+                        </div>
+                      </label>
+                      <label class="block">
+                        <span class="mb-1 block text-[10px] text-white/50">Высота (м)</span>
+                        <input id="calc-vertical-corners-height" type="number" min="0" step="0.01" value="3" class="rb-calc-input h-9 text-center" />
+                      </label>
+                    </div>
+                    <div class="relative mt-1" id="calc-vertical-picker">
+                      <button type="button" id="calc-vertical-trigger" class="rb-calc-input rb-calc-dropdown-pill flex items-center justify-between text-left">
+                        <span id="calc-vertical-selected-label" class="min-w-0 flex-1 truncate pr-2 text-[11px]">Выберите материал</span>
+                        <span class="text-white/45">⌄</span>
+                      </button>
+                      <div id="calc-vertical-panel" class="absolute left-0 right-0 z-50 mt-2 hidden overflow-hidden rounded-xl border border-white/15 bg-[#161616] shadow-[0_16px_40px_rgba(0,0,0,0.55)]">
+                        <div class="border-b border-white/10 p-2">
+                          <input id="calc-vertical-search" type="text" placeholder="Поиск..." class="rb-calc-input h-9" />
+                        </div>
+                        <div id="calc-vertical-tree" class="max-h-72 overflow-y-auto p-2"></div>
+                      </div>
+                      <select id="calc-vertical-material" class="hidden"></select>
+                    </div>
+                    <button type="button" id="calc-add-vertical-angle" class="rb-calc-mini-action">+ Добавить верт. угол</button>
+                  </div>
+
+                  <div>
+                    <p class="rb-calc-corner-group-title">Горизонтальные углы (по длине)</p>
+                    <div class="mt-1 grid grid-cols-2 gap-2">
+                      <label class="block">
+                        <span class="mb-1 block text-[10px] text-white/50">Кол-во линий</span>
+                        <div class="rb-calc-stepper">
+                          <button type="button" id="calc-horizontal-corners-minus" class="rb-calc-stepper-btn">−</button>
+                          <input id="calc-horizontal-corners-count" type="number" min="0" step="1" value="2" class="rb-calc-input h-[32px] text-center" />
+                          <button type="button" id="calc-horizontal-corners-plus" class="rb-calc-stepper-btn">+</button>
+                        </div>
+                      </label>
+                      <label class="block">
+                        <span class="mb-1 block text-[10px] text-white/50">Длина (м)</span>
+                        <input id="calc-horizontal-corners-length" type="number" min="0" step="0.01" value="10" class="rb-calc-input h-9 text-center" />
+                      </label>
+                    </div>
+                    <div class="relative mt-1" id="calc-horizontal-picker">
+                      <button type="button" id="calc-horizontal-trigger" class="rb-calc-input rb-calc-dropdown-pill flex items-center justify-between text-left">
+                        <span id="calc-horizontal-selected-label" class="min-w-0 flex-1 truncate pr-2 text-[11px]">Выберите материал</span>
+                        <span class="text-white/45">⌄</span>
+                      </button>
+                      <div id="calc-horizontal-panel" class="absolute left-0 right-0 z-50 mt-2 hidden overflow-hidden rounded-xl border border-white/15 bg-[#161616] shadow-[0_16px_40px_rgba(0,0,0,0.55)]">
+                        <div class="border-b border-white/10 p-2">
+                          <input id="calc-horizontal-search" type="text" placeholder="Поиск..." class="rb-calc-input h-9" />
+                        </div>
+                        <div id="calc-horizontal-tree" class="max-h-72 overflow-y-auto p-2"></div>
+                      </div>
+                      <select id="calc-horizontal-material" class="hidden"></select>
+                    </div>
+                    <button type="button" id="calc-add-horizontal-angle" class="rb-calc-mini-action">+ Добавить гориз. угол</button>
+                  </div>
+                </div>
+                <button type="button" id="calc-reset" class="rb-calc-btn-dark mt-2 h-9 w-full text-[10px]">Сбросить</button>
+              </div>
             </div>
 
-            <aside class="space-y-2">
-              <div class="rb-calc-card p-4">
-                <p class="text-[20px] font-semibold text-gold">📊 Результаты расчета</p>
-                <div class="mt-3 space-y-2.5 text-[13px]">
-                  <div class="flex items-center justify-between"><span class="text-white/60">Общая площадь стен</span><strong id="calc-total-area" class="text-white">0 м²</strong></div>
-                  <div class="flex items-center justify-between"><span class="text-white/60">Площадь проемов</span><strong id="calc-total-openings" class="text-white">0 м²</strong></div>
-                  <div class="flex items-center justify-between"><span class="text-white/60">Площадь облицовки</span><strong id="calc-total-net-area" class="text-white">0 м²</strong></div>
-                  <div class="flex items-center justify-between"><span class="text-white/60">Общая площадь с запасом 5%</span><strong id="calc-total-area-extra" class="text-white">0 м²</strong></div>
-                  <div class="flex items-center justify-between"><span class="text-white/60">Количество штук в упаковке</span><strong id="calc-pack-coverage" class="text-white">0 шт</strong></div>
-                  <div class="flex items-center justify-between"><span class="text-white/60">Рекомендуемое количество упаковок</span><strong id="calc-total-pieces" class="text-white">0 уп</strong></div>
-                </div>
+            <aside class="rb-calc-summary-card p-4">
+              <p class="text-[10px] font-semibold uppercase tracking-[0.08em] text-white/72">Итог материалов</p>
+              <div class="mt-2 flex items-end gap-2">
+                <p id="calc-total-price" class="text-[52px] font-semibold leading-none text-gold">0 ₽</p>
+                <span class="mb-1 text-[10px] text-white/50">/м²</span>
+              </div>
+              <p class="mt-1 text-[11px] text-white/55">Ориентировочная стоимость</p>
+
+              <div class="mt-3 space-y-2 text-[12px]">
+                <div class="rb-calc-meta-row"><span>Площадь с запасом (5%)</span><strong id="calc-total-area-extra" class="text-white">0 м²</strong></div>
+                <div class="rb-calc-meta-row"><span>Общая площадь</span><strong id="calc-total-area" class="text-white">0 м²</strong></div>
+                <div class="rb-calc-meta-row"><span>Площадь проемов</span><strong id="calc-total-openings" class="text-red-300">0 м²</strong></div>
+                <div class="rb-calc-meta-row"><span>Чистая площадь облицовки</span><strong id="calc-total-net-area" class="text-white">0 м²</strong></div>
               </div>
 
-              <div class="rb-calc-card p-4">
-                <p class="text-[20px] font-semibold text-gold">📐 Углы</p>
-                <div class="mt-3 space-y-2.5 text-[13px]">
-                  <div class="flex items-center justify-between"><span class="text-white/60">Вертикальные углы</span><strong id="calc-vertical-corners-lm" class="text-white">0 п.м.</strong></div>
-                  <div class="flex items-center justify-between"><span class="text-white/60">Горизонтальные углы</span><strong id="calc-horizontal-corners-lm" class="text-white">0 п.м.</strong></div>
-                  <div class="flex items-center justify-between"><span class="text-white/60">Рекомендуемое количество угловых элементов</span><strong id="calc-corners-lm-total" class="text-white">0 п.м.</strong></div>
-                </div>
+              <div class="mt-3 space-y-2 border-t border-white/10 pt-3 text-[12px]">
+                <div class="rb-calc-meta-row"><span>Основной материал</span><strong id="calc-total-wall-pieces" class="text-white">0 шт</strong></div>
+                <div class="rb-calc-meta-row"><span>Упаковок (основной)</span><strong id="calc-total-pieces" class="text-white">0 упак</strong></div>
+                <div class="rb-calc-meta-row"><span>Стоимость основного мат.</span><strong id="calc-walls-price" class="text-white">0</strong></div>
               </div>
 
-              <div class="rb-calc-card p-4">
-                <p class="text-[20px] font-semibold text-gold">💰 Ориентировочная стоимость</p>
-                <p id="calc-total-price" class="mt-2 text-[40px] leading-none text-gold">0 ₽</p>
-                <div class="mt-3 space-y-1.5 text-[13px] text-white/63">
-                  <div class="flex items-center justify-between"><span>Стоимость плитки</span><strong id="calc-walls-price" class="text-white">0</strong></div>
-                  <div class="flex items-center justify-between"><span>Стоимость углов</span><strong id="calc-corners-price" class="text-white">0</strong></div>
-                </div>
-                <div id="calc-mix" class="hidden"></div>
+              <div class="mt-3 space-y-2 border-t border-white/10 pt-3 text-[12px]">
+                <div class="rb-calc-meta-row"><span>Длина верт. углов</span><strong id="calc-vertical-corners-lm" class="text-white">0 п.м.</strong></div>
+                <div class="rb-calc-meta-row"><span>Длина гориз. углов</span><strong id="calc-horizontal-corners-lm" class="text-white">0 п.м.</strong></div>
+                <div class="rb-calc-meta-row"><span>Вертикальные элементы</span><strong id="calc-vertical-corners-qty" class="text-white">0 шт</strong></div>
+                <div class="rb-calc-meta-row"><span>Горизонтальные элементы</span><strong id="calc-horizontal-corners-qty" class="text-white">0 шт</strong></div>
+                <div class="rb-calc-meta-row"><span>Угловых элементов</span><strong id="calc-corners-lm-total" class="text-white">0 шт</strong></div>
+                <div class="rb-calc-meta-row"><span>Стоимость углов</span><strong id="calc-corners-price" class="text-white">0</strong></div>
               </div>
+
+              <button type="button" id="calc-run-summary" class="rb-calc-btn-gold mt-4 h-9 w-full">Добавить в корзину</button>
+              <p class="mt-1 text-center text-[10px] text-white/45">Живой расчет выполняется автоматически</p>
             </aside>
+
+            <div class="hidden xl:block"></div>
           </div>
 
-          <div class="mt-3 grid gap-3 lg:grid-cols-[1.38fr_0.82fr]">
-            <div class="grid gap-2 sm:grid-cols-2">
-              <div class="rb-calc-card p-3">
-                <p class="mb-2 text-[15px] font-semibold text-gold">↕ Вертикальные углы</p>
-                <div class="mb-2 grid grid-cols-2 gap-2">
-                  <label class="block">
-                    <span class="mb-1 block text-[11px] text-white/55">Количество углов</span>
-                    <div class="rb-calc-stepper">
-                      <button type="button" id="calc-vertical-corners-minus" class="rb-calc-stepper-btn">−</button>
-                      <input id="calc-vertical-corners-count" type="number" min="0" step="1" value="4" class="rb-calc-input h-[34px] text-center" />
-                      <button type="button" id="calc-vertical-corners-plus" class="rb-calc-stepper-btn">+</button>
-                    </div>
-                  </label>
-                  <label class="block">
-                    <span class="mb-1 block text-[11px] text-white/55">Высота (м)</span>
-                    <input id="calc-vertical-corners-height" type="number" min="0" step="0.01" value="3" class="rb-calc-input h-9" />
-                  </label>
-                </div>
-                <div class="relative" id="calc-vertical-picker">
-                  <span class="mb-1 block text-[11px] text-white/55">Материал вертикальных углов</span>
-                  <button type="button" id="calc-vertical-trigger" class="rb-calc-input h-9 flex items-center justify-between text-left">
-                    <span id="calc-vertical-selected-label" class="min-w-0 flex-1 truncate pr-2">Выберите материал</span>
-                    <span class="text-white/45">⌄</span>
-                  </button>
-                  <div id="calc-vertical-panel" class="absolute left-0 right-0 z-50 mt-2 hidden overflow-hidden rounded-xl border border-white/15 bg-[#161616] shadow-[0_16px_40px_rgba(0,0,0,0.55)]">
-                    <div class="border-b border-white/10 p-2">
-                      <input id="calc-vertical-search" type="text" placeholder="Поиск..." class="rb-calc-input h-9" />
-                    </div>
-                    <div id="calc-vertical-tree" class="max-h-72 overflow-y-auto p-2"></div>
-                  </div>
-                  <select id="calc-vertical-material" class="hidden"></select>
-                </div>
-              </div>
-
-              <div class="rb-calc-card p-3">
-                <p class="mb-2 text-[15px] font-semibold text-gold">↔ Горизонтальные углы</p>
-                <div class="mb-2 grid grid-cols-2 gap-2">
-                  <label class="block">
-                    <span class="mb-1 block text-[11px] text-white/55">Количество линий</span>
-                    <div class="rb-calc-stepper">
-                      <button type="button" id="calc-horizontal-corners-minus" class="rb-calc-stepper-btn">−</button>
-                      <input id="calc-horizontal-corners-count" type="number" min="0" step="1" value="2" class="rb-calc-input h-[34px] text-center" />
-                      <button type="button" id="calc-horizontal-corners-plus" class="rb-calc-stepper-btn">+</button>
-                    </div>
-                  </label>
-                  <label class="block">
-                    <span class="mb-1 block text-[11px] text-white/55">Длина (м)</span>
-                    <input id="calc-horizontal-corners-length" type="number" min="0" step="0.01" value="10" class="rb-calc-input h-9" />
-                  </label>
-                </div>
-                <div class="relative" id="calc-horizontal-picker">
-                  <span class="mb-1 block text-[11px] text-white/55">Материал горизонтальных углов</span>
-                  <button type="button" id="calc-horizontal-trigger" class="rb-calc-input h-9 flex items-center justify-between text-left">
-                    <span id="calc-horizontal-selected-label" class="min-w-0 flex-1 truncate pr-2">Выберите материал</span>
-                    <span class="text-white/45">⌄</span>
-                  </button>
-                  <div id="calc-horizontal-panel" class="absolute left-0 right-0 z-50 mt-2 hidden overflow-hidden rounded-xl border border-white/15 bg-[#161616] shadow-[0_16px_40px_rgba(0,0,0,0.55)]">
-                    <div class="border-b border-white/10 p-2">
-                      <input id="calc-horizontal-search" type="text" placeholder="Поиск..." class="rb-calc-input h-9" />
-                    </div>
-                    <div id="calc-horizontal-tree" class="max-h-72 overflow-y-auto p-2"></div>
-                  </div>
-                  <select id="calc-horizontal-material" class="hidden"></select>
-                </div>
-              </div>
-
-              <div class="flex items-center gap-2 sm:col-span-2">
-                <button type="button" id="calc-run" class="rb-calc-btn-gold h-11 px-7">Рассчитать</button>
-                <button type="button" id="calc-reset" class="rb-calc-btn-dark h-11 px-7">Сбросить</button>
-              </div>
-            </div>
-
-            <div class="rb-calc-card p-3">
-              <p class="text-[15px] font-semibold text-gold">📦 Информация о материалах</p>
-              <div class="mt-2 grid grid-cols-2 gap-2 text-[12px] sm:grid-cols-4">
-                <div class="rb-calc-mini-card">
-                  <div class="rb-calc-mini-icon">⬡</div>
-                  <div>
-                    <p class="text-white/45">Расход плитки</p>
-                    <p id="calc-info-tile" class="mt-1 text-white">0 шт/м²</p>
-                  </div>
-                </div>
-                <div class="rb-calc-mini-card">
-                  <div class="rb-calc-mini-icon">⌞</div>
-                  <div>
-                    <p class="text-white/45">Вертикальный угол</p>
-                    <p id="calc-info-v-corner" class="mt-1 text-white">0 п.м.</p>
-                  </div>
-                </div>
-                <div class="rb-calc-mini-card">
-                  <div class="rb-calc-mini-icon">₸</div>
-                  <div>
-                    <p class="text-white/45">Цена за упаковку</p>
-                    <p id="calc-info-pack-price" class="mt-1 text-white">0</p>
-                  </div>
-                </div>
-                <div class="rb-calc-mini-card">
-                  <div class="rb-calc-mini-icon">⌟</div>
-                  <div>
-                    <p class="text-white/45">Горизонтальный угол</p>
-                    <p id="calc-info-h-corner" class="mt-1 text-white">0 п.м.</p>
-                  </div>
-                </div>
-              </div>
-            </div>
+          <div class="hidden">
+            <button type="button" id="calc-run"></button>
+            <span id="calc-total-price-dup">0 ₽</span>
+            <span id="calc-pack-coverage">0 шт</span>
+            <span id="calc-info-tile">0 шт/м²</span>
+            <span id="calc-info-v-corner">0 п.м.</span>
+            <span id="calc-info-pack-price">0</span>
+            <span id="calc-info-h-corner">0 п.м.</span>
           </div>
+
+          <div id="calc-mix" class="hidden"></div>
         </div>
       </div>
     </section>
@@ -1071,6 +1459,16 @@
       ];
     @endphp
     <script id="calc-tree-data" type="application/json">@json($calcTreeData)</script>
+    <script>
+      (function () {
+        var summaryBtn = document.getElementById('calc-run-summary');
+        if (!summaryBtn) return;
+        summaryBtn.addEventListener('click', function () {
+          var runBtn = document.getElementById('calc-run');
+          if (runBtn) runBtn.click();
+        });
+      })();
+    </script>
     @endif
 
     <!-- Benefits -->

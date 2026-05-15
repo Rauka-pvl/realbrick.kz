@@ -290,6 +290,7 @@
 
     var piecesEl = document.getElementById('calc-total-pieces');
     var priceEl = document.getElementById('calc-total-price');
+    var priceDupEl = document.getElementById('calc-total-price-dup');
     var areaEl = document.getElementById('calc-total-area');
     var totalOpeningsEl = document.getElementById('calc-total-openings');
     var netAreaEl = document.getElementById('calc-total-net-area');
@@ -299,33 +300,41 @@
     var verticalCornersLmEl = document.getElementById('calc-vertical-corners-lm');
     var horizontalCornersLmEl = document.getElementById('calc-horizontal-corners-lm');
     var totalCornersLmEl = document.getElementById('calc-corners-lm-total');
+    var verticalCornersQtyEl = document.getElementById('calc-vertical-corners-qty');
+    var horizontalCornersQtyEl = document.getElementById('calc-horizontal-corners-qty');
     var wallsPriceEl = document.getElementById('calc-walls-price');
     var cornersPriceEl = document.getElementById('calc-corners-price');
     var infoTileEl = document.getElementById('calc-info-tile');
+    var totalWallPiecesEl = document.getElementById('calc-total-wall-pieces');
     var infoVCornerEl = document.getElementById('calc-info-v-corner');
     var infoPackPriceEl = document.getElementById('calc-info-pack-price');
     var infoHCornerEl = document.getElementById('calc-info-h-corner');
     var calcRunBtn = document.getElementById('calc-run');
     var calcResetBtn = document.getElementById('calc-reset');
+    var quickAddOpeningBtn = document.getElementById('calc-add-opening-quick');
+    var quickAddVerticalBtn = document.getElementById('calc-add-vertical-angle');
+    var quickAddHorizontalBtn = document.getElementById('calc-add-horizontal-angle');
     var verticalMinusBtn = document.getElementById('calc-vertical-corners-minus');
     var verticalPlusBtn = document.getElementById('calc-vertical-corners-plus');
     var horizontalMinusBtn = document.getElementById('calc-horizontal-corners-minus');
     var horizontalPlusBtn = document.getElementById('calc-horizontal-corners-plus');
 
     var wallsContainerEl = document.getElementById('calc-walls');
+    var inlineOpeningsEl = document.getElementById('calc-inline-openings');
     var addWallBtn = document.getElementById('calc-add-wall');
     var verticalCornersCountEl = document.getElementById('calc-vertical-corners-count');
     var verticalCornersHeightEl = document.getElementById('calc-vertical-corners-height');
     var horizontalCornersCountEl = document.getElementById('calc-horizontal-corners-count');
     var horizontalCornersLengthEl = document.getElementById('calc-horizontal-corners-length');
 
-    if (!wallsContainerEl || !addWallBtn || !verticalCornersCountEl || !verticalCornersHeightEl || !horizontalCornersCountEl || !horizontalCornersLengthEl) return;
+    if (!wallsContainerEl || !inlineOpeningsEl || !addWallBtn || !verticalCornersCountEl || !verticalCornersHeightEl || !horizontalCornersCountEl || !horizontalCornersLengthEl) return;
 
     var wallMaterials = [];
     var verticalCornerMaterials = [];
     var horizontalCornerMaterials = [];
     var sections = [];
     var walls = [];
+    var wallsVisible = false;
 
     try {
       var parsed = JSON.parse(dataEl.textContent || '{}');
@@ -561,95 +570,43 @@
       return { name: defaultName || 'Проем', width: 0, height: 0 };
     }
 
-    function renderWalls() {
-      wallsContainerEl.innerHTML = '';
-      walls.forEach(function (wall, wallIndex) {
-        var wallArea = Math.max((wall.width || 0) * (wall.height || 0), 0);
-        var openingsArea = (wall.openings || []).reduce(function (sum, o) {
-          return sum + Math.max((parseFloat(o.width) || 0) * (parseFloat(o.height) || 0), 0);
-        }, 0);
-        var openingCount = (wall.openings || []).length;
+    function renderInlineOpenings() {
+      inlineOpeningsEl.innerHTML = '';
+      if (!walls[0] || !Array.isArray(walls[0].openings) || walls[0].openings.length === 0) return;
 
+      walls[0].openings.forEach(function (opening, openingIndex) {
         var row = document.createElement('div');
-        row.className = 'rounded-xl border border-white/10 bg-[#151515] p-3.5';
-        row.setAttribute('data-wall-card', String(wallIndex));
+        row.className = 'rb-calc-inline-opening';
         row.innerHTML = ''
-          + '<div class="flex items-center justify-between gap-2 text-[12px] text-white/75">'
-          + '  <div class="flex items-center gap-2"><span class="flex h-6 w-6 items-center justify-center rounded-full border border-[#c9a96e]/55 text-[11px] text-[#c9a96e]">' + (wallIndex + 1) + '</span><span class="font-semibold text-white">Стена ' + (wallIndex + 1) + '</span></div>'
-          + '  <button type="button" data-action="remove-wall" data-wall="' + wallIndex + '" class="rounded-md border border-white/15 px-2 py-1 text-[11px] text-white/60 hover:border-red-400/60 hover:text-red-300">🗑</button>'
+          + '<div class="rb-calc-inline-opening-head">'
+          + '  <span>Проем ' + (openingIndex + 1) + '</span>'
+          + '  <button type="button" data-inline-action="remove-opening" data-opening="' + openingIndex + '" class="rb-calc-inline-opening-remove">удалить</button>'
           + '</div>'
-          + '<div class="mt-2 grid grid-cols-1 gap-3 lg:grid-cols-[1fr_320px]">'
-          + '  <div class="grid grid-cols-3 gap-2">'
-          + '    <label class="text-[11px] text-white/58">Ширина (м)<input data-action="wall-width" data-wall="' + wallIndex + '" type="number" min="0" step="0.01" value="' + wall.width + '" class="mt-1 h-10 w-full rounded-lg border border-white/10 bg-[#1d1d1f] px-2 text-sm text-white outline-none focus:border-[#c9a96e]/75"></label>'
-          + '    <label class="text-[11px] text-white/58">Высота (м)<input data-action="wall-height" data-wall="' + wallIndex + '" type="number" min="0" step="0.01" value="' + wall.height + '" class="mt-1 h-10 w-full rounded-lg border border-white/10 bg-[#1d1d1f] px-2 text-sm text-white outline-none focus:border-[#c9a96e]/75"></label>'
-          + '    <div class="text-[11px] text-white/58">Площадь стены<div data-wall-area="' + wallIndex + '" class="mt-1 h-10 rounded-lg border border-white/10 bg-[#1d1d1f] px-2 text-sm leading-10 text-[#c9a96e]">' + fmt(wallArea, 2) + ' м²</div></div>'
-          + '  </div>'
-          + '  <div class="border-l border-white/10 pl-3">'
-          + '    <div class="mb-1 flex items-center justify-between text-[12px] text-white/62"><span>Проемы <span class="text-[#c9a96e]">' + openingCount + '</span></span><button type="button" data-action="add-opening" data-wall="' + wallIndex + '" class="rounded-md border border-white/15 px-2 py-1 text-[11px] text-white/85 hover:border-[#c9a96e]/65 hover:text-[#c9a96e]">+ Добавить</button></div>'
-          + '    <div data-openings="' + wallIndex + '" class="space-y-1"></div>'
-          + '  </div>'
-          + '</div>'
-          + '<div class="mt-2 text-[11px] text-white/52">Площадь проемов: <span data-wall-openings-total="' + wallIndex + '" class="text-white/85">' + fmt(openingsArea, 2) + ' м²</span></div>';
-        wallsContainerEl.appendChild(row);
-
-        var openingsContainer = row.querySelector('[data-openings="' + wallIndex + '"]');
-        (wall.openings || []).forEach(function (opening, openingIndex) {
-          var item = document.createElement('div');
-          var openingArea = Math.max((parseFloat(opening.width) || 0) * (parseFloat(opening.height) || 0), 0);
-          item.className = 'rounded-md border border-white/10 bg-[#1d1d1f] p-2';
-          var openingName = String(opening.name || ('Проем ' + (openingIndex + 1)))
-            .replace(/&/g, '&amp;')
-            .replace(/</g, '&lt;')
-            .replace(/>/g, '&gt;')
-            .replace(/"/g, '&quot;');
-          item.innerHTML = ''
-            + '<div class="mb-1 flex items-center justify-between gap-2 text-[11px] text-white/80">'
-            + '<input data-action="opening-name" data-wall="' + wallIndex + '" data-opening="' + openingIndex + '" type="text" value="' + openingName + '" class="h-8 min-w-0 flex-1 rounded border border-white/10 bg-[#232323] px-2 text-[11px] text-white outline-none focus:border-[#c9a96e]/75">'
-            + '<div class="flex items-center gap-1"><button type="button" data-action="remove-opening" data-wall="' + wallIndex + '" data-opening="' + openingIndex + '" class="rounded border border-white/20 px-1.5 py-0.5 text-[10px] text-white/70 hover:border-red-400/60 hover:text-red-300">🗑</button></div>'
-            + '</div>'
-            + '<div class="grid grid-cols-2 gap-1">'
-            + '<input data-action="opening-width" data-wall="' + wallIndex + '" data-opening="' + openingIndex + '" type="number" min="0" step="0.01" value="' + (opening.width || 0) + '" placeholder="Ширина (м)" class="h-9 rounded border border-white/10 bg-[#232323] px-2 text-[11px] text-white outline-none focus:border-[#c9a96e]/75">'
-            + '<input data-action="opening-height" data-wall="' + wallIndex + '" data-opening="' + openingIndex + '" type="number" min="0" step="0.01" value="' + (opening.height || 0) + '" placeholder="Высота (м)" class="h-9 rounded border border-white/10 bg-[#232323] px-2 text-[11px] text-white outline-none focus:border-[#c9a96e]/75">'
-            + '</div>'
-            + '<div class="mt-1 text-[10px] text-white/55">Площадь: <span data-opening-area="' + wallIndex + '-' + openingIndex + '" class="text-white">' + fmt(openingArea, 2) + ' м²</span></div>';
-          openingsContainer.appendChild(item);
-        });
-
-        if (openingCount === 0) {
-          var emptyRow = document.createElement('div');
-          emptyRow.className = 'rounded-lg border border-white/10 bg-[#1d1d1f] px-2 py-1.5 text-[10px] text-white/48';
-          emptyRow.textContent = 'Нет проемов';
-          openingsContainer.appendChild(emptyRow);
-        }
+          + '<div class="rb-calc-inline-opening-grid">'
+          + '  <input data-inline-action="opening-width" data-opening="' + openingIndex + '" type="number" min="0" step="0.01" value="' + (opening.width || 0) + '" placeholder="Ширина (м)" class="rb-calc-inline-opening-input">'
+          + '  <input data-inline-action="opening-height" data-opening="' + openingIndex + '" type="number" min="0" step="0.01" value="' + (opening.height || 0) + '" placeholder="Высота (м)" class="rb-calc-inline-opening-input">'
+          + '</div>';
+        inlineOpeningsEl.appendChild(row);
       });
     }
 
-    function updateWallMetricsView(wallIndex) {
-      if (!Number.isInteger(wallIndex) || !walls[wallIndex]) return;
-      var wall = walls[wallIndex];
-      var wallArea = Math.max((wall.width || 0) * (wall.height || 0), 0);
-      var openingsArea = (wall.openings || []).reduce(function (sum, o) {
-        return sum + Math.max((parseFloat(o.width) || 0) * (parseFloat(o.height) || 0), 0);
-      }, 0);
-
-      var wallAreaEl = wallsContainerEl.querySelector('[data-wall-area="' + wallIndex + '"]');
-      if (wallAreaEl) wallAreaEl.textContent = fmt(wallArea, 2) + ' м²';
-
-      var openingsTotalEl = wallsContainerEl.querySelector('[data-wall-openings-total="' + wallIndex + '"]');
-      if (openingsTotalEl) openingsTotalEl.textContent = fmt(openingsArea, 2) + ' м²';
+    function renderWalls() {
+      wallsContainerEl.innerHTML = '';
+      wallsContainerEl.classList.add('hidden');
     }
+
+    function updateWallMetricsView() {}
 
     function syncWallsByPerimeter() {
       var l = Math.max(parseFloat(lengthEl.value) || 0, 0);
       var w = Math.max(parseFloat(widthEl.value) || 0, 0);
       var h = Math.max(parseFloat(heightEl.value) || 0, 0);
-      var target = [l, w, l, w];
-      while (walls.length < 4) walls.push(createWall(l, h));
-      if (walls.length > 4) walls = walls.slice(0, 4);
-      walls.forEach(function (wall, idx) {
-        wall.width = Math.max(target[idx] || 0, 0);
-        wall.height = h;
-      });
+      if (walls.length === 0) {
+        walls.push(createWall(l || w, h));
+      }
+      walls[0].width = Math.max(l || w, 0);
+      walls[0].height = h;
+      renderInlineOpenings();
       renderWalls();
     }
 
@@ -720,6 +677,7 @@
 
       if (piecesEl) piecesEl.textContent = fmt(packs, 0) + ' уп';
       if (priceEl) priceEl.textContent = formatCurrency(totalPrice, currency);
+      if (priceDupEl) priceDupEl.textContent = formatCurrency(totalPrice, currency);
       if (areaEl) areaEl.textContent = fmt(totalWallArea, 2) + ' м²';
       if (totalOpeningsEl) totalOpeningsEl.textContent = fmt(totalOpeningsArea, 2) + ' м²';
       if (netAreaEl) netAreaEl.textContent = fmt(netArea, 2) + ' м²';
@@ -729,82 +687,76 @@
       if (verticalCornersLmEl) verticalCornersLmEl.textContent = fmt(verticalLm, 2) + ' п.м.';
       if (horizontalCornersLmEl) horizontalCornersLmEl.textContent = fmt(horizontalLm, 2) + ' п.м.';
       if (totalCornersLmEl) totalCornersLmEl.textContent = fmt(verticalQty + horizontalQty, 0) + ' шт';
+      if (verticalCornersQtyEl) verticalCornersQtyEl.textContent = fmt(verticalQty, 0) + ' шт';
+      if (horizontalCornersQtyEl) horizontalCornersQtyEl.textContent = fmt(horizontalQty, 0) + ' шт';
       if (wallsPriceEl) wallsPriceEl.textContent = formatCurrency(wallsPrice, currency);
       if (cornersPriceEl) cornersPriceEl.textContent = formatCurrency(cornersPrice, currency);
       if (infoTileEl) infoTileEl.textContent = fmt(piecesPerM2, 2) + ' шт/м²';
+      if (totalWallPiecesEl) totalWallPiecesEl.textContent = fmt(totalWallPieces, 0) + ' шт';
       if (infoVCornerEl) infoVCornerEl.textContent = fmt(verticalLm, 2) + ' п.м.';
       if (infoPackPriceEl) infoPackPriceEl.textContent = formatCurrency(packs > 0 ? (wallsPrice / packs) : 0, currency);
       if (infoHCornerEl) infoHCornerEl.textContent = fmt(horizontalLm, 2) + ' п.м.';
     }
 
-    wallsContainerEl.addEventListener('input', function (e) {
-      var actionNode = e.target && e.target.closest ? e.target.closest('[data-action]') : null;
-      if (!actionNode) return;
-      var action = actionNode.dataset.action || '';
-      var wallIndex = parseInt(actionNode.getAttribute('data-wall'), 10);
+    inlineOpeningsEl.addEventListener('input', function (e) {
+      var actionNode = e.target && e.target.closest ? e.target.closest('[data-inline-action]') : null;
+      if (!actionNode || !walls[0] || !Array.isArray(walls[0].openings)) return;
+      var action = actionNode.dataset.inlineAction || '';
       var openingIndex = parseInt(actionNode.getAttribute('data-opening'), 10);
-      if (!Number.isInteger(wallIndex) || !walls[wallIndex]) return;
-
-      if (action === 'wall-width') walls[wallIndex].width = Math.max(parseFloat(actionNode.value) || 0, 0);
-      if (action === 'wall-height') walls[wallIndex].height = Math.max(parseFloat(actionNode.value) || 0, 0);
-      if (action === 'opening-name' && Number.isInteger(openingIndex) && walls[wallIndex].openings[openingIndex]) {
-        walls[wallIndex].openings[openingIndex].name = String(actionNode.value || '').trim();
-      }
-      if (action === 'opening-width' && Number.isInteger(openingIndex) && walls[wallIndex].openings[openingIndex]) {
-        walls[wallIndex].openings[openingIndex].width = Math.max(parseFloat(actionNode.value) || 0, 0);
-      }
-      if (action === 'opening-height' && Number.isInteger(openingIndex) && walls[wallIndex].openings[openingIndex]) {
-        walls[wallIndex].openings[openingIndex].height = Math.max(parseFloat(actionNode.value) || 0, 0);
-      }
-
-      if ((action === 'opening-width' || action === 'opening-height') && Number.isInteger(openingIndex) && walls[wallIndex].openings[openingIndex]) {
-        var opening = walls[wallIndex].openings[openingIndex];
-        var openingArea = Math.max((parseFloat(opening.width) || 0) * (parseFloat(opening.height) || 0), 0);
-        var openingAreaEl = wallsContainerEl.querySelector('[data-opening-area="' + wallIndex + '-' + openingIndex + '"]');
-        if (openingAreaEl) openingAreaEl.textContent = fmt(openingArea, 2) + ' м²';
-      }
-
-      updateWallMetricsView(wallIndex);
+      if (!Number.isInteger(openingIndex) || !walls[0].openings[openingIndex]) return;
+      if (action === 'opening-width') walls[0].openings[openingIndex].width = Math.max(parseFloat(actionNode.value) || 0, 0);
+      if (action === 'opening-height') walls[0].openings[openingIndex].height = Math.max(parseFloat(actionNode.value) || 0, 0);
       recalc();
     });
 
-    wallsContainerEl.addEventListener('click', function (e) {
-      var actionNode = e.target && e.target.closest ? e.target.closest('[data-action]') : null;
-      if (!actionNode) return;
-      var action = actionNode.dataset.action || '';
-      var wallIndex = parseInt(actionNode.getAttribute('data-wall'), 10);
+    inlineOpeningsEl.addEventListener('click', function (e) {
+      var actionNode = e.target && e.target.closest ? e.target.closest('[data-inline-action]') : null;
+      if (!actionNode || !walls[0] || !Array.isArray(walls[0].openings)) return;
+      var action = actionNode.dataset.inlineAction || '';
       var openingIndex = parseInt(actionNode.getAttribute('data-opening'), 10);
-      var changed = false;
-
-      if (action === 'add-opening' && Number.isInteger(wallIndex) && walls[wallIndex]) {
-        var nextNum = walls[wallIndex].openings.length + 1;
-        walls[wallIndex].openings.push(createOpening('Проем ' + nextNum));
-        changed = true;
-      }
-      if (action === 'remove-opening' && Number.isInteger(wallIndex) && Number.isInteger(openingIndex) && walls[wallIndex]) {
-        walls[wallIndex].openings.splice(openingIndex, 1);
-        changed = true;
-      }
-      if (action === 'remove-wall' && Number.isInteger(wallIndex) && walls.length > 1) {
-        walls.splice(wallIndex, 1);
-        changed = true;
-      }
-
-      if (changed) {
-        renderWalls();
+      if (action === 'remove-opening' && Number.isInteger(openingIndex) && walls[0].openings[openingIndex]) {
+        walls[0].openings.splice(openingIndex, 1);
+        renderInlineOpenings();
         recalc();
       }
     });
 
     addWallBtn.addEventListener('click', function () {
       var baseHeight = Math.max(parseFloat(heightEl.value) || 0, 0);
-      walls.push(createWall(0, baseHeight));
+      var baseWidth = Math.max(parseFloat(lengthEl.value) || 0, 0);
+      wallsVisible = true;
+      walls.push(createWall(baseWidth, baseHeight));
       renderWalls();
       recalc();
     });
 
     if (calcRunBtn) {
       calcRunBtn.addEventListener('click', function () {
+        recalc();
+      });
+    }
+
+    if (quickAddOpeningBtn) {
+      quickAddOpeningBtn.addEventListener('click', function () {
+        if (walls.length === 0) walls.push(createWall(Math.max(parseFloat(lengthEl.value) || 0, 0), Math.max(parseFloat(heightEl.value) || 0, 0)));
+        wallsVisible = true;
+        walls[0].openings.push(createOpening('Проем ' + (walls[0].openings.length + 1)));
+        renderInlineOpenings();
+        renderWalls();
+        recalc();
+      });
+    }
+
+    if (quickAddVerticalBtn) {
+      quickAddVerticalBtn.addEventListener('click', function () {
+        verticalCornersCountEl.value = String(Math.max((parseInt(verticalCornersCountEl.value, 10) || 0) + 1, 0));
+        recalc();
+      });
+    }
+
+    if (quickAddHorizontalBtn) {
+      quickAddHorizontalBtn.addEventListener('click', function () {
+        horizontalCornersCountEl.value = String(Math.max((parseInt(horizontalCornersCountEl.value, 10) || 0) + 1, 0));
         recalc();
       });
     }
@@ -833,6 +785,8 @@
         walls.forEach(function (wall) {
           wall.openings = [];
         });
+        wallsVisible = false;
+        renderInlineOpenings();
         renderWalls();
         recalc();
       });
@@ -854,6 +808,15 @@
       field.addEventListener('change', syncWallsByPerimeter);
     });
 
+    if (widthEl && widthEl.type === 'hidden') {
+      var mirrorWidth = function () {
+        widthEl.value = String(Math.max(parseFloat(lengthEl.value) || 0, 0));
+      };
+      lengthEl.addEventListener('input', mirrorWidth);
+      lengthEl.addEventListener('change', mirrorWidth);
+      mirrorWidth();
+    }
+
     [verticalCornersCountEl, verticalCornersHeightEl, horizontalCornersCountEl, horizontalCornersLengthEl, wallPicker.selectEl, verticalPicker.selectEl, horizontalPicker.selectEl].forEach(function (field) {
       field.addEventListener('input', recalc);
       field.addEventListener('change', recalc);
@@ -864,6 +827,7 @@
     }
 
     syncWallsByPerimeter();
+    renderInlineOpenings();
     recalc();
   }
 
