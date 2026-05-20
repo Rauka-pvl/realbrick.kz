@@ -310,31 +310,27 @@
     var infoPackPriceEl = document.getElementById('calc-info-pack-price');
     var infoHCornerEl = document.getElementById('calc-info-h-corner');
     var calcRunBtn = document.getElementById('calc-run');
+    var calcRunSummaryBtn = document.getElementById('calc-run-summary');
     var calcResetBtn = document.getElementById('calc-reset');
-    var quickAddOpeningBtn = document.getElementById('calc-add-opening-quick');
-    var quickAddVerticalBtn = document.getElementById('calc-add-vertical-angle');
-    var quickAddHorizontalBtn = document.getElementById('calc-add-horizontal-angle');
-    var verticalMinusBtn = document.getElementById('calc-vertical-corners-minus');
-    var verticalPlusBtn = document.getElementById('calc-vertical-corners-plus');
-    var horizontalMinusBtn = document.getElementById('calc-horizontal-corners-minus');
-    var horizontalPlusBtn = document.getElementById('calc-horizontal-corners-plus');
-
-    var wallsContainerEl = document.getElementById('calc-walls');
-    var inlineOpeningsEl = document.getElementById('calc-inline-openings');
+    var wallsListEl = document.getElementById('calc-walls-list');
     var addWallBtn = document.getElementById('calc-add-wall');
-    var verticalCornersCountEl = document.getElementById('calc-vertical-corners-count');
-    var verticalCornersHeightEl = document.getElementById('calc-vertical-corners-height');
-    var horizontalCornersCountEl = document.getElementById('calc-horizontal-corners-count');
-    var horizontalCornersLengthEl = document.getElementById('calc-horizontal-corners-length');
+    var verticalCornersListEl = document.getElementById('calc-vertical-corners-list');
+    var horizontalCornersListEl = document.getElementById('calc-horizontal-corners-list');
+    var addVerticalCornerBtn = document.getElementById('calc-add-vertical-corner');
+    var addHorizontalCornerBtn = document.getElementById('calc-add-horizontal-corner');
 
-    if (!wallsContainerEl || !inlineOpeningsEl || !addWallBtn || !verticalCornersCountEl || !verticalCornersHeightEl || !horizontalCornersCountEl || !horizontalCornersLengthEl) return;
+    if (!wallsListEl || !addWallBtn || !verticalCornersListEl || !horizontalCornersListEl || !addVerticalCornerBtn || !addHorizontalCornerBtn) return;
 
     var wallMaterials = [];
     var verticalCornerMaterials = [];
     var horizontalCornerMaterials = [];
     var sections = [];
+    var cartAddBatchUrl = '';
+    var cartIndexUrl = '';
+    var cartCsrf = '';
     var walls = [];
-    var wallsVisible = false;
+    var verticalCorners = [];
+    var horizontalCorners = [];
 
     try {
       var parsed = JSON.parse(dataEl.textContent || '{}');
@@ -342,11 +338,17 @@
       verticalCornerMaterials = Array.isArray(parsed.verticalCornerMaterials) ? parsed.verticalCornerMaterials : [];
       horizontalCornerMaterials = Array.isArray(parsed.horizontalCornerMaterials) ? parsed.horizontalCornerMaterials : [];
       sections = Array.isArray(parsed.sections) ? parsed.sections : [];
+      cartAddBatchUrl = String(parsed.cartAddBatchUrl || '');
+      cartIndexUrl = String(parsed.cartIndexUrl || '');
+      cartCsrf = String(parsed.csrf || '');
     } catch (e) {
       wallMaterials = [];
       verticalCornerMaterials = [];
       horizontalCornerMaterials = [];
       sections = [];
+      cartAddBatchUrl = '';
+      cartIndexUrl = '';
+      cartCsrf = '';
     }
 
     function normalizePath(path) {
@@ -358,6 +360,7 @@
       return {
         id: item.id,
         name: item.name || 'Материал',
+        imageUrl: String(item.image_url || ''),
         article: item.article || '',
         currency: (item.price_currency || 'USD').toUpperCase(),
         price: Math.max(parseFloat(item.price_value) || 0, 0),
@@ -367,6 +370,10 @@
         cornerWidthM: dims && dims.width_m ? Math.max(parseFloat(dims.width_m) || 0, 0) : 0,
         path: normalizePath(item.path || []),
       };
+    }
+
+    function optionImageUrl(option) {
+      return option && option.dataset && option.dataset.imageUrl ? String(option.dataset.imageUrl) : '';
     }
 
     function fmt(value, digits) {
@@ -411,6 +418,7 @@
         option.dataset.cornerHeightM = String(item.cornerHeightM || 0);
         option.dataset.cornerWidthM = String(item.cornerWidthM || 0);
         option.dataset.article = item.article || '';
+        if (item.imageUrl) option.dataset.imageUrl = item.imageUrl;
         selectEl.appendChild(option);
       });
 
@@ -558,44 +566,255 @@
 
     if (!wallPicker || !verticalPicker || !horizontalPicker) return;
 
-    function createWall(width, height) {
+    function createWall(width, height, collapsed) {
       return {
         width: Math.max(parseFloat(width) || 0, 0),
         height: Math.max(parseFloat(height) || 0, 0),
         openings: [],
+        collapsed: collapsed !== false,
       };
+    }
+
+    function createVerticalCorner(count, height, collapsed) {
+      return {
+        count: Math.max(parseInt(count, 10) || 0, 0),
+        height: Math.max(parseFloat(height) || 0, 0),
+        collapsed: collapsed !== false,
+      };
+    }
+
+    function createHorizontalCorner(count, length, collapsed) {
+      return {
+        count: Math.max(parseInt(count, 10) || 0, 0),
+        length: Math.max(parseFloat(length) || 0, 0),
+        collapsed: collapsed !== false,
+      };
+    }
+
+    function wallSummaryText(wall) {
+      var openingsN = (wall.openings || []).length;
+      var text = fmt(wall.width || 0, 1) + ' × ' + fmt(wall.height || 0, 1) + ' м';
+      if (openingsN > 0) text += ' · ' + openingsN + ' проём.';
+      return text;
+    }
+
+    function verticalCornerSummary(corner) {
+      var lm = Math.max((corner.count || 0) * (corner.height || 0), 0);
+      return fmt(corner.count || 0, 0) + ' × ' + fmt(corner.height || 0, 1) + ' м · ' + fmt(lm, 1) + ' п.м.';
+    }
+
+    function horizontalCornerSummary(corner) {
+      var lm = Math.max((corner.count || 0) * (corner.length || 0), 0);
+      return fmt(corner.count || 0, 0) + ' × ' + fmt(corner.length || 0, 1) + ' м · ' + fmt(lm, 1) + ' п.м.';
+    }
+
+    function totalVerticalLm() {
+      return verticalCorners.reduce(function (sum, corner) {
+        return sum + Math.max((corner.count || 0) * (corner.height || 0), 0);
+      }, 0);
+    }
+
+    function totalHorizontalLm() {
+      return horizontalCorners.reduce(function (sum, corner) {
+        return sum + Math.max((corner.count || 0) * (corner.length || 0), 0);
+      }, 0);
     }
 
     function createOpening(defaultName) {
       return { name: defaultName || 'Проем', width: 0, height: 0 };
     }
 
-    function renderInlineOpenings() {
-      inlineOpeningsEl.innerHTML = '';
-      if (!walls[0] || !Array.isArray(walls[0].openings) || walls[0].openings.length === 0) return;
+    function wallArea(wall) {
+      return Math.max((wall.width || 0) * (wall.height || 0), 0);
+    }
 
-      walls[0].openings.forEach(function (opening, openingIndex) {
-        var row = document.createElement('div');
-        row.className = 'rb-calc-inline-opening';
-        row.innerHTML = ''
-          + '<div class="rb-calc-inline-opening-head">'
-          + '  <span>Проем ' + (openingIndex + 1) + '</span>'
-          + '  <button type="button" data-inline-action="remove-opening" data-opening="' + openingIndex + '" class="rb-calc-inline-opening-remove">удалить</button>'
-          + '</div>'
-          + '<div class="rb-calc-inline-opening-grid">'
-          + '  <input data-inline-action="opening-width" data-opening="' + openingIndex + '" type="number" min="0" step="0.01" value="' + (opening.width || 0) + '" placeholder="Ширина (м)" class="rb-calc-inline-opening-input">'
-          + '  <input data-inline-action="opening-height" data-opening="' + openingIndex + '" type="number" min="0" step="0.01" value="' + (opening.height || 0) + '" placeholder="Высота (м)" class="rb-calc-inline-opening-input">'
+    function syncPrimaryWallFields() {
+      if (!walls[0]) return;
+      lengthEl.value = String(walls[0].width || 0);
+      widthEl.value = String(walls[0].width || 0);
+      heightEl.value = String(walls[0].height || 0);
+    }
+
+    function renderPillArrowsHtml(wallIndex, field) {
+      return ''
+        + '<span class="rb-calc-pill-arrows">'
+        + '  <button type="button" class="rb-calc-pill-step" data-wall-action="pill-step" data-wall="' + wallIndex + '" data-field="' + field + '" data-dir="1" aria-label="Увеличить">⌃</button>'
+        + '  <button type="button" class="rb-calc-pill-step" data-wall-action="pill-step" data-wall="' + wallIndex + '" data-field="' + field + '" data-dir="-1" aria-label="Уменьшить">⌄</button>'
+        + '</span>';
+    }
+
+    function renderWallOpeningsHtml(wallIndex, wall) {
+      if (!wall || !Array.isArray(wall.openings) || wall.openings.length === 0) return '';
+      return wall.openings.map(function (opening, openingIndex) {
+        return ''
+          + '<div class="rb-calc-inline-opening">'
+          + '  <div class="rb-calc-inline-opening-head">'
+          + '    <span>Проём ' + (openingIndex + 1) + '</span>'
+          + '    <button type="button" data-wall-action="remove-opening" data-wall="' + wallIndex + '" data-opening="' + openingIndex + '" class="rb-calc-inline-opening-remove" aria-label="Удалить проём">удалить</button>'
+          + '  </div>'
+          + '  <div class="rb-calc-inline-opening-grid">'
+          + '    <input data-wall-action="opening-width" data-wall="' + wallIndex + '" data-opening="' + openingIndex + '" type="number" min="0" step="0.01" value="' + (opening.width || 0) + '" placeholder="Ширина (м)" class="rb-calc-inline-opening-input">'
+          + '    <input data-wall-action="opening-height" data-wall="' + wallIndex + '" data-opening="' + openingIndex + '" type="number" min="0" step="0.01" value="' + (opening.height || 0) + '" placeholder="Высота (м)" class="rb-calc-inline-opening-input">'
+          + '  </div>'
           + '</div>';
-        inlineOpeningsEl.appendChild(row);
-      });
+      }).join('');
     }
 
     function renderWalls() {
-      wallsContainerEl.innerHTML = '';
-      wallsContainerEl.classList.add('hidden');
+      wallsListEl.innerHTML = '';
+      var canRemove = walls.length > 1;
+
+      walls.forEach(function (wall, wallIndex) {
+        var area = wallArea(wall);
+        var widthAttrs = wallIndex === 0 ? ' id="calc-length"' : '';
+        var heightAttrs = wallIndex === 0 ? ' id="calc-height"' : '';
+        var panel = document.createElement('div');
+        panel.className = 'rb-calc-wall-panel' + (wall.collapsed ? ' is-collapsed' : '');
+        panel.setAttribute('data-wall-index', String(wallIndex));
+        panel.innerHTML = ''
+          + '<div class="rb-calc-wall-panel-head">'
+          + '  <span class="rb-calc-wall-panel-num">' + (wallIndex + 1) + '</span>'
+          + '  <span class="rb-calc-wall-panel-title">Стена ' + (wallIndex + 1) + '</span>'
+          + '  <button type="button" class="rb-calc-panel-toggle" data-wall-action="toggle" data-wall="' + wallIndex + '" aria-expanded="' + (!wall.collapsed) + '" aria-label="Развернуть или свернуть"><span class="rb-calc-panel-toggle-icon" aria-hidden="true">▸</span></button>'
+          + '  <span class="rb-calc-wall-panel-summary">' + wallSummaryText(wall) + '</span>'
+          + '  <span class="rb-calc-wall-panel-area">' + fmt(area, 1) + ' м²</span>'
+          + '  <button type="button" class="rb-calc-wall-panel-remove" data-wall-action="remove-wall" data-wall="' + wallIndex + '"'
+          + (canRemove ? '' : ' disabled')
+          + ' title="' + (canRemove ? 'Удалить стену' : 'Нужна минимум одна стена') + '" aria-label="Удалить стену">×</button>'
+          + '</div>'
+          + '<div class="rb-calc-wall-panel-body">'
+          + '<div class="rb-calc-wall-grid">'
+          + '  <label class="block">'
+          + '    <span class="rb-calc-inline-label block">Ширина (м)</span>'
+          + '    <div class="rb-calc-pill-wrap">'
+          + '      <input' + widthAttrs + ' data-wall-action="wall-width" data-wall="' + wallIndex + '" type="number" min="0.1" step="0.1" value="' + (wall.width || 0) + '" class="rb-calc-pill-input" />'
+          + '      ' + renderPillArrowsHtml(wallIndex, 'width')
+          + '    </div>'
+          + '  </label>'
+          + '  <label class="block">'
+          + '    <span class="rb-calc-inline-label block">Высота (м)</span>'
+          + '    <div class="rb-calc-pill-wrap">'
+          + '      <input' + heightAttrs + ' data-wall-action="wall-height" data-wall="' + wallIndex + '" type="number" min="0.1" step="0.1" value="' + (wall.height || 0) + '" class="rb-calc-pill-input" />'
+          + '      ' + renderPillArrowsHtml(wallIndex, 'height')
+          + '    </div>'
+          + '  </label>'
+          + '</div>'
+          + '<button type="button" class="rb-calc-wall-panel-opening-btn" data-wall-action="add-opening" data-wall="' + wallIndex + '">+ Добавить проём (окно/дверь)</button>'
+          + '<div class="rb-calc-inline-openings">' + renderWallOpeningsHtml(wallIndex, wall) + '</div>'
+          + '</div>';
+        wallsListEl.appendChild(panel);
+      });
+
+      syncPrimaryWallFields();
     }
 
-    function updateWallMetricsView() {}
+    function parseCornerIndex(node) {
+      return parseInt(node.getAttribute('data-corner'), 10);
+    }
+
+    function renderVerticalCorners() {
+      verticalCornersListEl.innerHTML = '';
+      var canRemove = verticalCorners.length > 1;
+      verticalCorners.forEach(function (corner, cornerIndex) {
+        var panel = document.createElement('div');
+        panel.className = 'rb-calc-wall-panel' + (corner.collapsed ? ' is-collapsed' : '');
+        panel.setAttribute('data-corner-type', 'vertical');
+        panel.setAttribute('data-corner-index', String(cornerIndex));
+        panel.innerHTML = ''
+          + '<div class="rb-calc-wall-panel-head">'
+          + '  <span class="rb-calc-wall-panel-num">' + (cornerIndex + 1) + '</span>'
+          + '  <span class="rb-calc-wall-panel-title">Верт. угол ' + (cornerIndex + 1) + '</span>'
+          + '  <button type="button" class="rb-calc-panel-toggle" data-corner-action="toggle" data-corner-type="vertical" data-corner="' + cornerIndex + '" aria-expanded="' + (!corner.collapsed) + '" aria-label="Развернуть или свернуть"><span class="rb-calc-panel-toggle-icon" aria-hidden="true">▸</span></button>'
+          + '  <span class="rb-calc-wall-panel-summary">' + verticalCornerSummary(corner) + '</span>'
+          + '  <button type="button" class="rb-calc-wall-panel-remove" data-corner-action="remove" data-corner-type="vertical" data-corner="' + cornerIndex + '"'
+          + (canRemove ? '' : ' disabled')
+          + ' title="' + (canRemove ? 'Удалить' : 'Нужен минимум один') + '" aria-label="Удалить угол">×</button>'
+          + '</div>'
+          + '<div class="rb-calc-wall-panel-body">'
+          + '<div class="rb-calc-wall-grid">'
+          + '  <label class="block"><span class="rb-calc-inline-label block">Кол-во углов</span>'
+          + '    <input data-corner-action="count" data-corner-type="vertical" data-corner="' + cornerIndex + '" type="number" min="0" step="1" value="' + (corner.count || 0) + '" class="rb-calc-input h-9 text-center" /></label>'
+          + '  <label class="block"><span class="rb-calc-inline-label block">Высота (м)</span>'
+          + '    <input data-corner-action="height" data-corner-type="vertical" data-corner="' + cornerIndex + '" type="number" min="0" step="0.01" value="' + (corner.height || 0) + '" class="rb-calc-input h-9 text-center" /></label>'
+          + '</div></div>';
+        verticalCornersListEl.appendChild(panel);
+      });
+    }
+
+    function renderHorizontalCorners() {
+      horizontalCornersListEl.innerHTML = '';
+      var canRemove = horizontalCorners.length > 1;
+      horizontalCorners.forEach(function (corner, cornerIndex) {
+        var panel = document.createElement('div');
+        panel.className = 'rb-calc-wall-panel' + (corner.collapsed ? ' is-collapsed' : '');
+        panel.setAttribute('data-corner-type', 'horizontal');
+        panel.setAttribute('data-corner-index', String(cornerIndex));
+        panel.innerHTML = ''
+          + '<div class="rb-calc-wall-panel-head">'
+          + '  <span class="rb-calc-wall-panel-num">' + (cornerIndex + 1) + '</span>'
+          + '  <span class="rb-calc-wall-panel-title">Гориз. угол ' + (cornerIndex + 1) + '</span>'
+          + '  <button type="button" class="rb-calc-panel-toggle" data-corner-action="toggle" data-corner-type="horizontal" data-corner="' + cornerIndex + '" aria-expanded="' + (!corner.collapsed) + '" aria-label="Развернуть или свернуть"><span class="rb-calc-panel-toggle-icon" aria-hidden="true">▸</span></button>'
+          + '  <span class="rb-calc-wall-panel-summary">' + horizontalCornerSummary(corner) + '</span>'
+          + '  <button type="button" class="rb-calc-wall-panel-remove" data-corner-action="remove" data-corner-type="horizontal" data-corner="' + cornerIndex + '"'
+          + (canRemove ? '' : ' disabled')
+          + ' title="' + (canRemove ? 'Удалить' : 'Нужен минимум один') + '" aria-label="Удалить угол">×</button>'
+          + '</div>'
+          + '<div class="rb-calc-wall-panel-body">'
+          + '<div class="rb-calc-wall-grid">'
+          + '  <label class="block"><span class="rb-calc-inline-label block">Кол-во линий</span>'
+          + '    <input data-corner-action="count" data-corner-type="horizontal" data-corner="' + cornerIndex + '" type="number" min="0" step="1" value="' + (corner.count || 0) + '" class="rb-calc-input h-9 text-center" /></label>'
+          + '  <label class="block"><span class="rb-calc-inline-label block">Длина (м)</span>'
+          + '    <input data-corner-action="length" data-corner-type="horizontal" data-corner="' + cornerIndex + '" type="number" min="0" step="0.01" value="' + (corner.length || 0) + '" class="rb-calc-input h-9 text-center" /></label>'
+          + '</div></div>';
+        horizontalCornersListEl.appendChild(panel);
+      });
+    }
+
+    function updateCornerPanel(type, cornerIndex) {
+      var listEl = type === 'vertical' ? verticalCornersListEl : horizontalCornersListEl;
+      var corner = type === 'vertical' ? verticalCorners[cornerIndex] : horizontalCorners[cornerIndex];
+      if (!listEl || !corner) return;
+      var panel = listEl.querySelector('[data-corner-index="' + cornerIndex + '"]');
+      if (!panel) return;
+      var summaryEl = panel.querySelector('.rb-calc-wall-panel-summary');
+      if (summaryEl) {
+        summaryEl.textContent = type === 'vertical' ? verticalCornerSummary(corner) : horizontalCornerSummary(corner);
+      }
+    }
+
+    function handleCornerInput(actionNode) {
+      var action = actionNode.dataset.cornerAction || '';
+      var type = actionNode.getAttribute('data-corner-type') || '';
+      var cornerIndex = parseCornerIndex(actionNode);
+      var list = type === 'vertical' ? verticalCorners : horizontalCorners;
+      if (!Number.isInteger(cornerIndex) || !list[cornerIndex]) return;
+      var corner = list[cornerIndex];
+      if (action === 'count') corner.count = Math.max(parseInt(actionNode.value, 10) || 0, 0);
+      if (action === 'height' && type === 'vertical') corner.height = Math.max(parseFloat(actionNode.value) || 0, 0);
+      if (action === 'length' && type === 'horizontal') corner.length = Math.max(parseFloat(actionNode.value) || 0, 0);
+      updateCornerPanel(type, cornerIndex);
+      recalc();
+    }
+
+    function handleCornerClick(actionNode) {
+      var action = actionNode.dataset.cornerAction || '';
+      var type = actionNode.getAttribute('data-corner-type') || '';
+      var cornerIndex = parseCornerIndex(actionNode);
+      var list = type === 'vertical' ? verticalCorners : horizontalCorners;
+      if (!Number.isInteger(cornerIndex) || !list[cornerIndex]) return;
+      if (action === 'toggle') {
+        list[cornerIndex].collapsed = !list[cornerIndex].collapsed;
+        if (type === 'vertical') renderVerticalCorners(); else renderHorizontalCorners();
+        return;
+      }
+      if (action === 'remove') {
+        if (list.length <= 1) return;
+        list.splice(cornerIndex, 1);
+        if (type === 'vertical') renderVerticalCorners(); else renderHorizontalCorners();
+        recalc();
+      }
+    }
+
 
     function syncWallsByPerimeter() {
       var l = Math.max(parseFloat(lengthEl.value) || 0, 0);
@@ -606,11 +825,10 @@
       }
       walls[0].width = Math.max(l || w, 0);
       walls[0].height = h;
-      renderInlineOpenings();
       renderWalls();
     }
 
-    function recalc() {
+    function computeCalculatorTotals() {
       var wallOption = wallPicker.selectEl.options[wallPicker.selectEl.selectedIndex];
       var verticalOption = verticalPicker.selectEl.options[verticalPicker.selectEl.selectedIndex];
       var horizontalOption = horizontalPicker.selectEl.options[horizontalPicker.selectEl.selectedIndex];
@@ -633,10 +851,11 @@
       var packPieces = 0;
       var piecesPerM2 = 0;
       var totalWallPieces = 0;
+      var wallPackPrice = 0;
       if (wallOption && wallOption.value) {
         packPieces = Math.max(parseFloat(wallOption.dataset.packSize || '0') || 0, 0);
         piecesPerM2 = Math.max(parseFloat(wallOption.dataset.perM2 || '0') || 0, 0);
-        var wallPackPrice = Math.max(parseFloat(wallOption.dataset.price || '0') || 0, 0);
+        wallPackPrice = Math.max(parseFloat(wallOption.dataset.price || '0') || 0, 0);
         currency = (wallOption.dataset.currency || 'USD').toUpperCase();
         if (piecesPerM2 > 0) {
           totalWallPieces = areaWithReserve * piecesPerM2;
@@ -647,14 +866,17 @@
         }
       }
 
-      var verticalLm = Math.max((parseFloat(verticalCornersCountEl.value) || 0) * (parseFloat(verticalCornersHeightEl.value) || 0), 0);
-      var horizontalLm = Math.max((parseFloat(horizontalCornersCountEl.value) || 0) * (parseFloat(horizontalCornersLengthEl.value) || 0), 0);
+      var verticalLm = totalVerticalLm();
+      var horizontalLm = totalHorizontalLm();
 
       var verticalPrice = 0;
       var verticalQty = 0;
+      var verticalUnitPrice = 0;
+      var verticalCurrency = currency;
       if (verticalOption && verticalOption.value) {
         var verticalRatePerLm = Math.max(parseFloat(verticalOption.dataset.perM2 || '0') || 0, 0);
-        var verticalUnitPrice = Math.max(parseFloat(verticalOption.dataset.price || '0') || 0, 0);
+        verticalUnitPrice = Math.max(parseFloat(verticalOption.dataset.price || '0') || 0, 0);
+        verticalCurrency = (verticalOption.dataset.currency || currency).toUpperCase();
         if (verticalRatePerLm > 0) {
           verticalQty = Math.ceil(verticalLm * verticalRatePerLm);
           verticalPrice = verticalQty * verticalUnitPrice;
@@ -663,9 +885,12 @@
 
       var horizontalPrice = 0;
       var horizontalQty = 0;
+      var horizontalUnitPrice = 0;
+      var horizontalCurrency = currency;
       if (horizontalOption && horizontalOption.value) {
         var horizontalRatePerLm = Math.max(parseFloat(horizontalOption.dataset.perM2 || '0') || 0, 0);
-        var horizontalUnitPrice = Math.max(parseFloat(horizontalOption.dataset.price || '0') || 0, 0);
+        horizontalUnitPrice = Math.max(parseFloat(horizontalOption.dataset.price || '0') || 0, 0);
+        horizontalCurrency = (horizontalOption.dataset.currency || currency).toUpperCase();
         if (horizontalRatePerLm > 0) {
           horizontalQty = Math.ceil(horizontalLm * horizontalRatePerLm);
           horizontalPrice = horizontalQty * horizontalUnitPrice;
@@ -674,6 +899,151 @@
 
       var cornersPrice = verticalPrice + horizontalPrice;
       var totalPrice = wallsPrice + cornersPrice;
+
+      return {
+        wallOption: wallOption,
+        verticalOption: verticalOption,
+        horizontalOption: horizontalOption,
+        totalWallArea: totalWallArea,
+        totalOpeningsArea: totalOpeningsArea,
+        netArea: netArea,
+        areaWithReserve: areaWithReserve,
+        packs: packs,
+        wallsPrice: wallsPrice,
+        currency: currency,
+        packPieces: packPieces,
+        piecesPerM2: piecesPerM2,
+        totalWallPieces: totalWallPieces,
+        wallPackPrice: wallPackPrice,
+        verticalLm: verticalLm,
+        horizontalLm: horizontalLm,
+        verticalPrice: verticalPrice,
+        verticalQty: verticalQty,
+        verticalUnitPrice: verticalUnitPrice,
+        verticalCurrency: verticalCurrency,
+        horizontalPrice: horizontalPrice,
+        horizontalQty: horizontalQty,
+        horizontalUnitPrice: horizontalUnitPrice,
+        horizontalCurrency: horizontalCurrency,
+        cornersPrice: cornersPrice,
+        totalPrice: totalPrice,
+      };
+    }
+
+    function buildCartItemsFromTotals(totals) {
+      var items = [];
+
+      if (totals.wallOption && totals.wallOption.value && totals.packs > 0) {
+        items.push({
+          id: String(totals.wallOption.value),
+          name: String(totals.wallOption.textContent || 'Основной материал').trim(),
+          qty: totals.packs,
+          price_value: totals.wallPackPrice,
+          price_currency: totals.currency,
+          image_url: optionImageUrl(totals.wallOption),
+        });
+      }
+
+      if (totals.verticalOption && totals.verticalOption.value && totals.verticalQty > 0) {
+        items.push({
+          id: String(totals.verticalOption.value),
+          name: String(totals.verticalOption.textContent || 'Вертикальный угол').trim(),
+          qty: totals.verticalQty,
+          price_value: totals.verticalUnitPrice,
+          price_currency: totals.verticalCurrency,
+          image_url: optionImageUrl(totals.verticalOption),
+        });
+      }
+
+      if (totals.horizontalOption && totals.horizontalOption.value && totals.horizontalQty > 0) {
+        items.push({
+          id: String(totals.horizontalOption.value),
+          name: String(totals.horizontalOption.textContent || 'Горизонтальный угол').trim(),
+          qty: totals.horizontalQty,
+          price_value: totals.horizontalUnitPrice,
+          price_currency: totals.horizontalCurrency,
+          image_url: optionImageUrl(totals.horizontalOption),
+        });
+      }
+
+      return items;
+    }
+
+    function addCalculatorToCart() {
+      if (!cartAddBatchUrl || !cartCsrf) {
+        window.alert('Не удалось добавить в корзину. Обновите страницу.');
+        return;
+      }
+
+      var totals = computeCalculatorTotals();
+      var items = buildCartItemsFromTotals(totals);
+
+      if (items.length === 0) {
+        window.alert('Выберите материалы в калькуляторе и убедитесь, что расчёт показывает количество больше нуля.');
+        return;
+      }
+
+      var btn = calcRunSummaryBtn;
+      if (btn) {
+        btn.disabled = true;
+        btn.setAttribute('aria-busy', 'true');
+      }
+
+      fetch(cartAddBatchUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+          'X-CSRF-TOKEN': cartCsrf,
+        },
+        credentials: 'same-origin',
+        body: JSON.stringify({ items: items }),
+      })
+        .then(function (response) {
+          return response.json().then(function (payload) {
+            if (!response.ok) {
+              var err = new Error((payload && payload.message) || 'Ошибка добавления в корзину');
+              err.payload = payload;
+              throw err;
+            }
+            return payload;
+          });
+        })
+        .then(function (payload) {
+          var openCart = window.confirm((payload.message || 'Товары добавлены в корзину') + '\n\nОткрыть корзину?');
+          if (openCart && cartIndexUrl) {
+            window.location.href = cartIndexUrl;
+          }
+        })
+        .catch(function () {
+          window.alert('Не удалось добавить товары в корзину. Попробуйте ещё раз.');
+        })
+        .finally(function () {
+          if (btn) {
+            btn.disabled = false;
+            btn.removeAttribute('aria-busy');
+          }
+        });
+    }
+
+    function recalc() {
+      var totals = computeCalculatorTotals();
+      var packs = totals.packs;
+      var wallsPrice = totals.wallsPrice;
+      var currency = totals.currency;
+      var packPieces = totals.packPieces;
+      var piecesPerM2 = totals.piecesPerM2;
+      var totalWallPieces = totals.totalWallPieces;
+      var verticalLm = totals.verticalLm;
+      var horizontalLm = totals.horizontalLm;
+      var verticalQty = totals.verticalQty;
+      var horizontalQty = totals.horizontalQty;
+      var cornersPrice = totals.cornersPrice;
+      var totalPrice = totals.totalPrice;
+      var totalWallArea = totals.totalWallArea;
+      var totalOpeningsArea = totals.totalOpeningsArea;
+      var netArea = totals.netArea;
+      var areaWithReserve = totals.areaWithReserve;
 
       if (piecesEl) piecesEl.textContent = fmt(packs, 0) + ' уп';
       if (priceEl) priceEl.textContent = formatCurrency(totalPrice, currency);
@@ -698,78 +1068,187 @@
       if (infoHCornerEl) infoHCornerEl.textContent = fmt(horizontalLm, 2) + ' п.м.';
     }
 
-    inlineOpeningsEl.addEventListener('input', function (e) {
-      var actionNode = e.target && e.target.closest ? e.target.closest('[data-inline-action]') : null;
-      if (!actionNode || !walls[0] || !Array.isArray(walls[0].openings)) return;
-      var action = actionNode.dataset.inlineAction || '';
-      var openingIndex = parseInt(actionNode.getAttribute('data-opening'), 10);
-      if (!Number.isInteger(openingIndex) || !walls[0].openings[openingIndex]) return;
-      if (action === 'opening-width') walls[0].openings[openingIndex].width = Math.max(parseFloat(actionNode.value) || 0, 0);
-      if (action === 'opening-height') walls[0].openings[openingIndex].height = Math.max(parseFloat(actionNode.value) || 0, 0);
-      recalc();
-    });
+    function parseWallIndex(node) {
+      return parseInt(node.getAttribute('data-wall'), 10);
+    }
 
-    inlineOpeningsEl.addEventListener('click', function (e) {
-      var actionNode = e.target && e.target.closest ? e.target.closest('[data-inline-action]') : null;
-      if (!actionNode || !walls[0] || !Array.isArray(walls[0].openings)) return;
-      var action = actionNode.dataset.inlineAction || '';
-      var openingIndex = parseInt(actionNode.getAttribute('data-opening'), 10);
-      if (action === 'remove-opening' && Number.isInteger(openingIndex) && walls[0].openings[openingIndex]) {
-        walls[0].openings.splice(openingIndex, 1);
-        renderInlineOpenings();
+    function parseOpeningIndex(node) {
+      return parseInt(node.getAttribute('data-opening'), 10);
+    }
+
+    function updateWallAreaLabel(wallIndex) {
+      var panel = wallsListEl.querySelector('[data-wall-index="' + wallIndex + '"]');
+      if (!panel || !walls[wallIndex]) return;
+      var areaEl = panel.querySelector('.rb-calc-wall-panel-area');
+      if (areaEl) areaEl.textContent = fmt(wallArea(walls[wallIndex]), 1) + ' м²';
+      var summaryEl = panel.querySelector('.rb-calc-wall-panel-summary');
+      if (summaryEl) summaryEl.textContent = wallSummaryText(walls[wallIndex]);
+    }
+
+    function handleWallInput(actionNode) {
+      var action = actionNode.dataset.wallAction || '';
+      var wallIndex = parseWallIndex(actionNode);
+      if (!Number.isInteger(wallIndex) || !walls[wallIndex]) return;
+
+      if (action === 'wall-width') {
+        walls[wallIndex].width = Math.max(parseFloat(actionNode.value) || 0, 0);
+        if (wallIndex === 0) syncPrimaryWallFields();
+        updateWallAreaLabel(wallIndex);
+        recalc();
+        return;
+      }
+      if (action === 'wall-height') {
+        walls[wallIndex].height = Math.max(parseFloat(actionNode.value) || 0, 0);
+        if (wallIndex === 0) syncPrimaryWallFields();
+        updateWallAreaLabel(wallIndex);
+        recalc();
+        return;
+      }
+
+      var openingIndex = parseOpeningIndex(actionNode);
+      if (!Number.isInteger(openingIndex) || !walls[wallIndex].openings[openingIndex]) return;
+      if (action === 'opening-width') walls[wallIndex].openings[openingIndex].width = Math.max(parseFloat(actionNode.value) || 0, 0);
+      if (action === 'opening-height') walls[wallIndex].openings[openingIndex].height = Math.max(parseFloat(actionNode.value) || 0, 0);
+      recalc();
+    }
+
+    function handleWallClick(actionNode) {
+      var action = actionNode.dataset.wallAction || '';
+      var wallIndex = parseWallIndex(actionNode);
+      if (!Number.isInteger(wallIndex) || !walls[wallIndex]) return;
+
+      if (action === 'toggle') {
+        walls[wallIndex].collapsed = !walls[wallIndex].collapsed;
+        renderWalls();
+        return;
+      }
+
+      if (action === 'pill-step') {
+        var field = actionNode.getAttribute('data-field');
+        var dir = parseInt(actionNode.getAttribute('data-dir'), 10) || 0;
+        var step = 0.1;
+        var min = 0.1;
+        var wall = walls[wallIndex];
+        var next;
+        if (field === 'width') {
+          next = Math.max((wall.width || 0) + dir * step, min);
+          wall.width = Math.round(next * 10) / 10;
+        } else if (field === 'height') {
+          next = Math.max((wall.height || 0) + dir * step, min);
+          wall.height = Math.round(next * 10) / 10;
+        } else {
+          return;
+        }
+        var panel = wallsListEl.querySelector('[data-wall-index="' + wallIndex + '"]');
+        if (panel) {
+          var input = panel.querySelector('[data-wall-action="wall-' + field + '"]');
+          if (input) input.value = String(wall[field]);
+        }
+        if (wallIndex === 0) syncPrimaryWallFields();
+        updateWallAreaLabel(wallIndex);
+        recalc();
+        return;
+      }
+
+      if (action === 'remove-wall') {
+        if (walls.length <= 1) return;
+        walls.splice(wallIndex, 1);
+        renderWalls();
+        recalc();
+        return;
+      }
+
+      if (action === 'add-opening') {
+        walls[wallIndex].collapsed = false;
+        walls[wallIndex].openings.push(createOpening('Проём ' + (walls[wallIndex].openings.length + 1)));
+        renderWalls();
+        recalc();
+        return;
+      }
+
+      if (action === 'remove-opening') {
+        var openingIndex = parseOpeningIndex(actionNode);
+        if (!Number.isInteger(openingIndex) || !walls[wallIndex].openings[openingIndex]) return;
+        walls[wallIndex].openings.splice(openingIndex, 1);
+        renderWalls();
         recalc();
       }
+    }
+
+    wallsListEl.addEventListener('input', function (e) {
+      var actionNode = e.target && e.target.closest ? e.target.closest('[data-wall-action]') : null;
+      if (!actionNode) return;
+      handleWallInput(actionNode);
+    });
+
+    wallsListEl.addEventListener('click', function (e) {
+      var actionNode = e.target && e.target.closest ? e.target.closest('[data-wall-action]') : null;
+      if (!actionNode) return;
+      handleWallClick(actionNode);
     });
 
     addWallBtn.addEventListener('click', function () {
-      var baseHeight = Math.max(parseFloat(heightEl.value) || 0, 0);
-      var baseWidth = Math.max(parseFloat(lengthEl.value) || 0, 0);
-      wallsVisible = true;
-      walls.push(createWall(baseWidth, baseHeight));
+      var baseHeight = walls[0] ? walls[0].height : Math.max(parseFloat(heightEl.value) || 0, 0);
+      var baseWidth = walls[0] ? walls[0].width : Math.max(parseFloat(lengthEl.value) || 0, 0);
+      walls.forEach(function (w) { w.collapsed = true; });
+      walls.push(createWall(baseWidth, baseHeight, false));
       renderWalls();
       recalc();
     });
 
     if (calcRunBtn) {
-      calcRunBtn.addEventListener('click', function () {
+      calcRunBtn.addEventListener('click', recalc);
+    }
+
+    if (calcRunSummaryBtn) {
+      calcRunSummaryBtn.addEventListener('click', function () {
         recalc();
+        addCalculatorToCart();
       });
     }
 
-    if (quickAddOpeningBtn) {
-      quickAddOpeningBtn.addEventListener('click', function () {
-        if (walls.length === 0) walls.push(createWall(Math.max(parseFloat(lengthEl.value) || 0, 0), Math.max(parseFloat(heightEl.value) || 0, 0)));
-        wallsVisible = true;
-        walls[0].openings.push(createOpening('Проем ' + (walls[0].openings.length + 1)));
-        renderInlineOpenings();
-        renderWalls();
-        recalc();
-      });
-    }
+    addVerticalCornerBtn.addEventListener('click', function () {
+      var last = verticalCorners[verticalCorners.length - 1];
+      verticalCorners.forEach(function (c) { c.collapsed = true; });
+      verticalCorners.push(createVerticalCorner(last ? last.count : 1, last ? last.height : 3, false));
+      renderVerticalCorners();
+      recalc();
+    });
 
-    if (quickAddVerticalBtn) {
-      quickAddVerticalBtn.addEventListener('click', function () {
-        verticalCornersCountEl.value = String(Math.max((parseInt(verticalCornersCountEl.value, 10) || 0) + 1, 0));
-        recalc();
-      });
-    }
+    addHorizontalCornerBtn.addEventListener('click', function () {
+      var last = horizontalCorners[horizontalCorners.length - 1];
+      horizontalCorners.forEach(function (c) { c.collapsed = true; });
+      horizontalCorners.push(createHorizontalCorner(last ? last.count : 1, last ? last.length : 10, false));
+      renderHorizontalCorners();
+      recalc();
+    });
 
-    if (quickAddHorizontalBtn) {
-      quickAddHorizontalBtn.addEventListener('click', function () {
-        horizontalCornersCountEl.value = String(Math.max((parseInt(horizontalCornersCountEl.value, 10) || 0) + 1, 0));
-        recalc();
-      });
-    }
+    verticalCornersListEl.addEventListener('input', function (e) {
+      var node = e.target && e.target.closest ? e.target.closest('[data-corner-action]') : null;
+      if (!node) return;
+      handleCornerInput(node);
+    });
+    horizontalCornersListEl.addEventListener('input', function (e) {
+      var node = e.target && e.target.closest ? e.target.closest('[data-corner-action]') : null;
+      if (!node) return;
+      handleCornerInput(node);
+    });
+    verticalCornersListEl.addEventListener('click', function (e) {
+      var node = e.target && e.target.closest ? e.target.closest('[data-corner-action]') : null;
+      if (!node) return;
+      handleCornerClick(node);
+    });
+    horizontalCornersListEl.addEventListener('click', function (e) {
+      var node = e.target && e.target.closest ? e.target.closest('[data-corner-action]') : null;
+      if (!node) return;
+      handleCornerClick(node);
+    });
 
     if (calcResetBtn) {
       calcResetBtn.addEventListener('click', function () {
         lengthEl.value = '10';
         widthEl.value = '10';
         heightEl.value = '3';
-        verticalCornersCountEl.value = '4';
-        verticalCornersHeightEl.value = '3';
-        horizontalCornersCountEl.value = '2';
-        horizontalCornersLengthEl.value = '10';
         wallPicker.selectEl.selectedIndex = 0;
         verticalPicker.selectEl.selectedIndex = 0;
         horizontalPicker.selectEl.selectedIndex = 0;
@@ -781,27 +1260,15 @@
         if (vLabel) vLabel.textContent = 'Выберите материал';
         if (hLabel) hLabel.textContent = 'Выберите материал';
 
-        syncWallsByPerimeter();
-        walls.forEach(function (wall) {
-          wall.openings = [];
-        });
-        wallsVisible = false;
-        renderInlineOpenings();
+        walls = [createWall(10, 3, true)];
+        verticalCorners = [createVerticalCorner(4, 3, true)];
+        horizontalCorners = [createHorizontalCorner(2, 10, true)];
         renderWalls();
+        renderVerticalCorners();
+        renderHorizontalCorners();
         recalc();
       });
     }
-
-    function applyStepper(inputEl, delta) {
-      var next = Math.max((parseInt(inputEl.value, 10) || 0) + delta, 0);
-      inputEl.value = String(next);
-      recalc();
-    }
-
-    if (verticalMinusBtn) verticalMinusBtn.addEventListener('click', function () { applyStepper(verticalCornersCountEl, -1); });
-    if (verticalPlusBtn) verticalPlusBtn.addEventListener('click', function () { applyStepper(verticalCornersCountEl, 1); });
-    if (horizontalMinusBtn) horizontalMinusBtn.addEventListener('click', function () { applyStepper(horizontalCornersCountEl, -1); });
-    if (horizontalPlusBtn) horizontalPlusBtn.addEventListener('click', function () { applyStepper(horizontalCornersCountEl, 1); });
 
     [roomTypeEl, lengthEl, widthEl, heightEl].forEach(function (field) {
       field.addEventListener('input', syncWallsByPerimeter);
@@ -817,7 +1284,7 @@
       mirrorWidth();
     }
 
-    [verticalCornersCountEl, verticalCornersHeightEl, horizontalCornersCountEl, horizontalCornersLengthEl, wallPicker.selectEl, verticalPicker.selectEl, horizontalPicker.selectEl].forEach(function (field) {
+    [wallPicker.selectEl, verticalPicker.selectEl, horizontalPicker.selectEl].forEach(function (field) {
       field.addEventListener('input', recalc);
       field.addEventListener('change', recalc);
     });
@@ -826,8 +1293,11 @@
       // keep linter happy, sections are passed for future grouped rendering
     }
 
+    verticalCorners = [createVerticalCorner(4, 3, true)];
+    horizontalCorners = [createHorizontalCorner(2, 10, true)];
     syncWallsByPerimeter();
-    renderInlineOpenings();
+    renderVerticalCorners();
+    renderHorizontalCorners();
     recalc();
   }
 

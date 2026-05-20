@@ -2,9 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Support\Bitrix24CatalogImageUrls;
 use Illuminate\Support\Facades\DB;
-use Throwable;
 use Illuminate\Support\Str;
+use Throwable;
 
 class CalculatorController extends Controller
 {
@@ -44,7 +45,7 @@ class CalculatorController extends Controller
 
             $baseQuery = DB::connection('diller')
                 ->table('bitrix24_catalog_products')
-                ->select('bitrix_id', 'name', 'price_value', 'price_currency', 'path_parts', 'section_bitrix_id', 'units_per_sq_or_lm', 'pieces_per_pack', 'size', 'article')
+                ->select('bitrix_id', 'name', 'image_url', 'price_value', 'price_currency', 'path_parts', 'section_bitrix_id', 'units_per_sq_or_lm', 'pieces_per_pack', 'size', 'article')
                 ->where('active', true)
                 ->whereNotNull('price_value');
 
@@ -157,9 +158,12 @@ class CalculatorController extends Controller
             $path = ['Материалы'];
         }
 
+        $rawImage = isset($row->image_url) && $row->image_url !== '' ? (string) $row->image_url : null;
+
         return [
             'id' => (int) ($row->bitrix_id ?? 0),
             'name' => $displayName,
+            'image_url' => $this->resolveProductImageDisplayUrl($rawImage),
             'price_value' => (float) ($row->price_value ?? 0),
             'price_currency' => (string) ($row->price_currency ?? 'USD'),
             'per_m2' => $perM2,
@@ -168,6 +172,28 @@ class CalculatorController extends Controller
             'corner_dims' => $cornerDimensions,
             'path' => array_values($path),
         ];
+    }
+
+    private function resolveProductImageDisplayUrl(?string $raw): ?string
+    {
+        if ($raw === null || trim($raw) === '') {
+            return null;
+        }
+        $rawTrim = trim($raw);
+        $localUrl = Bitrix24CatalogImageUrls::publicAssetUrl($rawTrim);
+        if ($localUrl !== null) {
+            return $localUrl;
+        }
+        $webhook = rtrim((string) env('DILLER_BITRIX24_REST_URL', ''), '/');
+        if ($webhook === '') {
+            return preg_match('#^https?://#i', $rawTrim) ? $rawTrim : null;
+        }
+        $normalized = Bitrix24CatalogImageUrls::pathForStorage($rawTrim);
+        if ($normalized === null || $normalized === '') {
+            return null;
+        }
+
+        return Bitrix24CatalogImageUrls::displayUrl($normalized, $webhook);
     }
 
     private function extractConsumptionPerM2(string $rawValue): ?int

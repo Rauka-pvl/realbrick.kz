@@ -34,6 +34,7 @@ Route::get('/catalog/collection/{slug}', [CatalogController::class, 'collection'
 Route::get('/catalog/product/{slug}', [CatalogController::class, 'product'])->name('catalog.product');
 Route::get('/cart', [CartController::class, 'index'])->name('cart.index');
 Route::post('/cart/add', [CartController::class, 'add'])->name('cart.add');
+Route::post('/cart/add-batch', [CartController::class, 'addBatch'])->name('cart.add-batch');
 Route::post('/cart/update', [CartController::class, 'update'])->name('cart.update');
 Route::post('/cart/remove', [CartController::class, 'remove'])->name('cart.remove');
 Route::post('/cart/clear', [CartController::class, 'clear'])->name('cart.clear');
