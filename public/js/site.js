@@ -314,12 +314,12 @@
     var calcResetBtn = document.getElementById('calc-reset');
     var wallsListEl = document.getElementById('calc-walls-list');
     var addWallBtn = document.getElementById('calc-add-wall');
-    var verticalCornersListEl = document.getElementById('calc-vertical-corners-list');
-    var horizontalCornersListEl = document.getElementById('calc-horizontal-corners-list');
-    var addVerticalCornerBtn = document.getElementById('calc-add-vertical-corner');
-    var addHorizontalCornerBtn = document.getElementById('calc-add-horizontal-corner');
+    var verticalCornerCountEl = document.getElementById('calc-vertical-corners-count');
+    var verticalCornerHeightEl = document.getElementById('calc-vertical-corners-height');
+    var horizontalCornerCountEl = document.getElementById('calc-horizontal-corners-count');
+    var horizontalCornerHeightEl = document.getElementById('calc-horizontal-corners-height');
 
-    if (!wallsListEl || !addWallBtn || !verticalCornersListEl || !horizontalCornersListEl || !addVerticalCornerBtn || !addHorizontalCornerBtn) return;
+    if (!wallsListEl || !addWallBtn || !verticalCornerCountEl || !verticalCornerHeightEl || !horizontalCornerCountEl || !horizontalCornerHeightEl) return;
 
     var wallMaterials = [];
     var verticalCornerMaterials = [];
@@ -329,8 +329,8 @@
     var cartIndexUrl = '';
     var cartCsrf = '';
     var walls = [];
-    var verticalCorners = [];
-    var horizontalCorners = [];
+    var verticalCorner = { count: 4, height: 3 };
+    var horizontalCorner = { count: 2, height: 10 };
 
     try {
       var parsed = JSON.parse(dataEl.textContent || '{}');
@@ -384,7 +384,8 @@
     }
 
     function formatCurrency(value, currency) {
-      var suffix = currency === 'USD' ? ' $' : (currency === 'KZT' ? ' ₸' : (' ' + currency));
+      var code = String(currency || 'USD').toUpperCase();
+      var suffix = code === 'USD' || code === 'KZT' ? ' $' : (' ' + code);
       return fmt(value, 0) + suffix;
     }
 
@@ -575,22 +576,6 @@
       };
     }
 
-    function createVerticalCorner(count, height, collapsed) {
-      return {
-        count: Math.max(parseInt(count, 10) || 0, 0),
-        height: Math.max(parseFloat(height) || 0, 0),
-        collapsed: collapsed !== false,
-      };
-    }
-
-    function createHorizontalCorner(count, length, collapsed) {
-      return {
-        count: Math.max(parseInt(count, 10) || 0, 0),
-        length: Math.max(parseFloat(length) || 0, 0),
-        collapsed: collapsed !== false,
-      };
-    }
-
     function wallSummaryText(wall) {
       var openingsN = (wall.openings || []).length;
       var text = fmt(wall.width || 0, 1) + ' × ' + fmt(wall.height || 0, 1) + ' м';
@@ -598,26 +583,26 @@
       return text;
     }
 
-    function verticalCornerSummary(corner) {
-      var lm = Math.max((corner.count || 0) * (corner.height || 0), 0);
-      return fmt(corner.count || 0, 0) + ' × ' + fmt(corner.height || 0, 1) + ' м · ' + fmt(lm, 1) + ' п.м.';
+    function syncCornerInputsFromState() {
+      verticalCornerCountEl.value = String(verticalCorner.count || 0);
+      verticalCornerHeightEl.value = String(verticalCorner.height || 0);
+      horizontalCornerCountEl.value = String(horizontalCorner.count || 0);
+      horizontalCornerHeightEl.value = String(horizontalCorner.height || 0);
     }
 
-    function horizontalCornerSummary(corner) {
-      var lm = Math.max((corner.count || 0) * (corner.length || 0), 0);
-      return fmt(corner.count || 0, 0) + ' × ' + fmt(corner.length || 0, 1) + ' м · ' + fmt(lm, 1) + ' п.м.';
+    function readCornersFromInputs() {
+      verticalCorner.count = Math.max(parseInt(verticalCornerCountEl.value, 10) || 0, 0);
+      verticalCorner.height = Math.max(parseFloat(verticalCornerHeightEl.value) || 0, 0);
+      horizontalCorner.count = Math.max(parseInt(horizontalCornerCountEl.value, 10) || 0, 0);
+      horizontalCorner.height = Math.max(parseFloat(horizontalCornerHeightEl.value) || 0, 0);
     }
 
     function totalVerticalLm() {
-      return verticalCorners.reduce(function (sum, corner) {
-        return sum + Math.max((corner.count || 0) * (corner.height || 0), 0);
-      }, 0);
+      return Math.max((verticalCorner.count || 0) * (verticalCorner.height || 0), 0);
     }
 
     function totalHorizontalLm() {
-      return horizontalCorners.reduce(function (sum, corner) {
-        return sum + Math.max((corner.count || 0) * (corner.length || 0), 0);
-      }, 0);
+      return Math.max((horizontalCorner.count || 0) * (horizontalCorner.height || 0), 0);
     }
 
     function createOpening(defaultName) {
@@ -707,114 +692,6 @@
 
       syncPrimaryWallFields();
     }
-
-    function parseCornerIndex(node) {
-      return parseInt(node.getAttribute('data-corner'), 10);
-    }
-
-    function renderVerticalCorners() {
-      verticalCornersListEl.innerHTML = '';
-      var canRemove = verticalCorners.length > 1;
-      verticalCorners.forEach(function (corner, cornerIndex) {
-        var panel = document.createElement('div');
-        panel.className = 'rb-calc-wall-panel' + (corner.collapsed ? ' is-collapsed' : '');
-        panel.setAttribute('data-corner-type', 'vertical');
-        panel.setAttribute('data-corner-index', String(cornerIndex));
-        panel.innerHTML = ''
-          + '<div class="rb-calc-wall-panel-head">'
-          + '  <span class="rb-calc-wall-panel-num">' + (cornerIndex + 1) + '</span>'
-          + '  <span class="rb-calc-wall-panel-title">Верт. угол ' + (cornerIndex + 1) + '</span>'
-          + '  <button type="button" class="rb-calc-panel-toggle" data-corner-action="toggle" data-corner-type="vertical" data-corner="' + cornerIndex + '" aria-expanded="' + (!corner.collapsed) + '" aria-label="Развернуть или свернуть"><span class="rb-calc-panel-toggle-icon" aria-hidden="true">▸</span></button>'
-          + '  <span class="rb-calc-wall-panel-summary">' + verticalCornerSummary(corner) + '</span>'
-          + '  <button type="button" class="rb-calc-wall-panel-remove" data-corner-action="remove" data-corner-type="vertical" data-corner="' + cornerIndex + '"'
-          + (canRemove ? '' : ' disabled')
-          + ' title="' + (canRemove ? 'Удалить' : 'Нужен минимум один') + '" aria-label="Удалить угол">×</button>'
-          + '</div>'
-          + '<div class="rb-calc-wall-panel-body">'
-          + '<div class="rb-calc-wall-grid">'
-          + '  <label class="block"><span class="rb-calc-inline-label block">Кол-во углов</span>'
-          + '    <input data-corner-action="count" data-corner-type="vertical" data-corner="' + cornerIndex + '" type="number" min="0" step="1" value="' + (corner.count || 0) + '" class="rb-calc-input h-9 text-center" /></label>'
-          + '  <label class="block"><span class="rb-calc-inline-label block">Высота (м)</span>'
-          + '    <input data-corner-action="height" data-corner-type="vertical" data-corner="' + cornerIndex + '" type="number" min="0" step="0.01" value="' + (corner.height || 0) + '" class="rb-calc-input h-9 text-center" /></label>'
-          + '</div></div>';
-        verticalCornersListEl.appendChild(panel);
-      });
-    }
-
-    function renderHorizontalCorners() {
-      horizontalCornersListEl.innerHTML = '';
-      var canRemove = horizontalCorners.length > 1;
-      horizontalCorners.forEach(function (corner, cornerIndex) {
-        var panel = document.createElement('div');
-        panel.className = 'rb-calc-wall-panel' + (corner.collapsed ? ' is-collapsed' : '');
-        panel.setAttribute('data-corner-type', 'horizontal');
-        panel.setAttribute('data-corner-index', String(cornerIndex));
-        panel.innerHTML = ''
-          + '<div class="rb-calc-wall-panel-head">'
-          + '  <span class="rb-calc-wall-panel-num">' + (cornerIndex + 1) + '</span>'
-          + '  <span class="rb-calc-wall-panel-title">Гориз. угол ' + (cornerIndex + 1) + '</span>'
-          + '  <button type="button" class="rb-calc-panel-toggle" data-corner-action="toggle" data-corner-type="horizontal" data-corner="' + cornerIndex + '" aria-expanded="' + (!corner.collapsed) + '" aria-label="Развернуть или свернуть"><span class="rb-calc-panel-toggle-icon" aria-hidden="true">▸</span></button>'
-          + '  <span class="rb-calc-wall-panel-summary">' + horizontalCornerSummary(corner) + '</span>'
-          + '  <button type="button" class="rb-calc-wall-panel-remove" data-corner-action="remove" data-corner-type="horizontal" data-corner="' + cornerIndex + '"'
-          + (canRemove ? '' : ' disabled')
-          + ' title="' + (canRemove ? 'Удалить' : 'Нужен минимум один') + '" aria-label="Удалить угол">×</button>'
-          + '</div>'
-          + '<div class="rb-calc-wall-panel-body">'
-          + '<div class="rb-calc-wall-grid">'
-          + '  <label class="block"><span class="rb-calc-inline-label block">Кол-во линий</span>'
-          + '    <input data-corner-action="count" data-corner-type="horizontal" data-corner="' + cornerIndex + '" type="number" min="0" step="1" value="' + (corner.count || 0) + '" class="rb-calc-input h-9 text-center" /></label>'
-          + '  <label class="block"><span class="rb-calc-inline-label block">Длина (м)</span>'
-          + '    <input data-corner-action="length" data-corner-type="horizontal" data-corner="' + cornerIndex + '" type="number" min="0" step="0.01" value="' + (corner.length || 0) + '" class="rb-calc-input h-9 text-center" /></label>'
-          + '</div></div>';
-        horizontalCornersListEl.appendChild(panel);
-      });
-    }
-
-    function updateCornerPanel(type, cornerIndex) {
-      var listEl = type === 'vertical' ? verticalCornersListEl : horizontalCornersListEl;
-      var corner = type === 'vertical' ? verticalCorners[cornerIndex] : horizontalCorners[cornerIndex];
-      if (!listEl || !corner) return;
-      var panel = listEl.querySelector('[data-corner-index="' + cornerIndex + '"]');
-      if (!panel) return;
-      var summaryEl = panel.querySelector('.rb-calc-wall-panel-summary');
-      if (summaryEl) {
-        summaryEl.textContent = type === 'vertical' ? verticalCornerSummary(corner) : horizontalCornerSummary(corner);
-      }
-    }
-
-    function handleCornerInput(actionNode) {
-      var action = actionNode.dataset.cornerAction || '';
-      var type = actionNode.getAttribute('data-corner-type') || '';
-      var cornerIndex = parseCornerIndex(actionNode);
-      var list = type === 'vertical' ? verticalCorners : horizontalCorners;
-      if (!Number.isInteger(cornerIndex) || !list[cornerIndex]) return;
-      var corner = list[cornerIndex];
-      if (action === 'count') corner.count = Math.max(parseInt(actionNode.value, 10) || 0, 0);
-      if (action === 'height' && type === 'vertical') corner.height = Math.max(parseFloat(actionNode.value) || 0, 0);
-      if (action === 'length' && type === 'horizontal') corner.length = Math.max(parseFloat(actionNode.value) || 0, 0);
-      updateCornerPanel(type, cornerIndex);
-      recalc();
-    }
-
-    function handleCornerClick(actionNode) {
-      var action = actionNode.dataset.cornerAction || '';
-      var type = actionNode.getAttribute('data-corner-type') || '';
-      var cornerIndex = parseCornerIndex(actionNode);
-      var list = type === 'vertical' ? verticalCorners : horizontalCorners;
-      if (!Number.isInteger(cornerIndex) || !list[cornerIndex]) return;
-      if (action === 'toggle') {
-        list[cornerIndex].collapsed = !list[cornerIndex].collapsed;
-        if (type === 'vertical') renderVerticalCorners(); else renderHorizontalCorners();
-        return;
-      }
-      if (action === 'remove') {
-        if (list.length <= 1) return;
-        list.splice(cornerIndex, 1);
-        if (type === 'vertical') renderVerticalCorners(); else renderHorizontalCorners();
-        recalc();
-      }
-    }
-
 
     function syncWallsByPerimeter() {
       var l = Math.max(parseFloat(lengthEl.value) || 0, 0);
@@ -1027,6 +904,7 @@
     }
 
     function recalc() {
+      readCornersFromInputs();
       var totals = computeCalculatorTotals();
       var packs = totals.packs;
       var wallsPrice = totals.wallsPrice;
@@ -1207,41 +1085,9 @@
       });
     }
 
-    addVerticalCornerBtn.addEventListener('click', function () {
-      var last = verticalCorners[verticalCorners.length - 1];
-      verticalCorners.forEach(function (c) { c.collapsed = true; });
-      verticalCorners.push(createVerticalCorner(last ? last.count : 1, last ? last.height : 3, false));
-      renderVerticalCorners();
-      recalc();
-    });
-
-    addHorizontalCornerBtn.addEventListener('click', function () {
-      var last = horizontalCorners[horizontalCorners.length - 1];
-      horizontalCorners.forEach(function (c) { c.collapsed = true; });
-      horizontalCorners.push(createHorizontalCorner(last ? last.count : 1, last ? last.length : 10, false));
-      renderHorizontalCorners();
-      recalc();
-    });
-
-    verticalCornersListEl.addEventListener('input', function (e) {
-      var node = e.target && e.target.closest ? e.target.closest('[data-corner-action]') : null;
-      if (!node) return;
-      handleCornerInput(node);
-    });
-    horizontalCornersListEl.addEventListener('input', function (e) {
-      var node = e.target && e.target.closest ? e.target.closest('[data-corner-action]') : null;
-      if (!node) return;
-      handleCornerInput(node);
-    });
-    verticalCornersListEl.addEventListener('click', function (e) {
-      var node = e.target && e.target.closest ? e.target.closest('[data-corner-action]') : null;
-      if (!node) return;
-      handleCornerClick(node);
-    });
-    horizontalCornersListEl.addEventListener('click', function (e) {
-      var node = e.target && e.target.closest ? e.target.closest('[data-corner-action]') : null;
-      if (!node) return;
-      handleCornerClick(node);
+    [verticalCornerCountEl, verticalCornerHeightEl, horizontalCornerCountEl, horizontalCornerHeightEl].forEach(function (field) {
+      field.addEventListener('input', recalc);
+      field.addEventListener('change', recalc);
     });
 
     if (calcResetBtn) {
@@ -1261,11 +1107,10 @@
         if (hLabel) hLabel.textContent = 'Выберите материал';
 
         walls = [createWall(10, 3, true)];
-        verticalCorners = [createVerticalCorner(4, 3, true)];
-        horizontalCorners = [createHorizontalCorner(2, 10, true)];
+        verticalCorner = { count: 4, height: 3 };
+        horizontalCorner = { count: 2, height: 10 };
+        syncCornerInputsFromState();
         renderWalls();
-        renderVerticalCorners();
-        renderHorizontalCorners();
         recalc();
       });
     }
@@ -1293,11 +1138,8 @@
       // keep linter happy, sections are passed for future grouped rendering
     }
 
-    verticalCorners = [createVerticalCorner(4, 3, true)];
-    horizontalCorners = [createHorizontalCorner(2, 10, true)];
+    syncCornerInputsFromState();
     syncWallsByPerimeter();
-    renderVerticalCorners();
-    renderHorizontalCorners();
     recalc();
   }
 

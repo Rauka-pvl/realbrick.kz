@@ -45,16 +45,6 @@
           <div class="rounded-2xl border border-white/10 bg-charcoal/30 overflow-hidden">
             <img src="{{ $productImage ?: asset('storage/assets/collection-1.png') }}" alt="{{ $productName }}" class="w-full h-[360px] object-contain bg-charcoal/60" />
           </div>
-          @php($thumbs = collect($productImages ?? [])->filter()->unique()->reject(function ($u) use ($productImage) { return $u === $productImage; })->values()->take(4))
-          @if($thumbs->isNotEmpty())
-          <div class="mt-4 flex gap-3">
-            @foreach($thumbs as $thumb)
-              <div class="h-20 w-24 rounded-xl overflow-hidden border border-white/10 bg-charcoal/30">
-                <img src="{{ $thumb }}" alt="{{ $productName }}" class="h-full w-full object-contain bg-charcoal/60" />
-              </div>
-            @endforeach
-          </div>
-          @endif
         </div>
 
         <div class="pt-1">
@@ -70,7 +60,7 @@
           <div class="mt-5 grid grid-cols-1 gap-2 text-sm text-offwhite/75">
             <div><span class="text-muted">Категория:</span> <span class="ml-1 text-offwhite/90">{{ $categoryName ?: '—' }}</span></div>
             <div><span class="text-muted">Подкатегория:</span> <span class="ml-1 text-offwhite/90">{{ $subcategoryName ?: '—' }}</span></div>
-            <div><span class="text-muted">Цена:</span> <span class="ml-1 text-gold">{{ !empty($productPriceValue) ? number_format((float) $productPriceValue, 0, '.', ' ') . ' тг' : 'по запросу' }}</span></div>
+            <div><span class="text-muted">Цена:</span> <span class="ml-1 text-gold">{{ !empty($productPriceValue) ? number_format((float) $productPriceValue, 0, '.', ' ') . ' $' : 'по запросу' }}</span></div>
           </div>
 
           <div class="mt-6">
@@ -93,7 +83,7 @@
               <input type="hidden" name="slug" value="{{ request()->route('slug') }}">
               <input type="hidden" name="image_url" value="{{ $productImage ?? '' }}">
               <input type="hidden" name="price_value" value="{{ $productPriceValue ?? '' }}">
-              <input type="hidden" name="price_currency" value="{{ $productPriceCurrency ?? 'KZT' }}">
+              <input type="hidden" name="price_currency" value="{{ $productPriceCurrency ?? 'USD' }}">
               <input type="hidden" name="qty" value="1">
               <button type="submit" class="rounded-full bg-gold px-7 py-3 text-sm font-bold uppercase tracking-wider text-nearblack hover:opacity-90 transition">Добавить в корзину</button>
             </form>

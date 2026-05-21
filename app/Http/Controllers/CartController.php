@@ -224,7 +224,7 @@ class CartController extends Controller
             'slug' => (string) ($data['slug'] ?? ''),
             'image_url' => (string) ($data['image_url'] ?? ''),
             'price_value' => isset($data['price_value']) ? (float) $data['price_value'] : null,
-            'price_currency' => isset($data['price_currency']) ? (string) $data['price_currency'] : 'KZT',
+            'price_currency' => isset($data['price_currency']) ? (string) $data['price_currency'] : 'USD',
             'qty' => $qty,
         ];
     }
@@ -244,7 +244,7 @@ class CartController extends Controller
             $qty = max(1, (int) ($item['qty'] ?? 1));
             $price = (float) ($item['price_value'] ?? 0);
             $amount = $price * $qty;
-            $lines[] = "- {$name} x {$qty}".($price > 0 ? " ({$price} KZT, сумма {$amount} KZT)" : '');
+            $lines[] = "- {$name} x {$qty}".($price > 0 ? " ({$price} USD, сумма {$amount} USD)" : '');
         }
 
         return implode("\n", $lines);

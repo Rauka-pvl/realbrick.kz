@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Support\Bitrix24CatalogImageUrls;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
@@ -153,9 +154,18 @@ class Bitrix24CatalogSyncService
                     'synced_at' => $now,
                 ];
                 if ($hasImageCols) {
+                    $apiMedia = $this->mediaFromProperty172((int) $p['id'], $p['property172Raw'] ?? null);
                     $prev = $preservedMedia[(int) $p['id']] ?? null;
-                    $row['image_url'] = $prev['image_url'] ?? null;
-                    $row['gallery_json'] = $prev['gallery_json'] ?? null;
+                    if ($apiMedia['image_url'] !== null) {
+                        $row['image_url'] = $apiMedia['image_url'];
+                    } else {
+                        $prevImage = $prev['image_url'] ?? null;
+                        if ($this->preferBitrixFallbackUrls() && $this->isLocalStorageImagePath($prevImage)) {
+                            $prevImage = null;
+                        }
+                        $row['image_url'] = $prevImage;
+                    }
+                    $row['gallery_json'] = null;
                 }
                 if ($hasPhotoPropertyRawCol) {
                     $row['photo_property_raw'] = $p['property172Stored'] ?? null;
@@ -175,6 +185,58 @@ class Bitrix24CatalogSyncService
         ]);
 
         return true;
+    }
+
+    /**
+     * Заполняет image_url / gallery_json из photo_property_raw (без повторного API sync).
+     */
+    public function backfillProductImageUrls(): int
+    {
+        $db = DB::connection($this->dbConnection);
+        $schema = Schema::connection($this->dbConnection);
+        if (! $schema->hasColumn('bitrix24_catalog_products', 'image_url')
+            || ! $schema->hasColumn('bitrix24_catalog_products', 'photo_property_raw')) {
+            return 0;
+        }
+
+        $updated = 0;
+        $rows = $db->table('bitrix24_catalog_products')
+            ->select('bitrix_id', 'photo_property_raw')
+            ->whereNotNull('photo_property_raw')
+            ->where('photo_property_raw', '!=', '')
+            ->get();
+
+        foreach ($rows as $row) {
+            $productId = (int) $row->bitrix_id;
+            $raw = $this->decodePhotoPropertyRaw((string) $row->photo_property_raw);
+            $media = $this->mediaFromProperty172($productId, $raw);
+            if ($media['image_url'] === null) {
+                continue;
+            }
+            $db->table('bitrix24_catalog_products')
+                ->where('bitrix_id', $productId)
+                ->update([
+                    'image_url' => $media['image_url'],
+                    'gallery_json' => null,
+                ]);
+            $updated++;
+        }
+
+        return $updated;
+    }
+
+    protected function decodePhotoPropertyRaw(string $stored): mixed
+    {
+        $trim = trim($stored);
+        if ($trim === '') {
+            return null;
+        }
+        $decoded = json_decode($trim, true);
+        if (json_last_error() === JSON_ERROR_NONE) {
+            return $decoded;
+        }
+
+        return $trim;
     }
 
     protected function fetchAllSections(string $baseUrl): ?array
@@ -303,6 +365,7 @@ class Bitrix24CatalogSyncService
                     'property130' => $this->extractProductProperty($arr, 'property130'),
                     'property186' => $this->extractProductProperty($arr, 'property186'),
                     'property164' => $this->extractProductProperty($arr, 'property164'),
+                    'property172Raw' => $rawPhoto,
                     'property172Stored' => $this->serializeProperty172ForStorage($rawPhoto),
                 ];
             }
@@ -363,7 +426,7 @@ class Bitrix24CatalogSyncService
                 }
                 $out[$productId] = [
                     'priceValue' => $priceValue,
-                    'priceCurrency' => $this->extractProductCurrency($arr) ?? 'KZT',
+                    'priceCurrency' => $this->extractProductCurrency($arr) ?? 'USD',
                 ];
             }
 
@@ -589,5 +652,69 @@ class Bitrix24CatalogSyncService
         }
 
         return trim((string) $raw);
+    }
+
+    /**
+     * @return array{image_url: ?string, gallery_json: ?string}
+     */
+    protected function mediaFromProperty172(int $productId, mixed $rawPhoto): array
+    {
+        if ($productId <= 0 || $rawPhoto === null || $rawPhoto === '') {
+            return ['image_url' => null, 'gallery_json' => null];
+        }
+
+        $photoService = app(Bitrix24CatalogProductPhotosDownloadService::class);
+        $fileIds = $photoService->fileIdsFromPropertyValue($rawPhoto);
+        if ($fileIds === []) {
+            $pathFromUrl = $this->downloadPathFromPropertyValue($rawPhoto);
+            if ($pathFromUrl === null) {
+                return ['image_url' => null, 'gallery_json' => null];
+            }
+
+            return ['image_url' => $pathFromUrl, 'gallery_json' => null];
+        }
+
+        $paths = [];
+        foreach ($fileIds as $fileId) {
+            $paths[] = Bitrix24CatalogImageUrls::bitrixDownloadPath($productId, $fileId, $this->photoFieldName);
+        }
+
+        return [
+            'image_url' => $paths[0],
+            'gallery_json' => null,
+        ];
+    }
+
+    protected function preferBitrixFallbackUrls(): bool
+    {
+        return (bool) env('BITRIX24_IMAGES_FALLBACK_ONLY', false);
+    }
+
+    protected function isLocalStorageImagePath(?string $path): bool
+    {
+        if ($path === null || trim($path) === '') {
+            return false;
+        }
+        $trim = str_replace('\\', '/', trim($path));
+        if (preg_match('#^https?://#i', $trim) && str_contains($trim, '/storage/')) {
+            return true;
+        }
+
+        return str_contains($trim, 'storage/')
+            || str_contains($trim, 'bitrix-catalog/');
+    }
+
+    protected function downloadPathFromPropertyValue(mixed $rawPhoto): ?string
+    {
+        $encoded = json_encode($rawPhoto, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+        if ($encoded === false || ! str_contains($encoded, 'catalog.product.download')) {
+            return null;
+        }
+        if (preg_match('#/catalog\.product\.download\?[^"\s]+#', $encoded, $m) !== 1) {
+            return null;
+        }
+        $path = urldecode(stripslashes($m[0]));
+
+        return Bitrix24CatalogImageUrls::pathForStorage($path);
     }
 }

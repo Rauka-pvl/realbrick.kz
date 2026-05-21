@@ -329,7 +329,7 @@
             </div>
             <div class="rb-cart-qty">
               <strong data-cart-item-amount>{{ !empty($item['price_value']) ? number_format((float) $item['price_value'] * (int) $item['qty'], 0, '.', ' ') : 0 }}</strong>
-              тг
+              $
             </div>
           </article>
         @endforeach
@@ -339,7 +339,7 @@
         <h2>Итого</h2>
         <div class="rb-summary-row">
           <span>Товары ({{ $items->count() }})</span>
-          <span data-cart-total>{{ number_format((float) ($totalAmount ?? 0), 0, '.', ' ') }} тг</span>
+          <span data-cart-total>{{ number_format((float) ($totalAmount ?? 0), 0, '.', ' ') }} $</span>
         </div>
         <div class="rb-summary-row">
           <span>Доставка</span>
@@ -347,7 +347,7 @@
         </div>
         <div class="rb-summary-total">
           <span>К оплате</span>
-          <span data-cart-total>{{ number_format((float) ($totalAmount ?? 0), 0, '.', ' ') }} тг</span>
+          <span data-cart-total>{{ number_format((float) ($totalAmount ?? 0), 0, '.', ' ') }} $</span>
         </div>
 
         <h3 class="rb-checkout-title">Оформление заказа</h3>
@@ -385,7 +385,7 @@
 
     const formatAmount = (value) => {
       const num = Number(value || 0);
-      return `${Math.round(num).toLocaleString('ru-RU')} тг`;
+      return `${Math.round(num).toLocaleString('ru-RU')} $`;
     };
 
     const setTotals = (amount) => {

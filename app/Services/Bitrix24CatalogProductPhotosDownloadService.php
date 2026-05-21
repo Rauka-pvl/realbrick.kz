@@ -40,6 +40,12 @@ class Bitrix24CatalogProductPhotosDownloadService
 
     public function run(Command $command, ?int $rootSectionId = null, ?int $fromProductId = null): int
     {
+        if (! (bool) env('BITRIX24_PHOTO_DOWNLOAD_ENABLED', true)) {
+            $command->warn('Скачивание фото отключено (BITRIX24_PHOTO_DOWNLOAD_ENABLED=false).');
+
+            return Command::SUCCESS;
+        }
+
         $rootSectionId ??= (int) config('services.bitrix24.root_section_id', 22);
         if ($fromProductId !== null && $fromProductId <= 0) {
             $fromProductId = null;

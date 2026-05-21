@@ -84,9 +84,17 @@ class HomeController extends Controller
 
     private function getSectionCoverUrl(int $sectionId): ?string
     {
+        if ($sectionId <= 0) {
+            return null;
+        }
+
         $raw = DB::connection('diller')
-            ->table('bitrix24_catalog_sections')
-            ->where('bitrix_id', $sectionId)
+            ->table('bitrix24_catalog_products')
+            ->where('section_bitrix_id', $sectionId)
+            ->where('active', true)
+            ->whereNotNull('image_url')
+            ->where('image_url', '!=', '')
+            ->orderBy('name')
             ->value('image_url');
 
         return $this->resolveProductImageDisplayUrl($raw !== null && $raw !== '' ? (string) $raw : null);

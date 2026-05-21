@@ -22,6 +22,12 @@ final class Bitrix24CatalogImageUrls
             return null;
         }
 
+        // Fallback-only mode: skip local storage asset resolution.
+        // Absolute URLs are still allowed and returned as-is.
+        if ((bool) env('BITRIX24_IMAGES_FALLBACK_ONLY', false) === true) {
+            return preg_match('#^https?://#i', $trim) ? $trim : null;
+        }
+
         if (preg_match('#^https?://#i', $trim)) {
             return $trim;
         }
@@ -73,6 +79,20 @@ final class Bitrix24CatalogImageUrls
         }
 
         return $normalized;
+    }
+
+    /**
+     * Относительный путь Bitrix REST для скачивания/показа файла товара (без домена и вебхука).
+     */
+    public static function bitrixDownloadPath(int $productId, int $fileId, string $fieldName = 'property172'): string
+    {
+        return '/catalog.product.download?'.http_build_query([
+            'fields' => [
+                'fieldName' => $fieldName,
+                'fileId' => $fileId,
+                'productId' => $productId,
+            ],
+        ]);
     }
 
     /**

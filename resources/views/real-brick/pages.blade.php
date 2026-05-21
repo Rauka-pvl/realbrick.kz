@@ -1551,7 +1551,16 @@
               <div class="rb-calc-card rb-calc-secondary-card p-3">
                 <p class="rb-calc-secondary-title">Угловые элементы</p>
                 <p class="rb-calc-corner-group-title mt-2">Вертикальные углы (по высоте)</p>
-                <div id="calc-vertical-corners-list" class="rb-calc-items-list"></div>
+                <div class="rb-calc-wall-grid mt-2">
+                  <label class="block">
+                    <span class="rb-calc-inline-label block">Кол-во углов</span>
+                    <input id="calc-vertical-corners-count" type="number" min="0" step="1" value="4" class="rb-calc-input h-9 text-center" />
+                  </label>
+                  <label class="block">
+                    <span class="rb-calc-inline-label block">Высота (м)</span>
+                    <input id="calc-vertical-corners-height" type="number" min="0" step="0.01" value="3" class="rb-calc-input h-9 text-center" />
+                  </label>
+                </div>
                 <div class="relative mt-2" id="calc-vertical-picker">
                   <button type="button" id="calc-vertical-trigger" class="rb-calc-input rb-calc-dropdown-pill flex items-center justify-between text-left">
                     <span id="calc-vertical-selected-label" class="min-w-0 flex-1 truncate pr-2 text-[11px]">Выберите материал</span>
@@ -1565,13 +1574,18 @@
                   </div>
                   <select id="calc-vertical-material" class="hidden"></select>
                 </div>
-                <button type="button" id="calc-add-vertical-corner" class="rb-calc-btn-gold rb-calc-add-cta mt-2 h-9 w-full">
-                  <span class="rb-calc-add-cta-plus" aria-hidden="true">+</span>
-                  <span>Добавить верт. угол</span>
-                </button>
 
                 <p class="rb-calc-corner-group-title mt-3">Горизонтальные углы (по длине)</p>
-                <div id="calc-horizontal-corners-list" class="rb-calc-items-list"></div>
+                <div class="rb-calc-wall-grid mt-2">
+                  <label class="block">
+                    <span class="rb-calc-inline-label block">Кол-во углов</span>
+                    <input id="calc-horizontal-corners-count" type="number" min="0" step="1" value="2" class="rb-calc-input h-9 text-center" />
+                  </label>
+                  <label class="block">
+                    <span class="rb-calc-inline-label block">Высота (м)</span>
+                    <input id="calc-horizontal-corners-height" type="number" min="0" step="0.01" value="10" class="rb-calc-input h-9 text-center" />
+                  </label>
+                </div>
                 <div class="relative mt-2" id="calc-horizontal-picker">
                   <button type="button" id="calc-horizontal-trigger" class="rb-calc-input rb-calc-dropdown-pill flex items-center justify-between text-left">
                     <span id="calc-horizontal-selected-label" class="min-w-0 flex-1 truncate pr-2 text-[11px]">Выберите материал</span>
@@ -1585,10 +1599,6 @@
                   </div>
                   <select id="calc-horizontal-material" class="hidden"></select>
                 </div>
-                <button type="button" id="calc-add-horizontal-corner" class="rb-calc-btn-gold rb-calc-add-cta mt-2 h-9 w-full">
-                  <span class="rb-calc-add-cta-plus" aria-hidden="true">+</span>
-                  <span>Добавить гориз. угол</span>
-                </button>
 
                 <button type="button" id="calc-reset" class="rb-calc-btn-dark mt-2 h-9 w-full text-[10px]">Сбросить</button>
               </div>
@@ -1597,7 +1607,7 @@
             <aside class="rb-calc-summary-card p-4">
               <p class="text-[10px] font-semibold uppercase tracking-[0.08em] text-white/72">Итог материалов</p>
               <div class="mt-2 flex items-end gap-2">
-                <p id="calc-total-price" class="text-[52px] font-semibold leading-none text-gold">0 ₽</p>
+                <p id="calc-total-price" class="text-[52px] font-semibold leading-none text-gold">0 $</p>
 
               </div>
               <p class="mt-1 text-[11px] text-white/55">Ориентировочная стоимость</p>
@@ -1632,7 +1642,7 @@
 
           <div class="hidden">
             <button type="button" id="calc-run"></button>
-            <span id="calc-total-price-dup">0 ₽</span>
+            <span id="calc-total-price-dup">0 $</span>
             <span id="calc-pack-coverage">0 шт</span>
             <span id="calc-info-tile">0 шт/м²</span>
             <span id="calc-info-v-corner">0 п.м.</span>

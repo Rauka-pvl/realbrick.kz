@@ -121,7 +121,7 @@ class CatalogController extends Controller
 
         $product = DB::connection('diller')
             ->table('bitrix24_catalog_products')
-            ->select('bitrix_id', 'name', 'image_url', 'gallery_json', 'path_parts', 'section_bitrix_id', 'price_value', 'price_currency', 'size')
+            ->select('bitrix_id', 'name', 'image_url', 'path_parts', 'section_bitrix_id', 'price_value', 'price_currency', 'size')
             ->where('active', true)
             ->orderBy('name')
             ->get()
@@ -172,34 +172,14 @@ class CatalogController extends Controller
                 ->values();
         }
 
-        $galleryPaths = [];
-        if (isset($product->gallery_json) && $product->gallery_json !== null && $product->gallery_json !== '') {
-            $decoded = json_decode((string) $product->gallery_json, true);
-            if (is_array($decoded)) {
-                foreach ($decoded as $path) {
-                    if (is_string($path) && $path !== '') {
-                        $galleryPaths[] = $path;
-                    }
-                }
-            }
-        }
-        $galleryUrls = collect($galleryPaths)
-            ->map(fn (string $p) => $this->resolveProductImageDisplayUrl($p))
-            ->filter()
-            ->unique()
-            ->values()
-            ->all();
-
-        $mainImage = $galleryUrls[0] ?? $this->resolveProductImageDisplayUrl(
+        $productImage = $this->resolveProductImageDisplayUrl(
             isset($product->image_url) && $product->image_url !== '' ? (string) $product->image_url : null
         );
-        $productImages = $galleryUrls !== [] ? $galleryUrls : ($mainImage ? [$mainImage] : []);
 
         return view('real-brick.catalog.product', [
             'productName' => $this->localizeName((string) $product->name, $lang),
             'productBitrixId' => (int) $product->bitrix_id,
-            'productImage' => $mainImage,
-            'productImages' => $productImages,
+            'productImage' => $productImage,
             'productPriceValue' => isset($product->price_value) ? (float) $product->price_value : null,
             'productPriceCurrency' => isset($product->price_currency) ? (string) $product->price_currency : null,
             'productSize' => isset($product->size) ? trim((string) $product->size) : null,
@@ -310,19 +290,18 @@ class CatalogController extends Controller
 
     private function getSectionCoverUrl(int $sectionId): ?string
     {
-        $raw = DB::connection('diller')
-            ->table('bitrix24_catalog_sections')
-            ->where('bitrix_id', $sectionId)
-            ->value('image_url');
-
-        if ($raw === null || trim((string) $raw) === '') {
-            $raw = DB::connection('diller')
-                ->table('bitrix24_catalog_products')
-                ->where('section_bitrix_id', $sectionId)
-                ->where('active', true)
-                ->orderBy('name')
-                ->value('image_url');
+        if ($sectionId <= 0) {
+            return null;
         }
+
+        $raw = DB::connection('diller')
+            ->table('bitrix24_catalog_products')
+            ->where('section_bitrix_id', $sectionId)
+            ->where('active', true)
+            ->whereNotNull('image_url')
+            ->where('image_url', '!=', '')
+            ->orderBy('name')
+            ->value('image_url');
 
         return $this->resolveProductImageDisplayUrl($raw !== null && $raw !== '' ? (string) $raw : null);
     }

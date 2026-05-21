@@ -40,10 +40,30 @@ Artisan::command('bitrix:catalog-sync', function (Bitrix24CatalogSyncService $sy
 
     $sections = DB::connection($connection)->table('bitrix24_catalog_sections')->count();
     $products = DB::connection($connection)->table('bitrix24_catalog_products')->count();
-    $this->info("Готово. Разделов: {$sections}, товаров: {$products}");
+    $withImages = DB::connection($connection)->table('bitrix24_catalog_products')
+        ->whereNotNull('image_url')
+        ->where('image_url', '!=', '')
+        ->count();
+    $this->info("Готово. Разделов: {$sections}, товаров: {$products}, с image_url: {$withImages}");
 
     return self::SUCCESS;
 })->purpose('Sync Bitrix24 catalog to local database');
+
+Artisan::command('bitrix:catalog-backfill-image-urls', function (Bitrix24CatalogSyncService $syncService) {
+    $connection = (string) config('services.bitrix24.db_connection', 'diller');
+    $schema = Schema::connection($connection);
+    if (! $schema->hasTable('bitrix24_catalog_products')) {
+        $this->error("Таблица bitrix24_catalog_products не найдена ({$connection}).");
+
+        return self::FAILURE;
+    }
+
+    $this->line("Заполнение image_url из photo_property_raw ({$connection})...");
+    $updated = $syncService->backfillProductImageUrls();
+    $this->info("Готово. Обновлено товаров: {$updated}");
+
+    return self::SUCCESS;
+})->purpose('Fill image_url with Bitrix catalog.product.download paths from photo_property_raw');
 
 Artisan::command('bitrix:catalog-download-photos {--section= : Корневой раздел Bitrix (по умолчанию BITRIX24_ROOT_SECTION_ID, обычно 22)} {--from= : Минимальный bitrix id товара (обрабатываются только id >= from)}', function (Bitrix24CatalogProductPhotosDownloadService $downloadService) {
     $connection = (string) config('services.bitrix24.db_connection', 'diller');
