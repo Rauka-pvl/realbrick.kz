@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Support\Bitrix24CatalogImageUrls;
+use App\Support\CatalogSectionCover;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
@@ -16,7 +16,7 @@ class CatalogController extends Controller
 
         $sections = DB::connection('diller')
             ->table('bitrix24_catalog_sections')
-            ->select('bitrix_id', 'name', 'path_parts')
+            ->select(CatalogSectionCover::sectionSelectColumns())
             ->where('parent_bitrix_id', $rootSectionId)
             ->where('excluded', false)
             ->orderBy('name')
@@ -28,7 +28,10 @@ class CatalogController extends Controller
                     'id' => (int) $row->bitrix_id,
                     'name' => $this->localizeName((string) $row->name, $lang),
                     'slug' => $this->slugFromPathParts($parts),
-                    'cover_url' => $this->getSectionCoverUrl((int) $row->bitrix_id),
+                    'cover_url' => CatalogSectionCover::coverUrlForSection(
+                        (int) $row->bitrix_id,
+                        isset($row->image_url) ? (string) $row->image_url : null
+                    ),
                 ];
             })
             ->values();
@@ -64,7 +67,7 @@ class CatalogController extends Controller
 
         $leftSections = DB::connection('diller')
             ->table('bitrix24_catalog_sections')
-            ->select('bitrix_id', 'name', 'path_parts')
+            ->select(CatalogSectionCover::sectionSelectColumns())
             ->where('parent_bitrix_id', $sectionId)
             ->where('excluded', false)
             ->orderBy('name')
@@ -76,7 +79,10 @@ class CatalogController extends Controller
                     'id' => (int) $row->bitrix_id,
                     'name' => $this->localizeName((string) $row->name, $lang),
                     'slug' => $this->slugFromPathParts($parts),
-                    'cover_url' => $this->getSectionCoverUrl((int) $row->bitrix_id),
+                    'cover_url' => CatalogSectionCover::coverUrlForSection(
+                        (int) $row->bitrix_id,
+                        isset($row->image_url) ? (string) $row->image_url : null
+                    ),
                 ];
             })
             ->values();
@@ -95,7 +101,7 @@ class CatalogController extends Controller
                     'id' => (int) $row->bitrix_id,
                     'name' => $this->localizeName((string) $row->name, $lang),
                     'slug' => $this->slugFromPathParts($parts),
-                    'image_url' => $this->resolveProductImageDisplayUrl(
+                    'image_url' => CatalogSectionCover::resolveDisplayUrl(
                         isset($row->image_url) && $row->image_url !== '' ? (string) $row->image_url : null
                     ),
                     'price_value' => isset($row->price_value) ? (float) $row->price_value : null,
@@ -162,7 +168,7 @@ class CatalogController extends Controller
                         'id' => (int) $row->bitrix_id,
                         'name' => $this->localizeName((string) $row->name, $lang),
                         'slug' => $this->slugFromPathParts($parts),
-                        'image_url' => $this->resolveProductImageDisplayUrl(
+                        'image_url' => CatalogSectionCover::resolveDisplayUrl(
                             isset($row->image_url) && $row->image_url !== '' ? (string) $row->image_url : null
                         ),
                         'price_value' => isset($row->price_value) ? (float) $row->price_value : null,
@@ -172,7 +178,7 @@ class CatalogController extends Controller
                 ->values();
         }
 
-        $productImage = $this->resolveProductImageDisplayUrl(
+        $productImage = CatalogSectionCover::resolveDisplayUrl(
             isset($product->image_url) && $product->image_url !== '' ? (string) $product->image_url : null
         );
 
@@ -195,31 +201,6 @@ class CatalogController extends Controller
         $lang = strtolower((string) $request->query('lang', 'ru'));
 
         return in_array($lang, ['ru', 'kz'], true) ? $lang : 'ru';
-    }
-
-    /**
-     * Как в Diller Bitrix24CatalogService::resolveProductImageDisplayUrl.
-     */
-    private function resolveProductImageDisplayUrl(?string $raw): ?string
-    {
-        if ($raw === null || trim($raw) === '') {
-            return null;
-        }
-        $rawTrim = trim($raw);
-        $localUrl = Bitrix24CatalogImageUrls::publicAssetUrl($rawTrim);
-        if ($localUrl !== null) {
-            return $localUrl;
-        }
-        $webhook = rtrim((string) env('DILLER_BITRIX24_REST_URL', ''), '/');
-        if ($webhook === '') {
-            return preg_match('#^https?://#i', $rawTrim) ? $rawTrim : null;
-        }
-        $normalized = Bitrix24CatalogImageUrls::pathForStorage($rawTrim);
-        if ($normalized === null || $normalized === '') {
-            return null;
-        }
-
-        return Bitrix24CatalogImageUrls::displayUrl($normalized, $webhook);
     }
 
     private function decodePathParts(?string $rawPathParts, string $fallbackName): array
@@ -286,24 +267,6 @@ class CatalogController extends Controller
         }
 
         return $out;
-    }
-
-    private function getSectionCoverUrl(int $sectionId): ?string
-    {
-        if ($sectionId <= 0) {
-            return null;
-        }
-
-        $raw = DB::connection('diller')
-            ->table('bitrix24_catalog_products')
-            ->where('section_bitrix_id', $sectionId)
-            ->where('active', true)
-            ->whereNotNull('image_url')
-            ->where('image_url', '!=', '')
-            ->orderBy('name')
-            ->value('image_url');
-
-        return $this->resolveProductImageDisplayUrl($raw !== null && $raw !== '' ? (string) $raw : null);
     }
 
     private function buildProductPathParts(object $product, ?object $section): array

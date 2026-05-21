@@ -102,6 +102,17 @@ class Bitrix24CatalogSyncService
         $hasPhotoPropertyRawCol = $schema->hasColumn('bitrix24_catalog_products', 'photo_property_raw');
         $hasArticleCol = $schema->hasColumn('bitrix24_catalog_products', 'article');
 
+        $hasSectionImageCol = $schema->hasColumn('bitrix24_catalog_sections', 'image_url');
+        $preservedSectionImages = [];
+        if ($hasSectionImageCol) {
+            foreach ($db->table('bitrix24_catalog_sections')->get(['bitrix_id', 'image_url']) as $row) {
+                $img = isset($row->image_url) ? trim((string) $row->image_url) : '';
+                if ($img !== '') {
+                    $preservedSectionImages[(int) $row->bitrix_id] = $img;
+                }
+            }
+        }
+
         $preservedMedia = [];
         if ($hasImageCols) {
             foreach ($db->table('bitrix24_catalog_products')->get(['bitrix_id', 'image_url', 'gallery_json']) as $row) {
@@ -119,7 +130,7 @@ class Bitrix24CatalogSyncService
             }
         }
 
-        $db->transaction(function () use ($sections, $productsToInsert, $productPaths, $db, $preservedMedia, $hasImageCols, $hasPhotoPropertyRawCol, $hasArticleCol) {
+        $db->transaction(function () use ($sections, $productsToInsert, $productPaths, $db, $preservedMedia, $preservedSectionImages, $hasImageCols, $hasPhotoPropertyRawCol, $hasArticleCol, $hasSectionImageCol) {
             $db->table('bitrix24_catalog_products')->delete();
             $db->table('bitrix24_catalog_sections')->delete();
 
@@ -128,14 +139,18 @@ class Bitrix24CatalogSyncService
                 if ($s['excluded'] ?? false) {
                     continue;
                 }
-                $db->table('bitrix24_catalog_sections')->insert([
+                $sectionRow = [
                     'bitrix_id' => $s['id'],
                     'name' => $s['name'],
                     'parent_bitrix_id' => $s['iblockSectionId'] ?? 0,
                     'path_parts' => json_encode($s['path_parts'] ?? []),
                     'excluded' => $s['excluded'] ?? false,
                     'synced_at' => $now,
-                ]);
+                ];
+                if ($hasSectionImageCol) {
+                    $sectionRow['image_url'] = $preservedSectionImages[(int) $s['id']] ?? null;
+                }
+                $db->table('bitrix24_catalog_sections')->insert($sectionRow);
             }
 
             foreach ($productsToInsert as $i => $p) {
