@@ -31,7 +31,7 @@ if (track) {
     let startX = 0;
     let isDragging = false;
 
-    const getGap = () => (window.matchMedia('(max-width: 768px)').matches ? 16 : 24);
+    const getGap = () => (window.matchMedia('(max-width: 1023px)').matches ? 16 : 24);
     const getCardStep = () => allCards[0].offsetWidth + getGap();
 
     const updateDots = () => {

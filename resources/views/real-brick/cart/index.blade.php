@@ -287,7 +287,7 @@
     <div class="rb-empty">
       Корзина пока пустая. Добавьте товары из каталога.
       <div class="mt-4">
-        <a href="{{ route('catalog.index', ['lang' => ($lang ?? 'ru')]) }}" class="inline-flex rounded-full border border-gold/70 px-5 py-2 text-sm text-gold hover:bg-gold/10">Перейти в каталог</a>
+        <a href="{{ route('catalog.index') }}" class="inline-flex rounded-full border border-gold/70 px-5 py-2 text-sm text-gold hover:bg-gold/10">Перейти в каталог</a>
       </div>
     </div>
   @else
@@ -306,7 +306,7 @@
               <h3>{{ $item['name'] }}</h3>
               <div class="rb-cart-meta">Код товара: {{ $item['id'] }}</div>
               @if(!empty($item['slug']))
-                <a href="{{ route('catalog.product', ['slug' => $item['slug'], 'lang' => ($lang ?? 'ru')]) }}" class="text-xs text-gold/90 hover:text-gold">Открыть товар</a>
+                <a href="{{ route('catalog.product', ['slug' => $item['slug']]) }}" class="text-xs text-gold/90 hover:text-gold">Открыть товар</a>
               @endif
               <div class="rb-cart-actions">
                 <button type="button" class="rb-cart-step" data-cart-step="-1" aria-label="Уменьшить количество">-</button>
@@ -320,7 +320,7 @@
                   aria-label="Количество"
                 >
                 <button type="button" class="rb-cart-step" data-cart-step="1" aria-label="Увеличить количество">+</button>
-                <form method="POST" action="{{ route('cart.remove', ['lang' => ($lang ?? 'ru')]) }}">
+                <form method="POST" action="{{ route('cart.remove') }}">
                   @csrf
                   <input type="hidden" name="id" value="{{ $item['id'] }}">
                   <button type="submit" class="rb-cart-btn rb-cart-remove">Удалить</button>
@@ -351,7 +351,7 @@
         </div>
 
         <h3 class="rb-checkout-title">Оформление заказа</h3>
-        <form method="POST" action="{{ route('cart.submit', ['lang' => ($lang ?? 'ru')]) }}">
+        <form method="POST" action="{{ route('cart.submit') }}">
           @csrf
           <input class="rb-checkout-field" name="name" type="text" required maxlength="255" value="{{ old('name') }}" placeholder="Ваше имя*" />
           @error('name')<p class="mb-2 text-xs text-red-300">{{ $message }}</p>@enderror
@@ -364,11 +364,11 @@
         </form>
 
         <div class="mt-3 flex items-center justify-between gap-2">
-          <form method="POST" action="{{ route('cart.clear', ['lang' => ($lang ?? 'ru')]) }}">
+          <form method="POST" action="{{ route('cart.clear') }}">
             @csrf
             <button type="submit" class="text-xs text-offwhite/65 hover:text-offwhite">Очистить корзину</button>
           </form>
-          <a href="{{ route('catalog.index', ['lang' => ($lang ?? 'ru')]) }}" class="text-xs text-gold/95 hover:text-gold">Вернуться в каталог</a>
+          <a href="{{ route('catalog.index') }}" class="text-xs text-gold/95 hover:text-gold">Вернуться в каталог</a>
         </div>
       </aside>
     </div>
@@ -379,7 +379,7 @@
 @push('scripts')
 <script>
   (() => {
-    const updateUrl = @json(route('cart.update', ['lang' => ($lang ?? 'ru')]));
+    const updateUrl = @json(route('cart.update'));
     const csrf = @json(csrf_token());
     const totals = Array.from(document.querySelectorAll('[data-cart-total]'));
 

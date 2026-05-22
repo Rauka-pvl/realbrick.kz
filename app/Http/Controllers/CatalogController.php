@@ -198,9 +198,7 @@ class CatalogController extends Controller
 
     private function detectLang(Request $request): string
     {
-        $lang = strtolower((string) $request->query('lang', 'ru'));
-
-        return in_array($lang, ['ru', 'kz'], true) ? $lang : 'ru';
+        return 'ru';
     }
 
     private function decodePathParts(?string $rawPathParts, string $fallbackName): array
@@ -302,7 +300,7 @@ class CatalogController extends Controller
             $url = null;
             if ($i < $count - 1) {
                 $slug = $this->slugFromPathParts(array_slice($rawPathParts, 0, $i + 1));
-                $url = route('catalog.collection', ['slug' => $slug, 'lang' => $lang]);
+                $url = route('catalog.collection', ['slug' => $slug]);
             }
             $crumbs[] = ['name' => $name, 'url' => $url];
         }
@@ -321,7 +319,7 @@ class CatalogController extends Controller
             // На товаре делаем кликабельными категория/подкатегория, последний элемент (сам товар) без ссылки.
             if ($i < $count - 1) {
                 $slug = $this->slugFromPathParts(array_slice($rawPathParts, 0, $i + 1));
-                $url = route('catalog.collection', ['slug' => $slug, 'lang' => $lang]);
+                $url = route('catalog.collection', ['slug' => $slug]);
             }
             $crumbs[] = ['name' => $name, 'url' => $url];
         }

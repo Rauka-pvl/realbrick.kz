@@ -7,7 +7,7 @@
   <div class="pb-6 text-xs text-muted uppercase tracking-wide">
     <a href="/" class="text-offwhite/60 hover:text-offwhite">Главная</a>
     <span class="px-2">/</span>
-    <a href="{{ route('catalog.index', ['lang' => ($lang ?? 'ru')]) }}" class="text-offwhite/60 hover:text-offwhite">Каталог</a>
+    <a href="{{ route('catalog.index') }}" class="text-offwhite/60 hover:text-offwhite">Каталог</a>
     @foreach(($productBreadcrumbs ?? []) as $crumb)
       <span class="px-2">/</span>
       @if(!empty($crumb['url']))
@@ -23,7 +23,7 @@
       <div class="text-xs font-semibold uppercase tracking-wider text-muted">Товары раздела</div>
       <ul class="mt-4 space-y-2 text-sm">
         @foreach($relatedProducts as $item)
-          <li><a href="{{ route('catalog.product', ['slug' => $item['slug'], 'lang' => ($lang ?? 'ru')]) }}" class="block text-offwhite/70 transition hover:text-offwhite">{{ $item['name'] }}</a></li>
+          <li><a href="{{ route('catalog.product', ['slug' => $item['slug']]) }}" class="block text-offwhite/70 transition hover:text-offwhite">{{ $item['name'] }}</a></li>
         @endforeach
       </ul>
     </aside>
@@ -31,13 +31,7 @@
     <section class="flex-1">
       <div class="flex items-start justify-between gap-6 pb-6">
         <div class="text-sm text-muted">{{ $productName }}</div>
-        <div class="flex items-center gap-4">
-          <div class="text-sm text-muted">{{ count($relatedProducts) }} товаров в разделе</div>
-          <div class="inline-flex items-center gap-2 text-xs">
-            <a href="{{ route('catalog.product', ['slug' => request()->route('slug'), 'lang' => 'ru']) }}" class="rounded border px-2 py-1 {{ ($lang ?? 'ru') === 'ru' ? 'border-gold text-gold' : 'border-white/20 text-offwhite/70' }}">RU</a>
-            <a href="{{ route('catalog.product', ['slug' => request()->route('slug'), 'lang' => 'kz']) }}" class="rounded border px-2 py-1 {{ ($lang ?? 'ru') === 'kz' ? 'border-gold text-gold' : 'border-white/20 text-offwhite/70' }}">KZ</a>
-          </div>
-        </div>
+        <div class="text-sm text-muted">{{ count($relatedProducts) }} товаров в разделе</div>
       </div>
 
       <div class="grid grid-cols-1 gap-10 md:grid-cols-2">
@@ -76,7 +70,7 @@
           </div>
 
           <div class="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center">
-            <form method="POST" action="{{ route('cart.add', ['lang' => ($lang ?? 'ru')]) }}">
+            <form method="POST" action="{{ route('cart.add') }}">
               @csrf
               <input type="hidden" name="id" value="{{ $productBitrixId }}">
               <input type="hidden" name="name" value="{{ $productName }}">
@@ -87,7 +81,7 @@
               <input type="hidden" name="qty" value="1">
               <button type="submit" class="rounded-full bg-gold px-7 py-3 text-sm font-bold uppercase tracking-wider text-nearblack hover:opacity-90 transition">Добавить в корзину</button>
             </form>
-            <a href="{{ route('cart.index', ['lang' => ($lang ?? 'ru')]) }}" class="rounded-full border border-gold/60 bg-transparent px-7 py-3 text-sm font-semibold uppercase tracking-wider text-gold hover:bg-gold/10 transition">Открыть корзину</a>
+            <a href="{{ route('cart.index') }}" class="rounded-full border border-gold/60 bg-transparent px-7 py-3 text-sm font-semibold uppercase tracking-wider text-gold hover:bg-gold/10 transition">Открыть корзину</a>
           </div>
         </div>
       </div>

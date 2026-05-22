@@ -280,7 +280,7 @@
         <ul class="nav">
           <li class="nav_link"><a href="/">главная</a></li>
           <li class="nav_link"><a href="/about">о нас</a></li>
-          <li class="nav_link"><a href="{{ route('catalog.index', ['lang' => request('lang', 'ru')]) }}">каталог</a></li>
+          <li class="nav_link"><a href="{{ route('catalog.index') }}">каталог</a></li>
           <li class="nav_link"><a href="/gallery">галерея</a></li>
           <li class="nav_link"><a href="/blog">блог</a></li>
           <li class="nav_link"><a href="/contacts">контакты</a></li>
@@ -300,7 +300,7 @@
   <nav class="rb-mobile-menu" id="rb-mobile-menu" aria-label="Мобильная навигация">
     <a href="/">главная</a>
     <a href="/about">о нас</a>
-    <a href="{{ route('catalog.index', ['lang' => request('lang', 'ru')]) }}">каталог</a>
+    <a href="{{ route('catalog.index') }}">каталог</a>
     <a href="/gallery">галерея</a>
     <a href="/blog">блог</a>
     <a href="/contacts">контакты</a>
@@ -333,7 +333,7 @@
         <nav class="flex flex-wrap gap-x-6 gap-y-2 text-sm font-medium lowercase text-offwhite/85">
           <a href="/" class="transition hover:text-gold">главная</a>
           <a href="/about" class="transition hover:text-gold">о нас</a>
-          <a href="{{ route('catalog.index', ['lang' => request('lang', 'ru')]) }}" class="transition hover:text-gold">каталог</a>
+          <a href="{{ route('catalog.index') }}" class="transition hover:text-gold">каталог</a>
           <a href="/gallery" class="transition hover:text-gold">галерея</a>
           <a href="/blog" class="transition hover:text-gold">блог</a>
           <a href="/contacts" class="transition hover:text-gold">контакты</a>
@@ -350,7 +350,7 @@
   </footer>
   @if(request()->routeIs('catalog.*'))
     @php($floatingCartCount = (int) collect((array) session('cart.items', []))->sum('qty'))
-    <a href="{{ route('cart.index', ['lang' => request('lang', 'ru')]) }}" class="rb-floating-cart" aria-label="Открыть корзину">
+    <a href="{{ route('cart.index') }}" class="rb-floating-cart" aria-label="Открыть корзину">
       <svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true">
         <path d="M3 4.5h2.4c.48 0 .9.32 1.03.78l.35 1.22h11.96c.7 0 1.2.68.98 1.35l-1.5 4.9a1.1 1.1 0 0 1-1.04.77H9.07a1.1 1.1 0 0 1-1.05-.79L6.1 6.9" fill="none" stroke="#d6b57b" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
         <circle cx="10.2" cy="18.2" r="1.4" fill="#d6b57b"/>

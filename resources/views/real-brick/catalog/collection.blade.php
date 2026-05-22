@@ -7,7 +7,7 @@
   <div class="pb-6 text-xs text-muted uppercase tracking-wide">
     <a href="/" class="text-offwhite/60 hover:text-offwhite">Главная</a>
     <span class="px-2">/</span>
-    <a href="{{ route('catalog.index', ['lang' => ($lang ?? 'ru')]) }}" class="text-offwhite/60 hover:text-offwhite">Каталог</a>
+    <a href="{{ route('catalog.index') }}" class="text-offwhite/60 hover:text-offwhite">Каталог</a>
     @foreach(($collectionBreadcrumbs ?? []) as $crumb)
       <span class="px-2">/</span>
       @if(!empty($crumb['url']))
@@ -23,7 +23,7 @@
       <div class="text-xs font-semibold uppercase tracking-wider text-muted">Коллекции</div>
       <ul class="mt-4 space-y-3 text-sm">
         @forelse($leftSections as $section)
-          <li><a href="{{ route('catalog.collection', ['slug' => $section['slug'], 'lang' => ($lang ?? 'ru')]) }}" class="block text-offwhite/70 transition hover:text-offwhite">{{ $section['name'] }}</a></li>
+          <li><a href="{{ route('catalog.collection', ['slug' => $section['slug']]) }}" class="block text-offwhite/70 transition hover:text-offwhite">{{ $section['name'] }}</a></li>
         @empty
           <li class="text-offwhite/45">Нет вложенных разделов</li>
         @endforelse
@@ -36,15 +36,11 @@
           <div class="text-sm font-medium text-offwhite/90">{{ $sectionName }}</div>
           <div class="text-xs text-muted">{{ count($childSections) }} подкатегорий</div>
         </div>
-        <div class="inline-flex items-center gap-2 text-xs">
-          <a href="{{ route('catalog.collection', ['slug' => request()->route('slug'), 'lang' => 'ru']) }}" class="rounded border px-2 py-1 {{ ($lang ?? 'ru') === 'ru' ? 'border-gold text-gold' : 'border-white/20 text-offwhite/70' }}">RU</a>
-          <a href="{{ route('catalog.collection', ['slug' => request()->route('slug'), 'lang' => 'kz']) }}" class="rounded border px-2 py-1 {{ ($lang ?? 'ru') === 'kz' ? 'border-gold text-gold' : 'border-white/20 text-offwhite/70' }}">KZ</a>
-        </div>
       </div>
 
       <div class="grid grid-cols-1 gap-6 md:grid-cols-3">
         @forelse($childSections as $section)
-          <a href="{{ route('catalog.collection', ['slug' => $section['slug'], 'lang' => ($lang ?? 'ru')]) }}" class="group">
+          <a href="{{ route('catalog.collection', ['slug' => $section['slug']]) }}" class="group">
             <div class="relative overflow-hidden rounded-3xl border border-white/10 bg-charcoal shadow-lg">
               <div class="aspect-[4/3] overflow-hidden">
                 @if(!empty($section['cover_url']))
@@ -63,7 +59,7 @@
         @empty
           @forelse($products as $product)
             <div class="group relative overflow-hidden rounded-3xl border border-white/10 bg-charcoal shadow-lg">
-              <a href="{{ route('catalog.product', ['slug' => $product['slug'], 'lang' => ($lang ?? 'ru')]) }}">
+              <a href="{{ route('catalog.product', ['slug' => $product['slug']]) }}">
                 <div class="aspect-[4/3] overflow-hidden">
                   @if(!empty($product['image_url']))
                     <img src="{{ $product['image_url'] }}" alt="{{ $product['name'] }}" class="h-full w-full object-cover transition duration-300 group-hover:scale-[1.03]" />
@@ -80,7 +76,7 @@
                   <div class="mt-2 text-xs font-medium text-gold/90">товар <span class="text-offwhite/70" aria-hidden="true">→</span></div>
                 </div>
               </a>
-              <form method="POST" action="{{ route('cart.add', ['lang' => ($lang ?? 'ru')]) }}" class="absolute bottom-4 right-4 z-20">
+              <form method="POST" action="{{ route('cart.add') }}" class="absolute bottom-4 right-4 z-20">
                 @csrf
                 <input type="hidden" name="id" value="{{ $product['id'] }}">
                 <input type="hidden" name="name" value="{{ $product['name'] }}">

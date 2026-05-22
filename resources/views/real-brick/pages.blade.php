@@ -899,7 +899,7 @@
     @endphp
 
     @if($page === 'contacts')
-    <section class="overflow-x-clip bg-black pt-20 pb-0 md:pt-24 md:pb-0">
+    <section class="overflow-x-clip bg-black pt-20 pb-12 md:pt-24 max-lg:pb-14 lg:pb-0">
       <div class="mx-auto max-w-7xl px-4 lg:px-8">
         <div class="pb-8 text-xs text-offwhite/70">
           <a href="/" class="hover:text-offwhite">Главная</a>
@@ -907,8 +907,8 @@
           <span>Контакты</span>
         </div>
 
-        <div class="grid grid-cols-1 items-stretch justify-center gap-5 lg:grid-cols-[400px_400px]">
-          <div class="mx-auto flex h-full w-full max-w-[400px] min-h-[240px] flex-col rounded-3xl border border-gold/35 bg-nearblack/75 p-6 backdrop-blur-sm sm:min-h-[252px] sm:p-7 lg:mx-0 lg:max-w-none">
+        <div class="grid grid-cols-1 items-stretch justify-center gap-6 max-lg:gap-8 lg:grid-cols-[400px_400px] lg:gap-5">
+          <div class="mx-auto flex h-full w-full max-w-[400px] min-h-0 flex-col rounded-3xl border border-gold/35 bg-nearblack/75 p-6 backdrop-blur-sm sm:p-7 max-lg:min-h-0 lg:mx-0 lg:min-h-[252px] lg:max-w-none">
             <h2 class="text-4xl font-semibold leading-tight text-offwhite">Наши <span class="text-gold">контакты</span></h2>
             <p class="mt-4 text-sm text-offwhite/75">Мы всегда на связи, чтобы помочь вам реализовать проект вашей мечты.</p>
             <div class="mt-7 grid grid-cols-2 gap-5 text-sm">
@@ -942,7 +942,7 @@
             </div>
           </div>
 
-          <div class="relative mx-auto h-full w-full max-w-[400px] min-h-[240px] overflow-hidden rounded-3xl border border-gold/20 bg-nearblack/40 sm:min-h-[252px] lg:mx-0 lg:max-w-none">
+          <div class="relative mx-auto h-full w-full max-w-[400px] min-h-0 overflow-hidden rounded-3xl border border-gold/20 bg-nearblack/40 max-lg:aspect-[4/3] max-lg:min-h-[220px] sm:max-lg:min-h-[260px] lg:mx-0 lg:aspect-auto lg:min-h-[252px] lg:max-w-none">
             <iframe
               title="Карта — REAL BRICK (Казахстан, г. Алматы, ул. Минина 14А)"
               class="absolute inset-0 h-full w-full border-0"
@@ -954,8 +954,8 @@
           </div>
         </div>
 
-        <div class="relative left-1/2 mt-4 w-screen max-w-none -translate-x-1/2 overflow-x-clip lg:mt-2">
-          <div class="relative">
+        <div class="relative left-1/2 mt-4 w-screen max-w-none -translate-x-1/2 overflow-x-clip max-lg:static max-lg:left-auto max-lg:mt-8 max-lg:w-full max-lg:translate-x-0 lg:mt-2">
+          <div class="relative max-lg:flex max-lg:flex-col">
             <img
               src="{{ asset('storage/assets/contacts-bg.png') }}"
               alt=""
@@ -963,11 +963,11 @@
               height="1080"
               decoding="async"
               loading="lazy"
-              class="block h-auto w-full object-contain object-center"
+              class="block h-auto w-full object-contain object-center max-lg:max-h-[140px] max-lg:rounded-2xl max-lg:object-cover sm:max-lg:max-h-[180px] lg:max-h-none"
             />
-            <div class="pointer-events-none absolute inset-0 bg-gradient-to-b from-black/10 via-black/20 to-black/55 lg:from-black/0 lg:via-black/10 lg:to-black/45"></div>
-            <div class="absolute inset-0 z-10 flex items-center justify-center px-4 py-10 sm:py-12 md:py-16 lg:px-8">
-            <div class="pointer-events-auto mx-auto w-full max-w-2xl rounded-3xl border border-gold/35 bg-nearblack/85 p-6 shadow-[0_0_48px_rgba(0,0,0,0.55)] backdrop-blur-md sm:p-7 md:p-8">
+            <div class="pointer-events-none absolute inset-0 bg-gradient-to-b from-black/10 via-black/20 to-black/55 max-lg:hidden lg:from-black/0 lg:via-black/10 lg:to-black/45"></div>
+            <div class="max-lg:relative max-lg:mt-6 max-lg:px-4 max-lg:py-0 lg:absolute lg:inset-0 lg:z-10 lg:flex lg:items-center lg:justify-center lg:px-8 lg:py-10 md:py-16">
+            <div class="pointer-events-auto mx-auto w-full max-w-2xl rounded-3xl border border-gold/35 bg-nearblack/85 p-6 shadow-[0_0_48px_rgba(0,0,0,0.55)] backdrop-blur-md max-lg:shadow-none sm:p-7 md:p-8 lg:shadow-[0_0_48px_rgba(0,0,0,0.55)]">
             <h3 class="text-center text-4xl font-semibold leading-tight text-offwhite">Напишите <span class="text-gold">нам</span></h3>
             <p class="mt-2 text-center text-sm text-offwhite/70">Оставьте заявку, и наш специалист ответит вам в течение 15 минут</p>
             <form id="lead-form-el" class="mt-7 space-y-4">
@@ -1655,14 +1655,14 @@
       </div>
     </section>
     @php
-      $calcLang = request('lang', 'ru');
+      $calcLang = 'ru';
       $calcTreeData = [
         'materials' => $calculatorMaterials ?? [],
         'verticalCornerMaterials' => $calculatorVerticalCornerMaterials ?? [],
         'horizontalCornerMaterials' => $calculatorHorizontalCornerMaterials ?? [],
         'sections' => $calculatorSections ?? [],
-        'cartAddBatchUrl' => route('cart.add-batch', ['lang' => $calcLang]),
-        'cartIndexUrl' => route('cart.index', ['lang' => $calcLang]),
+        'cartAddBatchUrl' => route('cart.add-batch'),
+        'cartIndexUrl' => route('cart.index'),
         'csrf' => csrf_token(),
       ];
     @endphp

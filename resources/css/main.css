@@ -1444,6 +1444,28 @@ body {
 
 
 /* ═══════════════════════════════════════
+   TABLET / MOBILE ≤ 1023px (карусель usage)
+═══════════════════════════════════════ */
+
+@media (max-width: 1023px) {
+    .usage_slider {
+        width: 100%;
+        max-width: 100%;
+    }
+    .usage_card {
+        flex: 0 0 calc(100vw - 48px);
+        width: calc(100vw - 48px);
+        max-width: calc(100vw - 48px);
+        min-width: 0;
+        height: clamp(320px, 52vw, 420px);
+    }
+    .usage_track {
+        padding-left: 24px;
+        gap: 16px;
+    }
+}
+
+/* ═══════════════════════════════════════
    MOBILE ≤ 768px
 ═══════════════════════════════════════ */
 
@@ -1594,7 +1616,10 @@ body {
         margin-bottom: 24px;
     }
     .usage_card {
-        min-width: 82vw;
+        flex: 0 0 calc(100vw - 40px);
+        width: calc(100vw - 40px);
+        max-width: calc(100vw - 40px);
+        min-width: 0;
         height: 400px;
     }
     .usage_track {
@@ -1992,7 +2017,10 @@ body {
         font-size: 26px;
     }
     .usage_card {
-        min-width: 88vw;
+        flex: 0 0 calc(100vw - 32px);
+        width: calc(100vw - 32px);
+        max-width: calc(100vw - 32px);
+        min-width: 0;
         height: 340px;
     }
     .consult_right {

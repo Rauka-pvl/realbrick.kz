@@ -41,7 +41,6 @@ class CartController extends Controller
             'qty' => ['nullable', 'integer', 'min:1', 'max:999'],
             'price_value' => ['nullable', 'numeric', 'min:0'],
             'price_currency' => ['nullable', 'string', 'max:10'],
-            'lang' => ['nullable', 'in:ru,kz'],
         ]);
 
         $items = (array) $request->session()->get('cart.items', []);
@@ -195,7 +194,7 @@ class CartController extends Controller
         $request->session()->forget('cart.items');
 
         return redirect()
-            ->route('cart.index', ['lang' => $this->detectLang($request)])
+            ->route('cart.index')
             ->with('success', 'Заявка отправлена. Мы скоро свяжемся с вами.');
     }
 
@@ -231,9 +230,7 @@ class CartController extends Controller
 
     private function detectLang(Request $request): string
     {
-        $lang = strtolower((string) $request->query('lang', 'ru'));
-
-        return in_array($lang, ['ru', 'kz'], true) ? $lang : 'ru';
+        return 'ru';
     }
 
     private function formatCartItemsForLead(array $items): string
