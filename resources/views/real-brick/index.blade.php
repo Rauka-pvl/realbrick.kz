@@ -10,18 +10,26 @@
   .projects::before { background-image: url("{{ asset('storage/img/123123.png') }}") !important; }
   .projects::after { background-image: url("{{ asset('storage/img/123.png') }}") !important; }
   /* .consult { background-image: url("{{ asset('storage/img/pryamougolnik-2-kopiya-28.png') }}") !important; } */
-  /* Карусель usage: первая карточка с левого края контента, без «центрирования» */
-  .usage_slider {
-    scroll-padding-inline: 0 !important;
-  }
   .usage_track {
     transform: none !important;
     transition: none !important;
   }
-  .usage_card {
-    scroll-snap-align: start !important;
+  @media (max-width: 1023px) {
+    .usage { overflow: visible !important; }
+    .usage_slider {
+      touch-action: pan-x !important;
+      -webkit-overflow-scrolling: touch !important;
+      scroll-padding-left: 16px !important;
+      scroll-padding-right: 16px !important;
+    }
+    .usage_card img {
+      object-fit: contain !important;
+      object-position: center center !important;
+    }
+    .usage_card:hover img { transform: none !important; }
   }
   @media (min-width: 1024px) {
+    .usage_card { scroll-snap-align: start !important; }
     .usage {
       --usage-gutter: clamp(20px, calc((100vw - 1200px) / 2 + 20px), 96px) !important;
       --usage-gutter-end: 24px !important;

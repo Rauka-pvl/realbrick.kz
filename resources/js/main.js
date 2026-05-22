@@ -19,6 +19,8 @@
   let scrollRaf = null;
   const AUTOPLAY_MS = 4500;
 
+  const isMobileSlider = () => window.matchMedia('(max-width: 1023px)').matches;
+
   const getCardScrollLeft = (card) => {
     const sliderRect = slider.getBoundingClientRect();
     const cardRect = card.getBoundingClientRect();
@@ -30,10 +32,19 @@
     const card = cards[i];
     if (!card) return;
     activeIndex = i;
-    slider.scrollTo({
-      left: Math.max(0, getCardScrollLeft(card)),
-      behavior: smooth ? 'smooth' : 'auto',
-    });
+
+    if (isMobileSlider()) {
+      card.scrollIntoView({
+        behavior: smooth ? 'smooth' : 'auto',
+        inline: 'start',
+        block: 'nearest',
+      });
+    } else {
+      slider.scrollTo({
+        left: Math.max(0, getCardScrollLeft(card)),
+        behavior: smooth ? 'smooth' : 'auto',
+      });
+    }
     syncDots(i);
   };
 
