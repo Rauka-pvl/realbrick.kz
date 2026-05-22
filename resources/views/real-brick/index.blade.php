@@ -10,6 +10,42 @@
   .projects::before { background-image: url("{{ asset('storage/img/123123.png') }}") !important; }
   .projects::after { background-image: url("{{ asset('storage/img/123.png') }}") !important; }
   /* .consult { background-image: url("{{ asset('storage/img/pryamougolnik-2-kopiya-28.png') }}") !important; } */
+  /* Карусель usage: первая карточка с левого края контента, без «центрирования» */
+  .usage_slider {
+    scroll-padding-inline: 0 !important;
+  }
+  .usage_track {
+    transform: none !important;
+    transition: none !important;
+  }
+  .usage_card {
+    scroll-snap-align: start !important;
+  }
+  @media (min-width: 1024px) {
+    .usage {
+      --usage-gutter: clamp(20px, calc((100vw - 1200px) / 2 + 20px), 96px) !important;
+      --usage-gutter-end: 24px !important;
+    }
+    .usage_track {
+      padding-left: var(--usage-gutter) !important;
+      padding-right: var(--usage-gutter-end) !important;
+    }
+    .usage_slider {
+      scroll-padding-left: var(--usage-gutter) !important;
+      scroll-padding-right: var(--usage-gutter-end) !important;
+    }
+  }
+  @media (min-width: 1536px) {
+    .usage {
+      --usage-gutter: 96px !important;
+      --usage-gutter-end: 96px !important;
+    }
+    .usage_title {
+      max-width: none !important;
+      padding-left: 96px !important;
+      padding-right: 96px !important;
+    }
+  }
 </style>
 @endpush
 
@@ -81,10 +117,11 @@
     </section>
 
    <section class="usage">
-        <div class="usage_title text-[28px] leading-tight sm:text-[32px] lg:text-[36px] mb-5">
+        <div class="usage_title text-[28px] leading-tight sm:text-[32px] lg:text-[36px] mb-5 2xl:max-w-none 2xl:px-24 2xl:text-left">
           <p>Где используется  <span class="ml-1"> Real Brick</span></p>
         </div>
-        <div class="usage_slider">
+        <div class="usage_carousel">
+        <div class="usage_slider" aria-roledescription="carousel">
             <div class="usage_track">
 
               <div class="usage_card">
@@ -134,13 +171,14 @@
 
             </div>
           </div>
+        </div>
 
-          <div class="usage_dots">
-            <button class="usage_dot active" data-index="0"></button>
-            <button class="usage_dot" data-index="1"></button>
-            <button class="usage_dot" data-index="2"></button>
-            <button class="usage_dot" data-index="3"></button>
-            <button class="usage_dot" data-index="4"></button>
+          <div class="usage_dots" role="tablist" aria-label="Слайды карусели">
+            <button type="button" class="usage_dot active" data-index="0" aria-selected="true"></button>
+            <button type="button" class="usage_dot" data-index="1" aria-selected="false"></button>
+            <button type="button" class="usage_dot" data-index="2" aria-selected="false"></button>
+            <button type="button" class="usage_dot" data-index="3" aria-selected="false"></button>
+            <button type="button" class="usage_dot" data-index="4" aria-selected="false"></button>
           </div>
 
           <div class="usage_bottom">

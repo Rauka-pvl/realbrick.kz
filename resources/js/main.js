@@ -1,164 +1,125 @@
-/* ── USAGE SLIDER ── */
-const track = document.querySelector('.usage_track');
-const dots = document.querySelectorAll('.usage_dot');
-let current = 0;
+/* ── USAGE SLIDER (простая горизонтальная прокрутка, без клонов и бесконечного цикла) ── */
+(function initUsageSlider() {
+  const slider = document.querySelector('.usage_slider');
+  if (!slider) return;
 
-if (track) {
-  const originalCards = Array.from(track.querySelectorAll('.usage_card'));
-  const total = originalCards.length;
+  const track = slider.querySelector('.usage_track');
+  const cards = Array.from(slider.querySelectorAll('.usage_card'));
+  const dots = Array.from(document.querySelectorAll('.usage_dot'));
+  const total = cards.length;
+  if (total === 0) return;
 
-  if (total > 1) {
-    // Build 3 logical blocks: [clone all] [original] [clone all]
-    // This prevents "empty area" glitches on rapid ±2 navigation.
-    const leftBlock = originalCards.map((card) => {
-      const clone = card.cloneNode(true);
-      clone.setAttribute('aria-hidden', 'true');
-      return clone;
-    });
-    const rightBlock = originalCards.map((card) => {
-      const clone = card.cloneNode(true);
-      clone.setAttribute('aria-hidden', 'true');
-      return clone;
-    });
-
-    track.innerHTML = '';
-    leftBlock.forEach((n) => track.appendChild(n));
-    originalCards.forEach((n) => track.appendChild(n));
-    rightBlock.forEach((n) => track.appendChild(n));
-
-    const allCards = Array.from(track.querySelectorAll('.usage_card'));
-    let currentTrackIndex = total; // first slide in the middle block
-    let startX = 0;
-    let isDragging = false;
-
-    const getGap = () => (window.matchMedia('(max-width: 1023px)').matches ? 16 : 24);
-    const getCardStep = () => allCards[0].offsetWidth + getGap();
-
-    const updateDots = () => {
-      const logicalIndex = (currentTrackIndex - 1 + total) % total;
-      current = logicalIndex;
-      // Navigation dots work as relative controls: -2, -1, 0, +1, +2
-      // so the center dot always stays "active".
-      if (dots.length >= 5) {
-        dots.forEach(d => d.classList.remove('active'));
-        dots[2].classList.add('active');
-      } else {
-        dots.forEach(d => d.classList.remove('active'));
-        if (dots[logicalIndex]) dots[logicalIndex].classList.add('active');
-      }
-    };
-
-    const setPosition = (index, animated = true) => {
-      currentTrackIndex = index;
-      track.style.transition = animated ? 'transform 0.5s cubic-bezier(0.4, 0, 0.2, 1)' : 'none';
-      track.style.transform = `translateX(-${getCardStep() * currentTrackIndex}px)`;
-      updateDots();
-    };
-
-    const goNext = () => setPosition(currentTrackIndex + 1, true);
-    const goPrev = () => setPosition(currentTrackIndex - 1, true);
-
-    // Start from first real card in the center block.
-    setPosition(total, false);
-
-    if (dots.length >= 5) {
-      const relativeSteps = [-2, -1, 0, 1, 2];
-      dots.forEach((dot, index) => {
-        dot.dataset.step = String(relativeSteps[index] ?? 0);
-        dot.setAttribute('aria-label', relativeSteps[index] === 0
-          ? 'Текущий слайд'
-          : `Перейти на ${Math.abs(relativeSteps[index])} ${Math.abs(relativeSteps[index]) === 1 ? 'слайд' : 'слайда'} ${relativeSteps[index] > 0 ? 'вперед' : 'назад'}`);
-        dot.addEventListener('click', () => {
-          const step = Number(dot.dataset.step || '0');
-          if (step === 0) return;
-          setPosition(currentTrackIndex + step, true);
-          restartAutoplay();
-        });
-      });
-    } else {
-      dots.forEach(dot => {
-        dot.addEventListener('click', () => {
-          const logicalIndex = +dot.dataset.index;
-          setPosition(total + logicalIndex, true);
-          restartAutoplay();
-        });
-      });
-    }
-
-    track.addEventListener('transitionend', () => {
-      // Keep cursor in the center block for seamless infinite loop.
-      if (currentTrackIndex < total) {
-        setPosition(currentTrackIndex + total, false);
-      } else if (currentTrackIndex >= total * 2) {
-        setPosition(currentTrackIndex - total, false);
-      }
-    });
-
-    window.addEventListener('resize', () => setPosition(currentTrackIndex, false));
-
-    /* drag support — mouse */
-    track.addEventListener('mousedown', e => { startX = e.clientX; isDragging = true; });
-    track.addEventListener('mousemove', () => { if (!isDragging) return; });
-    track.addEventListener('mouseup', e => {
-      if (!isDragging) return;
-      isDragging = false;
-      const diff = startX - e.clientX;
-      if (diff > 60) goNext();
-      if (diff < -60) goPrev();
-    });
-    track.addEventListener('mouseleave', () => { isDragging = false; });
-
-    /* drag support — touch */
-    track.addEventListener('touchstart', e => {
-      startX = e.touches[0].clientX;
-      isDragging = true;
-    }, { passive: true });
-    track.addEventListener('touchend', e => {
-      if (!isDragging) return;
-      isDragging = false;
-      const diff = startX - e.changedTouches[0].clientX;
-      if (diff > 60) goNext();
-      if (diff < -60) goPrev();
-      if (Math.abs(diff) > 60) restartAutoplay();
-    });
-
-    // Infinite auto-loop
-    const slider = track.closest('.usage_slider');
-    const AUTOPLAY_DELAY = 3500;
-    let autoplayId = null;
-
-    function stopAutoplay() {
-      if (!autoplayId) return;
-      clearInterval(autoplayId);
-      autoplayId = null;
-    }
-
-    function startAutoplay() {
-      stopAutoplay();
-      autoplayId = setInterval(() => {
-        goNext();
-      }, AUTOPLAY_DELAY);
-    }
-
-    function restartAutoplay() {
-      startAutoplay();
-    }
-
-    if (slider) {
-      slider.addEventListener('mouseenter', stopAutoplay);
-      slider.addEventListener('mouseleave', startAutoplay);
-      slider.addEventListener('touchstart', stopAutoplay, { passive: true });
-      slider.addEventListener('touchend', startAutoplay);
-    }
-
-    document.addEventListener('visibilitychange', () => {
-      if (document.hidden) stopAutoplay();
-      else startAutoplay();
-    });
-
-    startAutoplay();
+  if (track) {
+    track.style.transform = '';
+    track.style.transition = '';
   }
-}
+
+  let activeIndex = 0;
+  let autoplayId = null;
+  let scrollRaf = null;
+  const AUTOPLAY_MS = 4500;
+
+  const getCardScrollLeft = (card) => {
+    const sliderRect = slider.getBoundingClientRect();
+    const cardRect = card.getBoundingClientRect();
+    return slider.scrollLeft + (cardRect.left - sliderRect.left);
+  };
+
+  const scrollToIndex = (index, smooth = true) => {
+    const i = Math.max(0, Math.min(total - 1, index));
+    const card = cards[i];
+    if (!card) return;
+    activeIndex = i;
+    slider.scrollTo({
+      left: Math.max(0, getCardScrollLeft(card)),
+      behavior: smooth ? 'smooth' : 'auto',
+    });
+    syncDots(i);
+  };
+
+  const syncDots = (index) => {
+    dots.forEach((dot, i) => {
+      dot.classList.toggle('active', i === index);
+      dot.setAttribute('aria-selected', i === index ? 'true' : 'false');
+    });
+  };
+
+  const readIndexFromScroll = () => {
+    const scrollPos = slider.scrollLeft;
+    let best = 0;
+    let bestDist = Infinity;
+    cards.forEach((card, i) => {
+      const dist = Math.abs(getCardScrollLeft(card) - scrollPos);
+      if (dist < bestDist) {
+        bestDist = dist;
+        best = i;
+      }
+    });
+    return best;
+  };
+
+  const onScroll = () => {
+    if (scrollRaf) cancelAnimationFrame(scrollRaf);
+    scrollRaf = requestAnimationFrame(() => {
+      const idx = readIndexFromScroll();
+      if (idx !== activeIndex) {
+        activeIndex = idx;
+        syncDots(idx);
+      }
+    });
+  };
+
+  const stopAutoplay = () => {
+    if (!autoplayId) return;
+    clearInterval(autoplayId);
+    autoplayId = null;
+  };
+
+  const startAutoplay = () => {
+    if (total < 2) return;
+    stopAutoplay();
+    autoplayId = setInterval(() => {
+      const next = activeIndex >= total - 1 ? 0 : activeIndex + 1;
+      scrollToIndex(next, true);
+    }, AUTOPLAY_MS);
+  };
+
+  dots.forEach((dot, i) => {
+    dot.setAttribute('role', 'tab');
+    dot.setAttribute('aria-label', `Слайд ${i + 1}`);
+    dot.addEventListener('click', () => {
+      scrollToIndex(i, true);
+      startAutoplay();
+    });
+  });
+
+  slider.addEventListener('scroll', onScroll, { passive: true });
+  slider.addEventListener('mouseenter', stopAutoplay);
+  slider.addEventListener('mouseleave', startAutoplay);
+  slider.addEventListener('touchstart', stopAutoplay, { passive: true });
+  slider.addEventListener('touchend', () => {
+    window.setTimeout(startAutoplay, 600);
+  }, { passive: true });
+
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden) stopAutoplay();
+    else startAutoplay();
+  });
+
+  const resetToStart = () => {
+    slider.scrollTo({ left: 0, behavior: 'auto' });
+    activeIndex = 0;
+    syncDots(0);
+  };
+
+  syncDots(0);
+  resetToStart();
+  requestAnimationFrame(() => {
+    resetToStart();
+    requestAnimationFrame(startAutoplay);
+  });
+  window.addEventListener('load', resetToStart, { once: true });
+})();
 
 /* ── FAQ ACCORDION ── */
 document.querySelectorAll('.faq_question').forEach(btn => {
@@ -296,7 +257,7 @@ document.head.insertAdjacentHTML('beforeend', `<style>
 
 /* Scroll-reveal */
 const revealTargets = document.querySelectorAll(
-  '.usage_card, .collections_card, .why_card, .faq_item, .contacts_item, .projects_cta-card'
+  '.collections_card, .why_card, .faq_item, .contacts_item, .projects_cta-card'
 );
 
 const revealObserver = new IntersectionObserver((entries) => {

@@ -307,32 +307,44 @@ body {
     color: #d9b176;
 }
 
-.usage_slider {
-    overflow: hidden;
-    cursor: grab;
-    user-select: none;
+.usage_carousel {
+    width: 100%;
 }
 
-.usage_slider:active {
-    cursor: grabbing;
+.usage_slider {
+    overflow-x: auto;
+    overflow-y: hidden;
+    scroll-snap-type: x mandatory;
+    scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    overscroll-behavior-x: contain;
+    width: 100%;
+}
+
+.usage_slider::-webkit-scrollbar {
+    display: none;
 }
 
 .usage_track {
     display: flex;
     gap: 24px;
-    /* padding: 0 calc((100vw - 1200px) / 2); */
-    padding-left: 25px;
-    transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-    will-change: transform;
+    padding: 0 24px 4px 16px;
+    width: max-content;
+    transform: none;
 }
 
 .usage_card {
     position: relative;
+    flex: 0 0 540px;
+    width: 540px;
     min-width: 540px;
     height: 560px;
     border-radius: 24px;
     overflow: hidden;
     flex-shrink: 0;
+    scroll-snap-align: start;
+    scroll-snap-stop: always;
 }
 
 .usage_card img {
@@ -1447,10 +1459,50 @@ body {
    TABLET / MOBILE ≤ 1023px (карусель usage)
 ═══════════════════════════════════════ */
 
+@media (min-width: 1024px) {
+    /* До 2xl — выравнивание с контейнером 1200px; на широких экранах не больше px-24 (96px) */
+    .usage {
+        --usage-gutter: clamp(20px, calc((100vw - 1200px) / 2 + 20px), 96px);
+        --usage-gutter-end: 24px;
+    }
+    .usage_title {
+        max-width: 1200px;
+        margin-left: auto;
+        margin-right: auto;
+        padding-left: 20px;
+        padding-right: 20px;
+    }
+    .usage_track {
+        padding-left: var(--usage-gutter);
+        padding-right: var(--usage-gutter-end);
+    }
+    .usage_slider {
+        scroll-padding-left: var(--usage-gutter);
+        scroll-padding-right: var(--usage-gutter-end);
+    }
+}
+
+/* 2xl (≥1536px): как header — полная ширина, отступы 96px, без «пустоты» по бокам */
+@media (min-width: 1536px) {
+    .usage {
+        --usage-gutter: 96px;
+        --usage-gutter-end: 96px;
+    }
+    .usage_title {
+        max-width: none;
+        margin-left: 0;
+        margin-right: 0;
+        padding-left: 96px;
+        padding-right: 96px;
+    }
+}
+
 @media (max-width: 1023px) {
     .usage_slider {
         width: 100%;
         max-width: 100%;
+        scroll-padding-left: 16px;
+        scroll-padding-right: 16px;
     }
     .usage_card {
         flex: 0 0 calc(100vw - 48px);
@@ -1460,7 +1512,7 @@ body {
         height: clamp(320px, 52vw, 420px);
     }
     .usage_track {
-        padding-left: 24px;
+        padding: 0 16px 4px 16px;
         gap: 16px;
     }
 }
@@ -1623,8 +1675,12 @@ body {
         height: 400px;
     }
     .usage_track {
-        padding-left: 20px;
+        padding: 0 20px 4px 20px;
         gap: 16px;
+    }
+    .usage_slider {
+        scroll-padding-left: 20px;
+        scroll-padding-right: 20px;
     }
     .usage_card-content {
         padding: 20px 22px;
