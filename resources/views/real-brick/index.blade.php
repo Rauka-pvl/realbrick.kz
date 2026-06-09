@@ -15,12 +15,19 @@
     transition: none !important;
   }
   @media (max-width: 1023px) {
+    html { scroll-behavior: auto !important; }
     .usage { overflow: visible !important; }
     .usage_slider {
-      touch-action: pan-x !important;
+      touch-action: pan-x pan-y !important;
+      scroll-snap-type: none !important;
+      scroll-behavior: auto !important;
       -webkit-overflow-scrolling: touch !important;
       scroll-padding-left: 16px !important;
       scroll-padding-right: 16px !important;
+    }
+    .usage_card {
+      scroll-snap-align: none !important;
+      scroll-snap-stop: normal !important;
     }
     .usage_card img {
       object-fit: contain !important;

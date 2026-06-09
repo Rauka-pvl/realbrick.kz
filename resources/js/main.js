@@ -32,19 +32,10 @@
     const card = cards[i];
     if (!card) return;
     activeIndex = i;
-
-    if (isMobileSlider()) {
-      card.scrollIntoView({
-        behavior: smooth ? 'smooth' : 'auto',
-        inline: 'start',
-        block: 'nearest',
-      });
-    } else {
-      slider.scrollTo({
-        left: Math.max(0, getCardScrollLeft(card)),
-        behavior: smooth ? 'smooth' : 'auto',
-      });
-    }
+    slider.scrollTo({
+      left: Math.max(0, getCardScrollLeft(card)),
+      behavior: smooth && !isMobileSlider() ? 'smooth' : 'auto',
+    });
     syncDots(i);
   };
 
@@ -87,7 +78,7 @@
   };
 
   const startAutoplay = () => {
-    if (total < 2) return;
+    if (total < 2 || isMobileSlider()) return;
     stopAutoplay();
     autoplayId = setInterval(() => {
       const next = activeIndex >= total - 1 ? 0 : activeIndex + 1;
@@ -108,13 +99,15 @@
   slider.addEventListener('mouseenter', stopAutoplay);
   slider.addEventListener('mouseleave', startAutoplay);
   slider.addEventListener('touchstart', stopAutoplay, { passive: true });
-  slider.addEventListener('touchend', () => {
-    window.setTimeout(startAutoplay, 600);
-  }, { passive: true });
 
   document.addEventListener('visibilitychange', () => {
     if (document.hidden) stopAutoplay();
     else startAutoplay();
+  });
+
+  window.matchMedia('(max-width: 1023px)').addEventListener('change', () => {
+    stopAutoplay();
+    startAutoplay();
   });
 
   const resetToStart = () => {
@@ -125,11 +118,9 @@
 
   syncDots(0);
   resetToStart();
-  requestAnimationFrame(() => {
-    resetToStart();
-    requestAnimationFrame(startAutoplay);
-  });
+  requestAnimationFrame(resetToStart);
   window.addEventListener('load', resetToStart, { once: true });
+  startAutoplay();
 })();
 
 /* ── FAQ ACCORDION ── */

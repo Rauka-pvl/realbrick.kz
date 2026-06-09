@@ -1509,7 +1509,10 @@ body {
         max-width: 100%;
         scroll-padding-left: 16px;
         scroll-padding-right: 16px;
-        touch-action: pan-x;
+        scroll-snap-type: none;
+        scroll-behavior: auto;
+        touch-action: pan-x pan-y;
+        overscroll-behavior-y: auto;
     }
     .usage_card {
         flex: 0 0 calc(100vw - 32px);
@@ -1518,6 +1521,8 @@ body {
         min-width: 0;
         height: clamp(300px, 58vw, 400px);
         background-color: #141414;
+        scroll-snap-align: none;
+        scroll-snap-stop: normal;
     }
     .usage_card img {
         object-fit: contain;

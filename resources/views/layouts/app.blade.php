@@ -40,6 +40,9 @@
       max-width: 100%;
       overflow-x: hidden;
     }
+    @media (max-width: 1023px) {
+      html { scroll-behavior: auto; }
+    }
     body {
       font-family: "Stem", "STEM", "Montserrat", system-ui, sans-serif;
       width: 100%;
