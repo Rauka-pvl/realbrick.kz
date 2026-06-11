@@ -38,8 +38,14 @@ class Bitrix24CatalogSyncService
         $this->photoFieldName = trim((string) config('services.bitrix24.photo_property_field', 'property172'));
     }
 
-    public function sync(): bool
+    public function sync(?callable $onProgress = null): bool
     {
+        $progress = static function (string $message) use ($onProgress): void {
+            if ($onProgress !== null) {
+                $onProgress($message);
+            }
+        };
+
         $baseUrl = rtrim((string) config('services.bitrix24.rest_url'), '/');
         if ($baseUrl === '') {
             Log::error('Bitrix24CatalogSync: BITRIX24_CATALOG_URL не задан');
@@ -56,8 +62,11 @@ class Bitrix24CatalogSyncService
             return false;
         }
 
+        $progress('Загрузка разделов из Bitrix24…');
         $sections = $this->fetchAllSections($baseUrl);
-        $products = $this->fetchAllProducts($baseUrl);
+        $progress('Загрузка товаров из Bitrix24…');
+        $products = $this->fetchAllProducts($baseUrl, $progress);
+        $progress('Загрузка цен из Bitrix24…');
         $priceMap = $this->fetchAllPrices($baseUrl) ?? [];
 
         if ($sections === null || $products === null) {
@@ -73,7 +82,6 @@ class Bitrix24CatalogSyncService
         $this->buildSectionPaths($sections, $sectionMap);
 
         $productsToInsert = [];
-        $productPaths = [];
         foreach ($products as $p) {
             if (($p['active'] ?? 'Y') !== 'Y') {
                 continue;
@@ -92,9 +100,10 @@ class Bitrix24CatalogSyncService
                 ? ($section['path_parts'] ?? ['Каталог'])
                 : ['Каталог'];
             $path[] = $p['name'];
+            $p['path'] = $path;
             $productsToInsert[] = $p;
-            $productPaths[] = $path;
         }
+        unset($products, $priceMap);
 
         $db = DB::connection($this->dbConnection);
         $schema = Schema::connection($this->dbConnection);
@@ -105,7 +114,7 @@ class Bitrix24CatalogSyncService
         $hasSectionImageCol = $schema->hasColumn('bitrix24_catalog_sections', 'image_url');
         $preservedSectionImages = [];
         if ($hasSectionImageCol) {
-            foreach ($db->table('bitrix24_catalog_sections')->get(['bitrix_id', 'image_url']) as $row) {
+            foreach ($db->table('bitrix24_catalog_sections')->select(['bitrix_id', 'image_url'])->cursor() as $row) {
                 $img = isset($row->image_url) ? trim((string) $row->image_url) : '';
                 if ($img !== '') {
                     $preservedSectionImages[(int) $row->bitrix_id] = $img;
@@ -115,26 +124,22 @@ class Bitrix24CatalogSyncService
 
         $preservedMedia = [];
         if ($hasImageCols) {
-            foreach ($db->table('bitrix24_catalog_products')->get(['bitrix_id', 'image_url', 'gallery_json']) as $row) {
-                $bid = (int) $row->bitrix_id;
-                $galleryRaw = $row->gallery_json ?? null;
-                $galleryStr = is_string($galleryRaw) ? trim($galleryRaw) : (is_scalar($galleryRaw) ? trim((string) $galleryRaw) : '');
-                $hasGallery = $galleryStr !== '' && $galleryStr !== '[]' && $galleryStr !== 'null';
+            foreach ($db->table('bitrix24_catalog_products')->select(['bitrix_id', 'image_url'])->cursor() as $row) {
                 $img = isset($row->image_url) ? trim((string) $row->image_url) : '';
-                if ($img !== '' || $hasGallery) {
-                    $preservedMedia[$bid] = [
-                        'image_url' => $img !== '' ? $img : null,
-                        'gallery_json' => $hasGallery ? $galleryRaw : null,
-                    ];
+                if ($img !== '') {
+                    $preservedMedia[(int) $row->bitrix_id] = $img;
                 }
             }
         }
 
-        $db->transaction(function () use ($sections, $productsToInsert, $productPaths, $db, $preservedMedia, $preservedSectionImages, $hasImageCols, $hasPhotoPropertyRawCol, $hasArticleCol, $hasSectionImageCol) {
+        $progress('Сохранение в БД '.$this->dbConnection.'…');
+
+        $db->transaction(function () use ($sections, $productsToInsert, $db, $preservedMedia, $preservedSectionImages, $hasImageCols, $hasPhotoPropertyRawCol, $hasArticleCol, $hasSectionImageCol, $progress) {
             $db->table('bitrix24_catalog_products')->delete();
             $db->table('bitrix24_catalog_sections')->delete();
 
             $now = now();
+            $sectionRows = [];
             foreach ($sections as $s) {
                 if ($s['excluded'] ?? false) {
                     continue;
@@ -150,11 +155,15 @@ class Bitrix24CatalogSyncService
                 if ($hasSectionImageCol) {
                     $sectionRow['image_url'] = $preservedSectionImages[(int) $s['id']] ?? null;
                 }
-                $db->table('bitrix24_catalog_sections')->insert($sectionRow);
+                $sectionRows[] = $sectionRow;
+            }
+            foreach (array_chunk($sectionRows, 100) as $chunk) {
+                $db->table('bitrix24_catalog_sections')->insert($chunk);
             }
 
-            foreach ($productsToInsert as $i => $p) {
-                $path = $productPaths[$i] ?? ['Каталог', $p['name']];
+            $productRows = [];
+            foreach ($productsToInsert as $p) {
+                $path = $p['path'] ?? ['Каталог', $p['name']];
                 $row = [
                     'bitrix_id' => $p['id'],
                     'name' => $p['name'],
@@ -169,12 +178,12 @@ class Bitrix24CatalogSyncService
                     'synced_at' => $now,
                 ];
                 if ($hasImageCols) {
-                    $apiMedia = $this->mediaFromProperty172((int) $p['id'], $p['property172Raw'] ?? null);
-                    $prev = $preservedMedia[(int) $p['id']] ?? null;
+                    $photoRaw = $this->decodePhotoPropertyRaw((string) ($p['property172Stored'] ?? ''));
+                    $apiMedia = $this->mediaFromProperty172((int) $p['id'], $photoRaw);
+                    $prevImage = $preservedMedia[(int) $p['id']] ?? null;
                     if ($apiMedia['image_url'] !== null) {
                         $row['image_url'] = $apiMedia['image_url'];
                     } else {
-                        $prevImage = $prev['image_url'] ?? null;
                         if ($this->preferBitrixFallbackUrls() && $this->isLocalStorageImagePath($prevImage)) {
                             $prevImage = null;
                         }
@@ -188,7 +197,16 @@ class Bitrix24CatalogSyncService
                 if ($hasArticleCol) {
                     $row['article'] = $p['property164'] ?? null;
                 }
-                $db->table('bitrix24_catalog_products')->insert($row);
+                $productRows[] = $row;
+            }
+            $totalProducts = count($productRows);
+            $savedProducts = 0;
+            foreach (array_chunk($productRows, 100) as $chunk) {
+                $db->table('bitrix24_catalog_products')->insert($chunk);
+                $savedProducts += count($chunk);
+                if ($totalProducts > 200) {
+                    $progress("  товаров в БД: {$savedProducts} / {$totalProducts}");
+                }
             }
         });
 
@@ -306,29 +324,47 @@ class Bitrix24CatalogSyncService
         return $out;
     }
 
-    protected function fetchAllProducts(string $baseUrl): ?array
+    protected function shouldFetchPhotoPropertyInSync(): bool
+    {
+        $explicit = env('BITRIX24_SYNC_FETCH_PHOTOS');
+        if ($explicit !== null && $explicit !== '') {
+            return filter_var($explicit, FILTER_VALIDATE_BOOL);
+        }
+
+        return (bool) env('BITRIX24_PHOTO_DOWNLOAD_ENABLED', false);
+    }
+
+    protected function fetchAllProducts(string $baseUrl, ?callable $onProgress = null): ?array
     {
         $url = $baseUrl.'/catalog.product.list';
         $out = [];
         $start = 0;
         $pageSize = 50;
+        $fetchPhotos = $this->shouldFetchPhotoPropertyInSync();
+        $select = [
+            'id',
+            'iblockId',
+            'name',
+            'iblockSectionId',
+            'active',
+            'price',
+            'currencyId',
+            'property50',
+            'property130',
+            'property186',
+            'property164',
+        ];
+        if ($fetchPhotos && $this->photoFieldName !== '') {
+            $select[] = $this->photoFieldName;
+        }
 
         do {
             $response = Http::timeout(30)->withOptions(['verify' => $this->verifySsl])->get($url, [
-                'select' => array_values(array_unique(array_merge([
-                    'id',
-                    'iblockId',
-                    'name',
-                    'iblockSectionId',
-                    'active',
-                    'price',
-                    'currencyId',
-                    'property50',
-                    'property130',
-                    'property186',
-                    'property164',
-                ], $this->photoFieldName !== '' ? [$this->photoFieldName] : []))),
-                'filter' => ['iblockId' => $this->productIblockId],
+                'select' => array_values(array_unique($select)),
+                'filter' => [
+                    'iblockId' => $this->productIblockId,
+                    'active' => 'Y',
+                ],
                 'order' => ['name' => 'ASC'],
                 'start' => $start,
             ]);
@@ -364,7 +400,7 @@ class Bitrix24CatalogSyncService
                 if ($id === null || $id === '') {
                     continue;
                 }
-                $rawPhoto = $this->photoFieldName !== ''
+                $rawPhoto = $fetchPhotos && $this->photoFieldName !== ''
                     ? ($arr[$this->photoFieldName] ?? $arr[mb_strtoupper($this->photoFieldName)] ?? null)
                     : null;
                 $out[] = [
@@ -380,12 +416,17 @@ class Bitrix24CatalogSyncService
                     'property130' => $this->extractProductProperty($arr, 'property130'),
                     'property186' => $this->extractProductProperty($arr, 'property186'),
                     'property164' => $this->extractProductProperty($arr, 'property164'),
-                    'property172Raw' => $rawPhoto,
                     'property172Stored' => $this->serializeProperty172ForStorage($rawPhoto),
                 ];
+                unset($rawPhoto);
             }
+            $pageCount = count($list);
+            if ($onProgress !== null && $pageCount > 0) {
+                $onProgress('  товаров из Bitrix: '.count($out));
+            }
+            unset($data, $result, $raw, $list, $response);
             $start += $pageSize;
-        } while (count($list) >= $pageSize);
+        } while ($pageCount >= $pageSize);
 
         return $out;
     }

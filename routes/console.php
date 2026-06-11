@@ -13,6 +13,8 @@ Artisan::command('inspire', function () {
 })->purpose('Display an inspiring quote');
 
 Artisan::command('bitrix:catalog-sync', function (Bitrix24CatalogSyncService $syncService) {
+    @ini_set('memory_limit', '512M');
+
     $connection = (string) config('services.bitrix24.db_connection', 'diller');
     $restUrl = trim((string) config('services.bitrix24.rest_url', ''));
 
@@ -31,7 +33,10 @@ Artisan::command('bitrix:catalog-sync', function (Bitrix24CatalogSyncService $sy
     }
 
     $this->line("Синхронизация Bitrix24 -> {$connection}...");
-    $ok = $syncService->sync();
+    $this->comment('Обычно 1–3 минуты при ~1500 товарах (запросы к Bitrix + запись в БД).');
+    $ok = $syncService->sync(function (string $message) {
+        $this->line($message);
+    });
     if (! $ok) {
         $this->error('Синхронизация завершилась с ошибкой. Проверьте laravel.log');
 
