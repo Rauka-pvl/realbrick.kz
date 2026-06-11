@@ -64,12 +64,8 @@ class Bitrix24CatalogSyncService
 
         $progress('Загрузка разделов из Bitrix24…');
         $sections = $this->fetchAllSections($baseUrl);
-        $progress('Загрузка товаров из Bitrix24…');
-        $products = $this->fetchAllProducts($baseUrl, $progress);
-        $progress('Загрузка цен из Bitrix24…');
-        $priceMap = $this->fetchAllPrices($baseUrl) ?? [];
 
-        if ($sections === null || $products === null) {
+        if ($sections === null) {
             return false;
         }
 
@@ -79,6 +75,29 @@ class Bitrix24CatalogSyncService
         }
 
         $this->markExcludedSections($sections, $sectionMap);
+        $allowedSectionIds = $this->allowedSectionBitrixIdsUnderRoot($sections, $sectionMap);
+        foreach ($sections as &$s) {
+            if (! isset($allowedSectionIds[$s['id']])) {
+                $s['excluded'] = true;
+            }
+        }
+        unset($s);
+
+        $allowedCount = count($allowedSectionIds);
+        $progress("Real Brick (раздел {$this->rootSectionId}): {$allowedCount} разделов в дереве");
+        $progress('Загрузка товаров из Bitrix24…');
+        $products = $this->fetchAllProducts($baseUrl, $allowedSectionIds, $progress);
+
+        $priceMap = [];
+        if (filter_var(env('BITRIX24_SYNC_FETCH_ALL_PRICES', false), FILTER_VALIDATE_BOOL)) {
+            $progress('Загрузка цен из Bitrix24…');
+            $priceMap = $this->fetchAllPrices($baseUrl) ?? [];
+        }
+
+        if ($products === null) {
+            return false;
+        }
+
         $this->buildSectionPaths($sections, $sectionMap);
 
         $productsToInsert = [];
@@ -334,11 +353,48 @@ class Bitrix24CatalogSyncService
         return (bool) env('BITRIX24_PHOTO_DOWNLOAD_ENABLED', false);
     }
 
-    protected function fetchAllProducts(string $baseUrl, ?callable $onProgress = null): ?array
+    /**
+     * Разделы в поддереве корня Real Brick (включая корень), без excluded-веток.
+     *
+     * @return array<int, true>
+     */
+    protected function allowedSectionBitrixIdsUnderRoot(array $sections, array $sectionMap): array
+    {
+        $childrenByParent = [];
+        foreach ($sections as $s) {
+            $pid = (int) ($s['iblockSectionId'] ?? 0);
+            $cid = (int) $s['id'];
+            $childrenByParent[$pid][] = $cid;
+        }
+
+        $allowed = [$this->rootSectionId => true];
+        $stack = $childrenByParent[$this->rootSectionId] ?? [];
+        while ($stack !== []) {
+            $cid = (int) array_pop($stack);
+            if (isset($allowed[$cid])) {
+                continue;
+            }
+            $sec = $sectionMap[$cid] ?? null;
+            if ($sec && ($sec['excluded'] ?? false)) {
+                continue;
+            }
+            $allowed[$cid] = true;
+            foreach ($childrenByParent[$cid] ?? [] as $next) {
+                $stack[] = (int) $next;
+            }
+        }
+
+        return $allowed;
+    }
+
+    /**
+     * @param  array<int, true>  $allowedSectionIds
+     */
+    protected function fetchAllProducts(string $baseUrl, array $allowedSectionIds, ?callable $onProgress = null): ?array
     {
         $url = $baseUrl.'/catalog.product.list';
         $out = [];
-        $start = 0;
+        $seenProductIds = [];
         $pageSize = 50;
         $fetchPhotos = $this->shouldFetchPhotoPropertyInSync();
         $select = [
@@ -358,75 +414,93 @@ class Bitrix24CatalogSyncService
             $select[] = $this->photoFieldName;
         }
 
-        do {
-            $response = Http::timeout(30)->withOptions(['verify' => $this->verifySsl])->get($url, [
-                'select' => array_values(array_unique($select)),
-                'filter' => [
-                    'iblockId' => $this->productIblockId,
-                    'active' => 'Y',
-                ],
-                'order' => ['name' => 'ASC'],
-                'start' => $start,
-            ]);
+        $sectionIds = array_map('intval', array_keys($allowedSectionIds));
+        sort($sectionIds);
+        $totalSections = count($sectionIds);
+        $sectionIndex = 0;
 
-            if (! $response->successful()) {
-                Log::error('Bitrix24CatalogSync: catalog.product.list failed', [
+        foreach ($sectionIds as $sectionBitrixId) {
+            $sectionIndex++;
+            $start = 0;
+            $pageCount = 0;
+
+            do {
+                $response = Http::timeout(30)->withOptions(['verify' => $this->verifySsl])->get($url, [
+                    'select' => array_values(array_unique($select)),
+                    'filter' => [
+                        'iblockId' => $this->productIblockId,
+                        'active' => 'Y',
+                        'iblockSectionId' => $sectionBitrixId,
+                    ],
+                    'order' => ['name' => 'ASC'],
                     'start' => $start,
-                    'status' => $response->status(),
                 ]);
 
-                return null;
-            }
+                if (! $response->successful()) {
+                    Log::error('Bitrix24CatalogSync: catalog.product.list failed', [
+                        'sectionId' => $sectionBitrixId,
+                        'start' => $start,
+                        'status' => $response->status(),
+                    ]);
 
-            $data = $response->json();
-            $result = $data['result'] ?? [];
-            if (! is_array($result)) {
-                $result = (array) $result;
-            }
-            $raw = isset($result['products']) ? $result['products'] : $result;
-            $list = array_values(is_array($raw) ? $raw : (array) $raw);
-            if ($this->debugRaw && $start === 0 && ! empty($list)) {
-                $firstRaw = is_object($list[0]) ? (array) $list[0] : (array) $list[0];
-                Log::info('Bitrix24CatalogSync: raw product sample', [
-                    'endpoint' => 'catalog.product.list',
-                    'keys' => array_keys($firstRaw),
-                    'product' => $firstRaw,
-                ]);
-            }
-
-            foreach ($list as $p) {
-                $arr = is_object($p) ? (array) $p : $p;
-                $id = $arr['id'] ?? $arr['ID'] ?? null;
-                if ($id === null || $id === '') {
-                    continue;
+                    return null;
                 }
-                $rawPhoto = $fetchPhotos && $this->photoFieldName !== ''
-                    ? ($arr[$this->photoFieldName] ?? $arr[mb_strtoupper($this->photoFieldName)] ?? null)
-                    : null;
-                $out[] = [
-                    'id' => (int) $id,
-                    'name' => (string) ($arr['name'] ?? $arr['NAME'] ?? '—'),
-                    'iblockSectionId' => isset($arr['iblockSectionId'])
-                        ? (int) $arr['iblockSectionId']
-                        : (isset($arr['IBLOCK_SECTION_ID']) ? (int) $arr['IBLOCK_SECTION_ID'] : null),
-                    'active' => $arr['active'] ?? $arr['ACTIVE'] ?? 'Y',
-                    'priceValue' => $this->extractProductPrice($arr),
-                    'priceCurrency' => $this->extractProductCurrency($arr),
-                    'property50' => $this->extractProductProperty($arr, 'property50'),
-                    'property130' => $this->extractProductProperty($arr, 'property130'),
-                    'property186' => $this->extractProductProperty($arr, 'property186'),
-                    'property164' => $this->extractProductProperty($arr, 'property164'),
-                    'property172Stored' => $this->serializeProperty172ForStorage($rawPhoto),
-                ];
-                unset($rawPhoto);
-            }
-            $pageCount = count($list);
-            if ($onProgress !== null && $pageCount > 0) {
-                $onProgress('  товаров из Bitrix: '.count($out));
-            }
-            unset($data, $result, $raw, $list, $response);
-            $start += $pageSize;
-        } while ($pageCount >= $pageSize);
+
+                $data = $response->json();
+                $result = $data['result'] ?? [];
+                if (! is_array($result)) {
+                    $result = (array) $result;
+                }
+                $raw = isset($result['products']) ? $result['products'] : $result;
+                $list = array_values(is_array($raw) ? $raw : (array) $raw);
+                if ($this->debugRaw && $sectionIndex === 1 && $start === 0 && ! empty($list)) {
+                    $firstRaw = is_object($list[0]) ? (array) $list[0] : (array) $list[0];
+                    Log::info('Bitrix24CatalogSync: raw product sample', [
+                        'endpoint' => 'catalog.product.list',
+                        'keys' => array_keys($firstRaw),
+                        'product' => $firstRaw,
+                    ]);
+                }
+
+                foreach ($list as $p) {
+                    $arr = is_object($p) ? (array) $p : $p;
+                    $id = $arr['id'] ?? $arr['ID'] ?? null;
+                    if ($id === null || $id === '') {
+                        continue;
+                    }
+                    $productId = (int) $id;
+                    if (isset($seenProductIds[$productId])) {
+                        continue;
+                    }
+                    $seenProductIds[$productId] = true;
+                    $rawPhoto = $fetchPhotos && $this->photoFieldName !== ''
+                        ? ($arr[$this->photoFieldName] ?? $arr[mb_strtoupper($this->photoFieldName)] ?? null)
+                        : null;
+                    $out[] = [
+                        'id' => $productId,
+                        'name' => (string) ($arr['name'] ?? $arr['NAME'] ?? '—'),
+                        'iblockSectionId' => isset($arr['iblockSectionId'])
+                            ? (int) $arr['iblockSectionId']
+                            : (isset($arr['IBLOCK_SECTION_ID']) ? (int) $arr['IBLOCK_SECTION_ID'] : null),
+                        'active' => $arr['active'] ?? $arr['ACTIVE'] ?? 'Y',
+                        'priceValue' => $this->extractProductPrice($arr),
+                        'priceCurrency' => $this->extractProductCurrency($arr),
+                        'property50' => $this->extractProductProperty($arr, 'property50'),
+                        'property130' => $this->extractProductProperty($arr, 'property130'),
+                        'property186' => $this->extractProductProperty($arr, 'property186'),
+                        'property164' => $this->extractProductProperty($arr, 'property164'),
+                        'property172Stored' => $this->serializeProperty172ForStorage($rawPhoto),
+                    ];
+                    unset($rawPhoto);
+                }
+                $pageCount = count($list);
+                if ($onProgress !== null && $pageCount > 0) {
+                    $onProgress("  раздел {$sectionIndex}/{$totalSections}, товаров: ".count($out));
+                }
+                unset($data, $result, $raw, $list, $response);
+                $start += $pageSize;
+            } while ($pageCount >= $pageSize);
+        }
 
         return $out;
     }
