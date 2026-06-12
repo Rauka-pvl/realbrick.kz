@@ -10,6 +10,7 @@ class Lead extends Model
         'name',
         'phone',
         'comment',
+        'bitrix_lead_id',
     ];
 }
 

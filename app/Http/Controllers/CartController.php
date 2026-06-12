@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Mail\LeadSubmittedMail;
 use App\Models\Lead;
+use App\Services\Bitrix24CrmLeadService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -183,10 +184,28 @@ class CartController extends Controller
         }
         $combinedComment = mb_substr($combinedComment, 0, 2000);
 
+        $totalAmount = (float) collect($items)->sum(function ($item) {
+            $qty = max(1, (int) ($item['qty'] ?? 1));
+            $price = (float) ($item['price_value'] ?? 0);
+
+            return $qty * $price;
+        });
+        $currency = (string) (collect($items)->first()['price_currency'] ?? 'USD');
+
+        $bitrixLeadId = app(Bitrix24CrmLeadService::class)->createOrderLead(
+            name: $data['name'],
+            phone: $data['phone'],
+            comment: $userComment,
+            items: $items,
+            totalAmount: $totalAmount,
+            currency: $currency,
+        );
+
         $lead = Lead::create([
             'name' => $data['name'],
             'phone' => $data['phone'],
             'comment' => $combinedComment,
+            'bitrix_lead_id' => $bitrixLeadId,
         ]);
 
         Mail::to('mr.redle3@gmail.com')->send(new LeadSubmittedMail($lead));

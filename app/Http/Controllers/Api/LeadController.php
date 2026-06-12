@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Mail\LeadSubmittedMail;
 use App\Models\Lead;
+use App\Services\Bitrix24CrmLeadService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
 
@@ -18,7 +19,16 @@ class LeadController extends Controller
             'comment' => ['nullable', 'string', 'max:2000'],
         ]);
 
-        $lead = Lead::create($validated);
+        $bitrixLeadId = app(Bitrix24CrmLeadService::class)->createFormLead(
+            name: $validated['name'],
+            phone: $validated['phone'],
+            comment: $validated['comment'] ?? null,
+        );
+
+        $lead = Lead::create([
+            ...$validated,
+            'bitrix_lead_id' => $bitrixLeadId,
+        ]);
 
         Mail::to('mr.redle3@gmail.com')->send(new LeadSubmittedMail($lead));
 
